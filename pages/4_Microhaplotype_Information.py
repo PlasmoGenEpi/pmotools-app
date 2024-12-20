@@ -1,36 +1,13 @@
-# utils.py
-from src.field_matcher import fuzzy_field_matching_page_section, interactive_field_mapping_page_section
-from src.data_loader import load_csv
 import streamlit as st
+from src.data_loader import load_csv
+from src.field_matcher import fuzzy_field_matching_page_section, interactive_field_mapping_page_section
+from src.transformer import transform_mhap_info
+from src.format_page import render_header
 
 
-def render_header():
-    """
-    Render a header with a logo alongside text.
-    """
-    st.set_page_config(
-        page_title="PMO Builder",
-        page_icon="📂",
-        layout="wide",
-    )
-
-    # Create two columns for layout: logo + text
-    col1, col2 = st.columns([1, 4])
-
-    with col1:
-        st.image(
-            "images/PGE_logo.png"
-        )
-
-    with col2:
-        # Add title and subtitle
-        st.title("PMO File Builder")
-        st.markdown("**Streamlined Workflow for Generating PMO Files**")
-
-
-class BasicPage:
-    def __init__(self, target_schema):
-        self.target_schema = target_schema
+class MhapPage:
+    def __init__(self):
+        self.target_schema = ["sampleID", "locus", "asv", "reads"]
 
     def upload_csv(self):
         st.subheader("Upload File")
@@ -61,6 +38,24 @@ class BasicPage:
                 st.write("You selected:", selected_additional_fields)
         return selected_additional_fields
 
+    def bioinfo_id_input(self):
+        st.subheader("Bioinformatics ID")
+        return st.text_input("Enter bioinfo ID:", help='Identifier for the bioinformatics run.')
+
+    def transform_and_save_data(self, df, bioinfo_ID, field_mapping, selected_additional_fields):
+        if bioinfo_ID:
+            st.subheader("Transform Data")
+            if st.button("Transform Data"):
+                transformed_df = transform_mhap_info(
+                    df, bioinfo_ID, field_mapping, selected_additional_fields)
+                # json_data = json.dumps(transformed_df, indent=4)
+                st.session_state["mhap_data"] = transformed_df
+                try:
+                    st.success(
+                        f"Microhaplotype Information from Bioinformatics Run '{bioinfo_ID}' has been saved!")
+                except Exception as e:
+                    st.error(f"Error saving Microhaplotype Information: {e}")
+
     def run(self):
         # File upload
         uploaded_file = self.upload_csv()
@@ -77,4 +72,16 @@ class BasicPage:
             selected_additional_fields = self.add_additional_fields(
                 unused_field_names)
 
-            # TODO: Implement Transform and save data
+            # Enter bioinformatics ID
+            bioinfo_ID = self.bioinfo_id_input()
+
+            self.transform_and_save_data(
+                df, bioinfo_ID, field_mapping, selected_additional_fields)
+
+
+# Initialize and run the app
+if __name__ == "__main__":
+    render_header()
+    st.subheader("Microhaplotype Information Converter", divider="gray")
+    app = MhapPage()
+    app.run()

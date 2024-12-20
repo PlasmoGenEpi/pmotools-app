@@ -2,7 +2,7 @@ import streamlit as st
 import json
 import os
 from src.data_loader import load_csv
-from src.field_matcher import fuzzy_match_fields, check_for_duplicates, interactive_field_mapping, field_mapping_json_to_table
+from src.field_matcher import fuzzy_field_matching_page_section, interactive_field_mapping_page_section
 from src.transformer import transform_panel_info
 from src.format_page import render_header
 
@@ -30,7 +30,7 @@ class PanelManager:
         return [f.split(".json")[0] for f in os.listdir(self.save_dir) if f.endswith(".json")]
 
 
-class PanelApp:
+class PanelPage:
     def __init__(self, save_dir):
         self.save_dir = save_dir
         self.panel_manager = PanelManager(self.save_dir)
@@ -60,34 +60,13 @@ class PanelApp:
         st.subheader("Upload File")
         return st.file_uploader("Upload a TSV file", type="csv")
 
-    def fuzzy_field_matching(self, df):
-        st.subheader("Match Fields")
-        field_mapping, unused_field_names = fuzzy_match_fields(
-            df.columns.tolist(), self.target_schema
-        )
-        st.write("Suggested Field Mapping:")
-        st.dataframe(field_mapping_json_to_table(field_mapping))
-        return field_mapping, unused_field_names
-
-    def interactive_field_mapping(self, field_mapping, df_columns):
-        interactive_field_mapping_on = st.toggle(
-            "Manually Alter Field Mapping")
-        if interactive_field_mapping_on:
-            updated_mapping = interactive_field_mapping(
-                field_mapping, df_columns)
-            st.write("Updated Field Mapping:")
-            st.dataframe(field_mapping_json_to_table(updated_mapping))
-            check_for_duplicates(updated_mapping)
-            return updated_mapping
-        return field_mapping
-
     def field_mapping(self, df):
-        # AI/Fuzzy field matching
-        field_mapping, unused_field_names = self.fuzzy_field_matching(
-            df)
+        # Fuzzy field matching
+        field_mapping, unused_field_names = fuzzy_field_matching_page_section(
+            df, self.target_schema)
 
         # Interactive field mapping
-        field_mapping = self.interactive_field_mapping(
+        field_mapping = interactive_field_mapping_page_section(
             field_mapping, df.columns.tolist())
         return field_mapping, unused_field_names
 
@@ -180,5 +159,5 @@ class PanelApp:
 if __name__ == "__main__":
     render_header()
     st.subheader("Panel Information Converter", divider="gray")
-    app = PanelApp(save_dir=os.path.join(os.getcwd(), "saved_panels"))
+    app = PanelPage(save_dir=os.path.join(os.getcwd(), "saved_panels"))
     app.run()
