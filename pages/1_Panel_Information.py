@@ -58,7 +58,7 @@ class PanelPage:
 
     def upload_csv(self):
         st.subheader("Upload File")
-        return st.file_uploader("Upload a TSV file", type="csv")
+        return st.file_uploader("Upload a TSV file", type=["csv", "tsv", "xlsx", "xls", "txt"])
 
     def field_mapping(self, df):
         # Fuzzy field matching
@@ -74,7 +74,8 @@ class PanelPage:
         st.subheader("Add Additional Fields")
         selected_additional_fields = None
         if unused_field_names:
-            optional_additional_fields = st.toggle("Add additional fields")
+            optional_additional_fields = st.toggle(
+                "Add additional fields from your table")
             if optional_additional_fields:
                 checkbox_states = {}
                 st.write("Select the extra columns you would like to include:")
@@ -119,8 +120,10 @@ class PanelPage:
 
     def display_panel_info(self):
         if "panel_info" in st.session_state:
-            st.write("Current Panel Information:")
-            st.json(st.session_state["panel_info"])
+            preview = st.toggle("Preview Panel Information")
+            if preview:
+                st.write("Current Panel Information:")
+                st.json(st.session_state["panel_info"])
 
     def run(self):
         # Load past panel if applicable

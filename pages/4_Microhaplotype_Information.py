@@ -7,11 +7,11 @@ from src.format_page import render_header
 
 class MhapPage:
     def __init__(self):
-        self.target_schema = ["sampleID", "locus", "asv", "reads"]
+        self.target_schema = ["sampleID", "target_id", "asv", "reads"]
 
     def upload_csv(self):
         st.subheader("Upload File")
-        return st.file_uploader("Upload a TSV file", type="csv")
+        return st.file_uploader("Upload a TSV file", type=["csv", "tsv", "xlsx", "xls", "txt"])
 
     def field_mapping(self, df):
         # Fuzzy field matching

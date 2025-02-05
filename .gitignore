@@ -162,3 +162,4 @@ cython_debug/
 #.idea/
 
 pmotools-python/
+*saved_panels/

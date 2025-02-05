@@ -20,17 +20,14 @@ def fuzzy_match_fields(field_names, target_schema):
     matches = {}
     unused_field_names = []  # To store any unused field names
 
-    for field in field_names:
-        # TODO: change this so it's not dependent on order. Maximise across scores.
-        best_match = process.extractOne(field, target_schema)
+    # For every target find the best matching field
+    # TODO: Think about whether to allow multiple matches from a single field.
+    for target in target_schema:
+        best_match = process.extractOne(target, field_names)
         best_match_field = best_match[0]
-
-        # Check if the best match has already been used
-        if best_match_field not in matches.keys():
-            matches[best_match_field] = field
-        else:
-            unused_field_names.append(field)
-
+        matches[target] = best_match_field
+    # Find unused field names
+    unused_field_names = [f for f in field_names if f not in matches]
     return matches, unused_field_names
 
 
