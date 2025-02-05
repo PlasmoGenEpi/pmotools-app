@@ -49,7 +49,7 @@ class DemultiplexPage:
             if st.button("Transform Data"):
                 transformed_df = transform_demultiplexed_info(
                     df, bioinfo_ID, field_mapping, selected_additional_fields)
-                st.session_state["mhap_data"] = transformed_df
+                st.session_state["demultiplexed_data"] = transformed_df
                 try:
                     st.success(
                         f"Demultiplexed Information from Bioinformatics Run '{bioinfo_ID}' has been saved!")

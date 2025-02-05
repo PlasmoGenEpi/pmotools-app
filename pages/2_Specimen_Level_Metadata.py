@@ -43,7 +43,7 @@ class SpecimenMetadataPage:
         if st.button("Transform Data"):
             transformed_df = transform_specimen_info(
                 df, field_mapping, selected_additional_fields)
-            st.session_state["speciment_info"] = transformed_df
+            st.session_state["specimen_info"] = transformed_df
             try:
                 st.success(
                     f"Specimen Information has been saved!")
