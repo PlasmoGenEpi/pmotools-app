@@ -24,7 +24,7 @@ Contents
 - fuzzywuzzy
 
 ## Usage 
-
+Note : This won't work for now as pmotools-python is not pip installable yet. See Dev Notes for current set up
 1. Clone the repository:
    ```bash
    git clone https://github.com/yourusername/streamlit-pmo-converter.git
@@ -36,3 +36,20 @@ Contents
     ```bash
     streamlit run PMO_Builder.py
 ## Developer Notes
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/streamlit-pmo-converter.git
+   cd streamlit-pmo-converter
+2. Install the dependencies 
+    ```bash
+    pip install -r requirements.txt
+3. Clone the pmotools-python repository and install 
+    ```bash
+    git clone git@github.com:PlasmoGenEpi/pmotools-python.git 
+    cd pmotools-python 
+    git checkout develop 
+    pip install -e .
+    cd ..
+3. Launch the app with 
+    ```bash
+    streamlit run PMO_Builder.py
