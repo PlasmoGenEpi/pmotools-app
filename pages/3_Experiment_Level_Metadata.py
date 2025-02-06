@@ -79,5 +79,5 @@ if __name__ == "__main__":
     schema_fields = load_schema()
     target_schema = schema_fields["experiment_level_metadata"]["required"]
     alternate_schema_names = schema_fields["experiment_level_metadata"]["alternatives"]
-    app = ExperimentMetadataPage(target_schema)
+    app = ExperimentMetadataPage(target_schema, alternate_schema_names)
     app.run()
