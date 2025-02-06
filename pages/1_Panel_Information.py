@@ -37,6 +37,8 @@ class PanelPage:
         self.panel_manager.check_save_dir()
         self.target_schema = ["target_id",
                               "forward_primers", "reverse_primers"]
+        self.alternate_schema_names = {"target_id": ["locus", "amplicon"], "forward_primers": [
+            "fwd_primers"], "reverse_primers": ["rev_primers"]}
 
     def load_saved_panel(self):
         use_past = st.checkbox("Use a past version")
@@ -63,7 +65,7 @@ class PanelPage:
     def field_mapping(self, df):
         # Fuzzy field matching
         field_mapping, unused_field_names = fuzzy_field_matching_page_section(
-            df, self.target_schema)
+            df, self.target_schema, self.alternate_schema_names)
 
         # Interactive field mapping
         field_mapping = interactive_field_mapping_page_section(

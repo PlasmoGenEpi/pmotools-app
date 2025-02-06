@@ -6,8 +6,9 @@ from src.transformer import transform_specimen_info
 
 
 class SpecimenMetadataPage:
-    def __init__(self, target_schema):
+    def __init__(self, target_schema, alternate_schema_names):
         self.target_schema = target_schema
+        self.alternate_schema_names = alternate_schema_names
 
     def upload_csv(self):
         st.subheader("Upload File")
