@@ -33,7 +33,8 @@
             "specimen_id": [
                 "sample_id",
                 "bio_id",
-                "specimen_name"
+                "specimen_name",
+                "sample_accession"
             ],
             "samp_taxon_id": [
                 "taxon_id",
@@ -49,7 +50,9 @@
                 "country_of_collection",
                 "sampling_country",
                 "origin_country",
-                "country"
+                "country",
+                "admin_level_0",
+                "geo_admin0"
             ],
             "collector": [
                 "sample_collector",
@@ -78,7 +81,7 @@
             "sequencing_info_id",
             "specimen_id",
             "panel_id",
-            "experiment_sample_id",
+            "experiment_sample_id"
         ],
         "alternatives": {
             "sequencing_info_id": [
@@ -91,7 +94,8 @@
             "specimen_id": [
                 "sample_id",
                 "bio_id",
-                "specimen_code"
+                "specimen_code",
+                "sample_accession"
             ],
             "panel_id": [
                 "test_panel_id",
@@ -104,7 +108,8 @@
                 "test_sample_id",
                 "lab_sample_id",
                 "sequencing_id",
-                "extraction_id"
+                "extraction_id",
+                "run_accession"
             ]
         }
     },
@@ -181,7 +186,7 @@
             "lib_screen",
             "lib_layout",
             "lib_kit",
-            "seq_center",
+            "seq_center"
         ]
     },
     "bioinformatics_info": {

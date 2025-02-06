@@ -5,6 +5,7 @@ from src.data_loader import load_csv
 from src.field_matcher import fuzzy_field_matching_page_section, interactive_field_mapping_page_section
 from src.transformer import transform_panel_info
 from src.format_page import render_header
+from src.utils import load_schema
 
 
 class PanelManager:
@@ -31,14 +32,12 @@ class PanelManager:
 
 
 class PanelPage:
-    def __init__(self, save_dir):
+    def __init__(self, save_dir, target_schema, alternate_schema_names):
         self.save_dir = save_dir
         self.panel_manager = PanelManager(self.save_dir)
         self.panel_manager.check_save_dir()
-        self.target_schema = ["target_id",
-                              "forward_primers", "reverse_primers"]
-        self.alternate_schema_names = {"target_id": ["locus", "amplicon"], "forward_primers": [
-            "fwd_primers"], "reverse_primers": ["rev_primers"]}
+        self.target_schema = target_schema
+        self.alternate_schema_names = alternate_schema_names
 
     def load_saved_panel(self):
         use_past = st.checkbox("Use a past version")
@@ -164,5 +163,9 @@ class PanelPage:
 if __name__ == "__main__":
     render_header()
     st.subheader("Panel Information Converter", divider="gray")
-    app = PanelPage(save_dir=os.path.join(os.getcwd(), "saved_panels"))
+    schema_fields = load_schema()
+    target_schema = schema_fields["panel_info"]["required"]
+    alternate_schema_names = schema_fields["panel_info"]["alternatives"]
+    app = PanelPage(os.path.join(os.getcwd(), "saved_panels"),
+                    target_schema, alternate_schema_names)
     app.run()

@@ -3,12 +3,13 @@ from src.data_loader import load_csv
 from src.field_matcher import fuzzy_field_matching_page_section, interactive_field_mapping_page_section
 from src.transformer import transform_demultiplexed_info
 from src.format_page import render_header
+from src.utils import load_schema
 
 
 class DemultiplexPage:
-    def __init__(self):
-        self.target_schema = ["sampleID",
-                              "target_id", "raw_read_count"]
+    def __init__(self, target_schema, alternate_schema_names):
+        self.target_schema = target_schema
+        self.alternate_schema_names = alternate_schema_names
 
     def upload_csv(self):
         st.subheader("Upload File")
@@ -17,7 +18,7 @@ class DemultiplexPage:
     def field_mapping(self, df):
         # Fuzzy field matching
         field_mapping, unused_field_names = fuzzy_field_matching_page_section(
-            df, self.target_schema)
+            df, self.target_schema, self.alternate_schema_names)
 
         # Interactive field mapping
         field_mapping = interactive_field_mapping_page_section(
@@ -83,5 +84,8 @@ class DemultiplexPage:
 if __name__ == "__main__":
     render_header()
     st.subheader("Microhaplotype Information Converter", divider="gray")
-    app = DemultiplexPage()
+    schema_fields = load_schema()
+    target_schema = schema_fields["demultiplexed_samples"]["required"]
+    alternate_schema_names = schema_fields["demultiplexed_samples"]["alternatives"]
+    app = DemultiplexPage(target_schema, alternate_schema_names)
     app.run()
