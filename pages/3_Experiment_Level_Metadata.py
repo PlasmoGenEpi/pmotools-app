@@ -3,11 +3,13 @@ from src.format_page import render_header
 from src.data_loader import load_csv
 from src.field_matcher import fuzzy_field_matching_page_section, interactive_field_mapping_page_section
 from src.transformer import transform_experiment_info
+from src.utils import load_schema
 
 
 class ExperimentMetadataPage:
-    def __init__(self, target_schema):
+    def __init__(self, target_schema, alternate_schema_names):
         self.target_schema = target_schema
+        self.alternate_schema_names = alternate_schema_names
 
     def upload_csv(self):
         st.subheader("Upload File")
@@ -16,7 +18,7 @@ class ExperimentMetadataPage:
     def field_mapping(self, df):
         # Fuzzy field matching
         field_mapping, unused_field_names = fuzzy_field_matching_page_section(
-            df, self.target_schema)
+            df, self.target_schema, self.alternate_schema_names)
 
         # Interactive field mapping
         field_mapping = interactive_field_mapping_page_section(
@@ -74,7 +76,8 @@ class ExperimentMetadataPage:
 if __name__ == "__main__":
     render_header()
     st.subheader("Experiment Level Metadata Converter", divider="gray")
-    target_schema = ["sequencing_info_id", "specimen_id",
-                     "panel_id", "experiment_sample_id",]
+    schema_fields = load_schema()
+    target_schema = schema_fields["experiment_level_metadata"]["required"]
+    alternate_schema_names = schema_fields["experiment_level_metadata"]["alternatives"]
     app = ExperimentMetadataPage(target_schema)
     app.run()

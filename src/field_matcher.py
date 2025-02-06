@@ -4,7 +4,7 @@ import pandas as pd
 import streamlit as st
 
 
-def fuzzy_match_fields(field_names, target_schema):
+def fuzzy_match_fields(field_names, target_schema, alternate_schema_names=None):
     """
     Matches field names to the target schema using fuzzy matching, ensuring 
     that each target schema field is only matched to one field name.
@@ -24,6 +24,12 @@ def fuzzy_match_fields(field_names, target_schema):
     # TODO: Think about whether to allow multiple matches from a single field.
     for target in target_schema:
         best_match = process.extractOne(target, field_names)
+        if alternate_schema_names:
+            alt_targets = alternate_schema_names[target]
+            for alt_target in alt_targets:
+                alt_match = process.extractOne(alt_target, field_names)
+                if alt_match[1] > best_match[1]:
+                    best_match = alt_match
         best_match_field = best_match[0]
         matches[target] = best_match_field
     # Find unused field names
@@ -82,10 +88,10 @@ def field_mapping_json_to_table(mapping):
     return df
 
 
-def fuzzy_field_matching_page_section(df, target_schema):
+def fuzzy_field_matching_page_section(df, target_schema, alternate_schema_names=None):
     st.subheader("Match Fields")
     field_mapping, unused_field_names = fuzzy_match_fields(
-        df.columns.tolist(), target_schema
+        df.columns.tolist(), target_schema, alternate_schema_names
     )
     st.write("Suggested Field Mapping:")
     st.dataframe(field_mapping_json_to_table(field_mapping))
