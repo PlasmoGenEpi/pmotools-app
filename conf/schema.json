@@ -1,0 +1,199 @@
+{
+    "panel_info": {
+        "required": [
+            "target_id",
+            "forward_primers",
+            "reverse_primers"
+        ],
+        "alternatives": {
+            "target_id": [
+                "locus",
+                "amplicon"
+            ],
+            "forward_primers": [
+                "fwd_primers"
+            ],
+            "reverse_primers": [
+                "rev_primers"
+            ]
+        }
+    },
+    "specimen_level_metadata": {
+        "required": [
+            "specimen_id",
+            "samp_taxon_id",
+            "collection_date",
+            "collection_country",
+            "collector",
+            "samp_store_loc",
+            "samp_collect_device",
+            "project_name"
+        ],
+        "alternatives": {
+            "specimen_id": [
+                "sample_id",
+                "bio_id",
+                "specimen_name",
+                "sample_accession"
+            ],
+            "samp_taxon_id": [
+                "taxon_id",
+                "species_id",
+                "organism_id"
+            ],
+            "collection_date": [
+                "date_of_collection",
+                "sampling_date",
+                "gathering_date"
+            ],
+            "collection_country": [
+                "country_of_collection",
+                "sampling_country",
+                "origin_country",
+                "country",
+                "admin_level_0",
+                "geo_admin0"
+            ],
+            "collector": [
+                "sample_collector",
+                "field_researcher",
+                "gatherer"
+            ],
+            "samp_store_loc": [
+                "site_location",
+                "storage_location",
+                "sample_storage_site"
+            ],
+            "samp_collect_device": [
+                "collection_device",
+                "sampling_tool",
+                "gathering_equipment"
+            ],
+            "project_name": [
+                "study_name",
+                "research_project",
+                "experiment_name"
+            ]
+        }
+    },
+    "experiment_level_metadata": {
+        "required": [
+            "sequencing_info_id",
+            "specimen_id",
+            "panel_id",
+            "experiment_sample_id"
+        ],
+        "alternatives": {
+            "sequencing_info_id": [
+                "seq_info_id",
+                "sequencing_id",
+                "sequence_record_id",
+                "sequencing_run",
+                "seq_run"
+            ],
+            "specimen_id": [
+                "sample_id",
+                "bio_id",
+                "specimen_code",
+                "sample_accession"
+            ],
+            "panel_id": [
+                "test_panel_id",
+                "assay_id",
+                "panel",
+                "panel_name"
+            ],
+            "experiment_sample_id": [
+                "exp_sample_id",
+                "test_sample_id",
+                "lab_sample_id",
+                "sequencing_id",
+                "extraction_id",
+                "run_accession"
+            ]
+        }
+    },
+    "mhap_info": {
+        "required": [
+            "sampleID",
+            "target_id",
+            "asv",
+            "reads"
+        ],
+        "alternatives": {
+            "sampleID": [
+                "specimen_id",
+                "sample_id",
+                "biosample_id"
+            ],
+            "target_id": [
+                "locus",
+                "marker_id",
+                "amplicon",
+                "locus_id"
+            ],
+            "asv": [
+                "amplicon_sequence_variant",
+                "otu",
+                "sequence_variant",
+                "microhaplotype",
+                "allele",
+                "seq",
+                "sequence"
+            ],
+            "reads": [
+                "read_count",
+                "sequence_reads",
+                "read_depth"
+            ]
+        }
+    },
+    "demultiplexed_samples": {
+        "required": [
+            "sampleID",
+            "target_id",
+            "raw_read_count"
+        ],
+        "alternatives": {
+            "sampleID": [
+                "specimen_id",
+                "sample_id",
+                "biosample_id"
+            ],
+            "target_id": [
+                "locus",
+                "marker_id",
+                "amplicon",
+                "locus_id"
+            ],
+            "raw_read_count": [
+                "read_count",
+                "sequence_reads",
+                "read_depth",
+                "demuliplexed",
+                "demuliplexed_read_count"
+            ]
+        }
+    },
+    "sequencing_info": {
+        "required": [
+            "seq_date",
+            "nucl_acid_ext",
+            "nucl_acid_amp",
+            "nucl_acid_ext_date",
+            "nucl_acid_amp_date",
+            "pcr_cond",
+            "lib_screen",
+            "lib_layout",
+            "lib_kit",
+            "seq_center"
+        ]
+    },
+    "bioinformatics_info": {
+        "required": [
+            "demultiplexing_method",
+            "denoising_method",
+            "tar_amp_bioinformatics_info_id"
+        ]
+    }
+}

@@ -3,11 +3,13 @@ from src.format_page import render_header
 from src.data_loader import load_csv
 from src.field_matcher import fuzzy_field_matching_page_section, interactive_field_mapping_page_section
 from src.transformer import transform_specimen_info
+from src.utils import load_schema
 
 
 class SpecimenMetadataPage:
-    def __init__(self, target_schema):
+    def __init__(self, target_schema, alternate_schema_names):
         self.target_schema = target_schema
+        self.alternate_schema_names = alternate_schema_names
 
     def upload_csv(self):
         st.subheader("Upload File")
@@ -16,7 +18,7 @@ class SpecimenMetadataPage:
     def field_mapping(self, df):
         # Fuzzy field matching
         field_mapping, unused_field_names = fuzzy_field_matching_page_section(
-            df, self.target_schema)
+            df, self.target_schema, self.alternate_schema_names)
 
         # Interactive field mapping
         field_mapping = interactive_field_mapping_page_section(
@@ -74,7 +76,8 @@ class SpecimenMetadataPage:
 if __name__ == "__main__":
     render_header()
     st.subheader("Specimen Level Metadata Converter", divider="gray")
-    target_schema = ["specimen_id", "samp_taxon_id", "collection_date", "collection_country",
-                     "collector", "samp_store_loc", "samp_collect_device", "project_name"]
-    app = SpecimenMetadataPage(target_schema)
+    schema_fields = load_schema()
+    target_schema = schema_fields["specimen_level_metadata"]["required"]
+    alternate_schema_names = schema_fields["specimen_level_metadata"]["alternatives"]
+    app = SpecimenMetadataPage(target_schema, alternate_schema_names)
     app.run()
