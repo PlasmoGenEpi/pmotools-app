@@ -8,13 +8,16 @@
         "alternatives": {
             "target_id": [
                 "locus",
-                "amplicon"
+                "amplicon",
+                "mip_id"
             ],
             "forward_primers": [
-                "fwd_primers"
+                "fwd_primers",
+                "extension_arm"
             ],
             "reverse_primers": [
-                "rev_primers"
+                "rev_primers",
+                "ligation_arm"
             ]
         }
     },
@@ -130,7 +133,8 @@
                 "locus",
                 "marker_id",
                 "amplicon",
-                "locus_id"
+                "locus_id",
+                "p_targetName"
             ],
             "asv": [
                 "amplicon_sequence_variant",
@@ -144,7 +148,8 @@
             "reads": [
                 "read_count",
                 "sequence_reads",
-                "read_depth"
+                "read_depth",
+                "c_readCnt"
             ]
         }
     },
