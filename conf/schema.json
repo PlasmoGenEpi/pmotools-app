@@ -149,6 +149,7 @@
                 "read_count",
                 "sequence_reads",
                 "read_depth",
+                "c_barcodeCnt",
                 "c_readCnt"
             ]
         }
