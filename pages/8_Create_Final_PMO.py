@@ -3,118 +3,58 @@ import json
 import os
 from src.format_page import render_header
 
-def check_panel_info():
-    # PANEL INFO
-    if "panel_info" in st.session_state:
-        panel_info = st.session_state["panel_info"]
-        panel_id = ', '.join(panel_info["panel_info"].keys())
-        st.write("**Current Panel Information:**", panel_id)
-    else:
-        panel_info, panel_id=None, None
-        st.error(
-            "No panel information found. Please go to the Panel Information tab before proceeding.")
-    return panel_info, panel_id
+#the checks almost look like they could be generalized but they all have
+#different print statements on success. If we could standardize these somewhat,
+#it should be possible to generalize the check functions
+#def check_missing(key_value, error_message, success_message)
 
-def check_specimen_info():
-    # SPECIMEN INFO
-    if "specimen_info" in st.session_state:
-        spec_samples = ', '.join(
-            list(st.session_state["specimen_info"].keys())[:10])
-        st.write("**Current Specimen Information for samples (showing first 10):** ",
-                 spec_samples, '...')
-    else:
-        st.error(
-            "No specimen information found. Please go to the Specimen Information tab before proceeding.")
+check_dict={'panel_info':'Panel Information',
+'specimen_info': 'Specimen Level Metadata',
+'experiment_info':'Experiment Level Metadata',
+'mhap_data':'Microhaplotype Information',
+'demultiplexed_data':'Demultiplexed Samples',
+'seq_info':'Sequencing Information',
+'bioinfo_infos':'Bioinformatics Information'}
 
-def check_experiment_info():
-    # EXPERIMENT INFO
-    if "experiment_info" in st.session_state:
-        experiment_samples = ', '.join(
-            list(st.session_state["experiment_info"].keys())[:10])
-        st.write("**Current Experiment Information for samples (showing first 10):** ",
-                 experiment_samples, '...')
-    else:
-        st.error(
-            "No experiment information found. Please go to the Experiment Information tab before proceeding.")
+def check_all(check_dict):
+    '''
+    checks if outputs of a given page exists, and refers user to the page to
+    populate if the page doesn't exist 
+    '''
+    all_passed=True
+    for check_key in check_dict:
+        source_page=check_dict[check_key]
+        if check_key in st.session_state:
+            st.write(f'Data from {source_page} tab has been successfully'
+                ' loaded')
+        else:
+            st.error(f'Data from {source_page} tab not found. Please fill out'
+            f' the {source_page} tab (the link is at the left side of this'
+            ' page) before proceeding')
+            all_passed=False
+            break
+    return all_passed
 
-def check_microhaplotype_info():
-    # MICROHAPLOTYPE INFO
-    if "mhap_data" in st.session_state:
-        bioinfo_id = ', '.join(st.session_state["mhap_data"]["microhaplotypes_detected"].keys()
-                               )
-        st.write(
-            "**Current Microhaplotype Information from bioinformatics run:**", bioinfo_id)
-    else:
-        bioinfo_id=None
-        st.error(
-            "No microhaplotype information found. Please go to the Microhaplotype Information tab before proceeding.")
-    return bioinfo_id
-
-def check_demultiplexed_info():
-    # DEMULTIPLEXED INFO
-    if "demultiplexed_data" in st.session_state:
-        # demultiplexed_data = st.session_state["demultiplexed_data"]
-        demultiplexed_bioinfo_id = st.session_state["demultiplexed_data"].keys()
-        st.write("**Current Demultiplexed Information from bioinformatics run:**",
-                 ', '.join(demultiplexed_bioinfo_id))
-    else:
-        st.error(
-            "No demultiplexed information found. Please go to the Demultiplexed Samples tab before proceeding.")
-
-def check_sequencing_info():
-    # SEQUENCING INFO
-    if "seq_info" in st.session_state:
-        seq_info_id = st.session_state["seq_info"].keys(
-        )
-        st.write("**Current Sequencing Information had ID:**",
-                 ', '.join(seq_info_id))
-    else:
-        st.error(
-            "No sequencing information found. Please go to the Sequencing Information tab before proceeding.")
-
-def check_bioinformatics_info():
-    # BIOINFORMATICS INFO
-    if "bioinfo_infos" in st.session_state:
-        bioinfo_info_id = st.session_state["bioinfo_infos"]["tar_amp_bioinformatics_info_id"]
-        st.write("**Current Bioinformatics Information had ID:**", bioinfo_info_id)
-    else:
-        st.error(
-            "No bioinformatics information found. Please go to the Bioinformatics Information tab before proceeding.")
-
-def merge_data(panel_info, panel_id, bioinfo_id):
+def merge_data():
     # MERGE DATA
-    if ('panel_info' in st.session_state
-        and 'specimen_info' in st.session_state
-        and 'experiment_info' in st.session_state
-        and 'mhap_data' in st.session_state
-        and 'demultiplexed_data' in st.session_state
-        and 'seq_info' in st.session_state
-        and 'bioinfo_infos' in st.session_state):
-        st.subheader("Merge Components to Final PMO")
-        if st.button("Merge Data"):
-            formatted_pmo = {
-                "experiment_infos": st.session_state["experiment_info"],
-                "sequencing_infos": st.session_state["seq_info"],
-                "specimen_infos": st.session_state["specimen_info"],
-                "taramp_bioinformatics_infos": st.session_state["bioinfo_infos"],
-                **st.session_state["mhap_data"],
-                **panel_info,
-                **st.session_state["demultiplexed_data"],
-            }
-            output_path = os.path.join(SAVE_DIR, f"{panel_id}_{bioinfo_id}.json")
-            with open(output_path, "w") as f:
-                json.dump(formatted_pmo, f, indent=4)
-            st.success(f"Your PMO has been saved! It can be found here: {output_path}")
-
-def run_components():
-    panel_info, panel_id=check_panel_info()
-    check_specimen_info()
-    check_experiment_info()
-    bioinfo_id=check_microhaplotype_info()
-    check_demultiplexed_info()
-    check_sequencing_info()
-    check_bioinformatics_info()
-    merge_data(panel_info, panel_id, bioinfo_id)
+    st.subheader("Merge Components to Final PMO")
+    panel_info = st.session_state["panel_info"]
+    panel_id = ', '.join(panel_info["panel_info"].keys())
+    bioinfo_id = ', '.join(st.session_state["mhap_data"]["microhaplotypes_detected"].keys())
+    if st.button("Merge Data"):
+        formatted_pmo = {
+            "experiment_infos": st.session_state["experiment_info"],
+            "sequencing_infos": st.session_state["seq_info"],
+            "specimen_infos": st.session_state["specimen_info"],
+            "taramp_bioinformatics_infos": st.session_state["bioinfo_infos"],
+            **st.session_state["mhap_data"],
+            **panel_info,
+            **st.session_state["demultiplexed_data"],
+        }
+        output_path = os.path.join(SAVE_DIR, f"{panel_id}_{bioinfo_id}.json")
+        with open(output_path, "w") as f:
+            json.dump(formatted_pmo, f, indent=4)
+        st.success(f"Your PMO has been saved! It can be found here: {output_path}")
 
 # Initialize and run the app
 if __name__ == "__main__":
@@ -124,4 +64,6 @@ if __name__ == "__main__":
     render_header()
     st.subheader("Create Final PMO", divider="gray")
     st.subheader("Components")
-    run_components()
+    all_passed=check_all(check_dict)
+    if all_passed:
+        merge_data()
