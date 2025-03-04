@@ -83,7 +83,7 @@ class DemultiplexPage:
 # Initialize and run the app
 if __name__ == "__main__":
     render_header()
-    st.subheader("Microhaplotype Information Converter", divider="gray")
+    st.subheader("Demultiplexed Sample Read Count Converter", divider="gray")
     schema_fields = load_schema()
     target_schema = schema_fields["demultiplexed_samples"]["required"]
     alternate_schema_names = schema_fields["demultiplexed_samples"]["alternatives"]

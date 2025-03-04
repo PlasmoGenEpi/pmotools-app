@@ -25,14 +25,13 @@ def check_all(check_dict):
     for check_key in check_dict:
         source_page=check_dict[check_key]
         if check_key in st.session_state:
-            st.write(f'Data from {source_page} tab has been successfully'
+            st.success(f'Data from {source_page} tab has been successfully'
                 ' loaded')
         else:
             st.error(f'Data from {source_page} tab not found. Please fill out'
             f' the {source_page} tab (the link is at the left side of this'
             ' page) before proceeding')
             all_passed=False
-            break
     return all_passed
 
 def merge_data():
