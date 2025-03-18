@@ -3,11 +3,6 @@ import json
 import os
 from src.format_page import render_header
 
-#the checks almost look like they could be generalized but they all have
-#different print statements on success. If we could standardize these somewhat,
-#it should be possible to generalize the check functions
-#def check_missing(key_value, error_message, success_message)
-
 check_dict={'panel_info':'Panel Information',
 'specimen_info': 'Specimen Level Metadata',
 'experiment_info':'Experiment Level Metadata',
@@ -22,11 +17,11 @@ def check_all(check_dict):
     populate if the page doesn't exist 
     '''
     all_passed=True
-    for check_key in check_dict:
-        source_page=check_dict[check_key]
+    for check_key, source_page in check_dict.items():
         if check_key in st.session_state:
             st.success(f'Data from {source_page} tab has been successfully'
                 ' loaded')
+            print('key is', check_key, 'keys are', st.session_state[check_key].keys())
         else:
             st.error(f'Data from {source_page} tab not found. Please fill out'
             f' the {source_page} tab (the link is at the left side of this'
@@ -63,6 +58,5 @@ if __name__ == "__main__":
     render_header()
     st.subheader("Create Final PMO", divider="gray")
     st.subheader("Components")
-    all_passed=check_all(check_dict)
-    if all_passed:
+    if check_all(check_dict):
         merge_data()
