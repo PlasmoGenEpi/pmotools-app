@@ -7,7 +7,6 @@ from src.transformer import transform_panel_info
 from src.format_page import render_header
 from src.utils import load_schema
 
-
 class PanelManager:
     def __init__(self, save_dir):
         self.save_dir = save_dir

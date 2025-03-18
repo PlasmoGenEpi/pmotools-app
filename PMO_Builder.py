@@ -1,7 +1,6 @@
 import streamlit as st
 from src.format_page import render_header
 
-
 def main():
     render_header()
     # Introduction Section
