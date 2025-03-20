@@ -35,20 +35,18 @@ def merge_data():
     panel_info = st.session_state["panel_info"]
     panel_id = ', '.join(panel_info["panel_info"].keys())
     bioinfo_id = ', '.join(st.session_state["mhap_data"]["microhaplotypes_detected"].keys())
-    if st.button("Merge Data"):
-        formatted_pmo = {
-            "experiment_infos": st.session_state["experiment_info"],
-            "sequencing_infos": st.session_state["seq_info"],
-            "specimen_infos": st.session_state["specimen_info"],
-            "taramp_bioinformatics_infos": st.session_state["bioinfo_infos"],
-            **st.session_state["mhap_data"],
-            **panel_info,
-            **st.session_state["demultiplexed_data"],
-        }
-        output_path = os.path.join(SAVE_DIR, f"{panel_id}_{bioinfo_id}.json")
-        with open(output_path, "w") as f:
-            json.dump(formatted_pmo, f, indent=4)
-        st.success(f"Your PMO has been saved! It can be found here: {output_path}")
+    formatted_pmo = {
+        "experiment_infos": st.session_state["experiment_info"],
+        "sequencing_infos": st.session_state["seq_info"],
+        "specimen_infos": st.session_state["specimen_info"],
+        "taramp_bioinformatics_infos": st.session_state["bioinfo_infos"],
+        **st.session_state["mhap_data"],
+        **panel_info,
+        **st.session_state["demultiplexed_data"],
+    }
+    file_string=json.dumps(formatted_pmo, indent=4)
+    st.download_button('Download Final PMO', file_string, file_name='final_pmo.json')
+
 
 # Initialize and run the app
 if __name__ == "__main__":
