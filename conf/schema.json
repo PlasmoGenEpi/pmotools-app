@@ -32,7 +32,7 @@
             "samp_collect_device",
             "project_name"
         ],
-        "alternatives": {
+        "required_alternatives": {
             "specimen_id": [
                 "sample_id",
                 "bio_id",
@@ -76,6 +76,65 @@
                 "study_name",
                 "research_project",
                 "experiment_name"
+            ]
+        },
+        "optional": [
+            "alternate_identifiers",
+            "geo_admin1",
+            "geo_admin2",
+            "geo_admin3",
+            "host_taxon_id",
+            "individual_id",
+            "lat_lon",
+            "parasite_density",
+            "plate_col",
+            "plate_name",
+            "plate_row",
+            "sample_comments"
+        ],
+        "optional_alternatives": {
+            "alternate_identifiers": [
+                "alternate identifiers",
+                "alternate_IDs"
+            ],
+            "geo_admin1": [
+                "Region",
+                "State",
+                "District"
+            ],
+            "geo_admin2": [
+                "District",
+                "county"
+            ],
+            "geo_admin3": [
+                "City"
+            ],
+            "host_taxon_id": [
+                "host_species_ID",
+                "host_taxon_ID"
+            ],
+            "individual_id": [
+                "individual_ID"
+            ],
+            "lat_lon": [
+                "latitude_longitude"
+            ],
+            "parasite_density": [
+                "parasitemia",
+                "parasites/ul"
+            ],
+            "plate_col": [
+                "plate_column",
+                "column_number"
+            ],
+            "plate_name": [
+                "plate_number"
+            ],
+            "plate_row": [
+                "row_number"
+            ],
+            "sample_comments": [
+                "additional_sample_info"
             ]
         }
     },
