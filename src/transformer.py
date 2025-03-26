@@ -24,7 +24,8 @@ def transform_panel_info(df, panel_id, field_mapping, target_genome_info, additi
     return transformed_df
 
 
-def transform_specimen_info(df, field_mapping, additional_fields=None):
+def transform_specimen_info(df, field_mapping, optional_field_mapping, additional_fields=None):
+    print('optional field mapping is', optional_field_mapping)
     transformed_df = specimen_info_table_to_json(
         df,
         specimen_id_col=field_mapping["specimen_id"],
@@ -35,6 +36,18 @@ def transform_specimen_info(df, field_mapping, additional_fields=None):
         samp_store_loc=field_mapping["samp_store_loc"],
         samp_collect_device=field_mapping["samp_collect_device"],
         project_name=field_mapping["project_name"],
+        alternate_identifiers=optional_field_mapping['alternate_identifiers'],
+        geo_admin1=optional_field_mapping['geo_admin1'],
+        geo_admin2=optional_field_mapping['geo_admin2'],
+        geo_admin3=optional_field_mapping['geo_admin3'],
+        host_taxon_id=optional_field_mapping['host_taxon_id'],
+        individual_id=optional_field_mapping['individual_id'],
+        lat_lon=optional_field_mapping['lat_lon'],
+        parasite_density=optional_field_mapping['parasite_density'],
+        plate_col=optional_field_mapping['plate_col'],
+        plate_name=optional_field_mapping['plate_name'],
+        plate_row=optional_field_mapping['plate_row'],
+        sample_comments=optional_field_mapping['sample_comments'],
         additional_specimen_cols=additional_fields
     )
     return transformed_df

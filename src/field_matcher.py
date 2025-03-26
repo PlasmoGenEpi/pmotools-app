@@ -33,9 +33,8 @@ def fuzzy_match_fields(field_names, target_schema, alternate_schema_names=None):
         best_match_field = best_match[0]
         matches[target] = best_match_field
     # Find unused field names
-    unused_field_names = [f for f in field_names if f not in matches]
+    unused_field_names = list(set(field_names)-set(matches.values()))
     return matches, unused_field_names
-
 
 def check_for_duplicates(field_mapping):
     """
@@ -51,6 +50,8 @@ def check_for_duplicates(field_mapping):
     counts = Counter(list(field_mapping.values()))
     duplicates = {item for item, count in counts.items() if count > 1}
     # Check for duplicates by comparing the length of the list to the length of the set
+    if 'no match' in duplicates:
+        duplicates.remove('no match')
     if duplicates:
         raise ValueError(
             f"Duplicate target schema fields found: {duplicates}")
@@ -99,8 +100,22 @@ def fuzzy_field_matching_page_section(df, target_schema, alternate_schema_names=
 
 
 def interactive_field_mapping_page_section(field_mapping, df_columns):
+    df_columns+=['no match']
     interactive_field_mapping_on = st.toggle(
         "Manually Alter Field Mapping")
+    if interactive_field_mapping_on:
+        updated_mapping = interactive_field_mapping(
+            field_mapping, df_columns)
+        st.write("Updated Field Mapping:")
+        st.dataframe(field_mapping_json_to_table(updated_mapping))
+        check_for_duplicates(updated_mapping)
+        return updated_mapping
+    return field_mapping
+
+def interactive_field_mapping_page_section_optional(field_mapping, df_columns):
+    df_columns+=['no match']
+    interactive_field_mapping_on = st.toggle(
+        "Manually Alter Field Mapping of optional arguments")
     if interactive_field_mapping_on:
         updated_mapping = interactive_field_mapping(
             field_mapping, df_columns)
