@@ -99,23 +99,10 @@ def fuzzy_field_matching_page_section(df, target_schema, alternate_schema_names=
     return field_mapping, unused_field_names
 
 
-def interactive_field_mapping_page_section(field_mapping, df_columns):
+def interactive_field_mapping_page_section(field_mapping, df_columns, toggle_name="Manually Alter Field Mapping"):
     df_columns+=['no match']
     interactive_field_mapping_on = st.toggle(
-        "Manually Alter Field Mapping")
-    if interactive_field_mapping_on:
-        updated_mapping = interactive_field_mapping(
-            field_mapping, df_columns)
-        st.write("Updated Field Mapping:")
-        st.dataframe(field_mapping_json_to_table(updated_mapping))
-        check_for_duplicates(updated_mapping)
-        return updated_mapping
-    return field_mapping
-
-def interactive_field_mapping_page_section_optional(field_mapping, df_columns):
-    df_columns+=['no match']
-    interactive_field_mapping_on = st.toggle(
-        "Manually Alter Field Mapping of optional arguments")
+        toggle_name)
     if interactive_field_mapping_on:
         updated_mapping = interactive_field_mapping(
             field_mapping, df_columns)

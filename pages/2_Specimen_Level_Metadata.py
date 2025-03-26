@@ -1,7 +1,7 @@
 import streamlit as st
 from src.format_page import render_header
 from src.data_loader import load_csv
-from src.field_matcher import fuzzy_field_matching_page_section, interactive_field_mapping_page_section, interactive_field_mapping_page_section_optional
+from src.field_matcher import fuzzy_field_matching_page_section, interactive_field_mapping_page_section
 from src.transformer import transform_specimen_info
 from src.utils import load_schema
 
@@ -51,8 +51,8 @@ class SpecimenMetadataPage:
                 schema_fields["specimen_level_metadata"]["optional_alternatives"])
 
             #Interactive field mapping optional arguments
-            mapped_fields = interactive_field_mapping_page_section_optional(
-                mapped_fields, new_df.columns.tolist())
+            mapped_fields = interactive_field_mapping_page_section(
+                mapped_fields, new_df.columns.tolist(), "Manually Alter Field Mapping of optional arguments")
         for key in mapped_fields:
             if mapped_fields[key]=='no match':
                 mapped_fields[key]=None
