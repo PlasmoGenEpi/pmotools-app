@@ -2,6 +2,7 @@ from fuzzywuzzy import process
 from collections import Counter
 import pandas as pd
 import streamlit as st
+from src.data_loader import load_csv
 
 
 def fuzzy_match_fields(field_names, target_schema, alternate_schema_names=None):
@@ -111,3 +112,66 @@ def interactive_field_mapping_page_section(field_mapping, df_columns, toggle_nam
         check_for_duplicates(updated_mapping)
         return updated_mapping
     return field_mapping
+
+def add_optional_fields(df, unused_field_names, optional_schema,
+    optional_alternate_schema):
+    st.subheader("Add Optional Fields")
+    mapped_fields = {key:None for key in optional_schema}
+    if unused_field_names:
+        new_df=df[unused_field_names]
+        # Fuzzy field matching optional arguments
+        mapped_fields, junk = fuzzy_field_matching_page_section(new_df,
+            optional_schema, optional_alternate_schema)
+        #Interactive field mapping optional arguments
+        mapped_fields = interactive_field_mapping_page_section(
+            mapped_fields, new_df.columns.tolist(), "Manually Alter Field Mapping of optional arguments")
+    for key in mapped_fields:
+        if mapped_fields[key]=='no match':
+            mapped_fields[key]=None
+    remaining_unused=list(set(unused_field_names)-set(mapped_fields.values()))
+    return mapped_fields, remaining_unused
+
+def add_additional_fields(unused_field_names):
+    st.subheader("Add Additional Fields")
+    selected_additional_fields = None
+    if unused_field_names:
+        optional_additional_fields = st.toggle("Add additional fields")
+        if optional_additional_fields:
+            checkbox_states = {}
+            st.write("Select the extra columns you would like to include:")
+            for item in unused_field_names:
+                checkbox_states[item] = st.checkbox(label=item)
+            selected_additional_fields = [
+                key for key, value in checkbox_states.items() if value]
+            st.write("You selected:", selected_additional_fields)
+    return selected_additional_fields
+
+def field_mapping(df, target_schema, target_alternate_schema):
+    # Fuzzy field matching required arguments
+    mapped_fields, unused_field_names = fuzzy_field_matching_page_section(
+        df, target_schema, target_alternate_schema)
+
+    # Interactive field mapping
+    mapped_fields = interactive_field_mapping_page_section(
+        mapped_fields, df.columns.tolist())
+    return mapped_fields, unused_field_names
+
+def load_data(target_schema, target_alternate_schema, optional_schema,
+    optional_alternate_schema):
+    st.subheader("Upload File")
+    uploaded_file=st.file_uploader("Upload a TSV file", type=["csv", "tsv", "xlsx", "xls", "txt"])
+    df, mapped_fields, selected_optional_fields, selected_additional_fields=None, None, None, None
+    if uploaded_file:
+        df = load_csv(uploaded_file)
+        interactive_preview = st.toggle("Preview File")
+        if interactive_preview:
+            st.write("Uploaded File Preview:")
+            st.dataframe(df)
+        mapped_fields, unused_field_names = field_mapping(df, target_schema,
+            target_alternate_schema)
+        # Add optional fields
+        selected_optional_fields, unused_field_names = add_optional_fields(df,
+            unused_field_names, optional_schema, optional_alternate_schema)
+        # Add additional fields
+        selected_additional_fields = add_additional_fields(unused_field_names)
+    return df, mapped_fields, selected_optional_fields, selected_additional_fields

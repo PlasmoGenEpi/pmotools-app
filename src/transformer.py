@@ -53,17 +53,21 @@ def transform_specimen_info(df, field_mapping, optional_field_mapping, additiona
     return transformed_df
 
 
-def transform_experiment_info(df, field_mapping, additional_fields=None):
+def transform_experiment_info(df, field_mapping, optional_mapping,
+    additional_fields=None):
     transformed_df = experiment_info_table_to_json(
         df,
         experiment_sample_id_col=field_mapping["experiment_sample_id"],
         sequencing_info_id=field_mapping["sequencing_info_id"],
         specimen_id=field_mapping["specimen_id"],
         panel_id=field_mapping["panel_id"],
+        accession=optional_mapping["accession"],
+        plate_col=optional_mapping["plate_col"],
+        plate_name=optional_mapping["plate_name"],
+        plate_row=optional_mapping["plate_row"],
         additional_experiment_cols=additional_fields
     )
     return transformed_df
-
 
 def transform_demultiplexed_info(df, bioinfo_id, field_mapping, additional_hap_detected_cols=None):
     """Reformat the DataFrame based on the provided field mapping."""

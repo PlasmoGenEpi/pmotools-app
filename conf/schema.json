@@ -145,7 +145,7 @@
             "panel_id",
             "experiment_sample_id"
         ],
-        "alternatives": {
+        "required_alternatives": {
             "sequencing_info_id": [
                 "seq_info_id",
                 "sequencing_id",
@@ -172,6 +172,26 @@
                 "sequencing_id",
                 "extraction_id",
                 "run_accession"
+            ]
+        },
+        "optional": [
+            "accession",
+            "plate_col",
+            "plate_name",
+            "plate_row"
+        ],
+        "optional_alternatives": {
+            "accession": [
+                "Accession information"
+            ],
+            "plate_col": [
+                "plate_column"
+            ],
+            "plate_name": [
+                "name_of_plate"
+            ],
+            "plate_row": [
+                "row_of_plate"
             ]
         }
     },

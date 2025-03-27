@@ -2,7 +2,7 @@ import streamlit as st
 import json
 import os
 from src.data_loader import load_csv
-from src.field_matcher import fuzzy_field_matching_page_section, interactive_field_mapping_page_section
+from src.field_matcher import fuzzy_field_matching_page_section, interactive_field_mapping_page_section, add_additional_fields
 from src.transformer import transform_panel_info
 from src.format_page import render_header
 from src.utils import load_schema
@@ -70,22 +70,6 @@ class PanelPage:
             field_mapping, df.columns.tolist())
         return field_mapping, unused_field_names
 
-    def add_additional_fields(self, unused_field_names):
-        st.subheader("Add Additional Fields")
-        selected_additional_fields = None
-        if unused_field_names:
-            optional_additional_fields = st.toggle(
-                "Add additional fields from your table")
-            if optional_additional_fields:
-                checkbox_states = {}
-                st.write("Select the extra columns you would like to include:")
-                for item in unused_field_names:
-                    checkbox_states[item] = st.checkbox(label=item)
-                selected_additional_fields = [
-                    key for key, value in checkbox_states.items() if value]
-                st.write("You selected:", selected_additional_fields)
-        return selected_additional_fields
-
     def add_genome_information(self):
         st.subheader("Add Genome Information")
         genome_name = st.text_input("Name:", help='Name of the genome.')
@@ -144,7 +128,7 @@ class PanelPage:
             field_mapping, unused_field_names = self.field_mapping(df)
 
             # Add additional fields
-            selected_additional_fields = self.add_additional_fields(
+            selected_additional_fields = add_additional_fields(
                 unused_field_names)
 
             # Add genome information
