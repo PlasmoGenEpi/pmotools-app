@@ -202,7 +202,7 @@
             "asv",
             "reads"
         ],
-        "alternatives": {
+        "required_alternatives": {
             "sampleID": [
                 "specimen_id",
                 "sample_id",
@@ -231,6 +231,10 @@
                 "c_barcodeCnt",
                 "c_readCnt"
             ]
+        },
+        "optional": [
+        ],
+        "optional_alternatives": {
         }
     },
     "demultiplexed_samples": {
@@ -239,7 +243,7 @@
             "target_id",
             "raw_read_count"
         ],
-        "alternatives": {
+        "required_alternatives": {
             "sampleID": [
                 "specimen_id",
                 "sample_id",
@@ -258,6 +262,10 @@
                 "demuliplexed",
                 "demuliplexed_read_count"
             ]
+        },
+        "optional": [
+        ],
+        "optional_alternatives": {
         }
     },
     "sequencing_info": {

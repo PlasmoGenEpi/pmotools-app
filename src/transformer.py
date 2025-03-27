@@ -4,10 +4,17 @@ from pmotools.json_convertors.metatable_to_json_meta import experiment_info_tabl
 from pmotools.json_convertors.demultiplexed_targets_to_pmo_dict import demultiplexed_targets_to_pmo_dict
 
 
-def transform_mhap_info(df, bioinfo_id, field_mapping, additional_hap_detected_cols=None):
+def transform_mhap_info(df, bioinfo_id, field_mapping, optional_mapping,
+    additional_hap_detected_cols=None):
     """Reformat the DataFrame based on the provided field mapping."""
     transformed_df = microhaplotype_table_to_pmo_dict(
-        df, bioinfo_id, sampleID_col=field_mapping["sampleID"], locus_col=field_mapping['target_id'], mhap_col=field_mapping['asv'], reads_col=field_mapping['reads'], additional_hap_detected_cols=additional_hap_detected_cols)
+        df,
+        bioinfo_id,
+        sampleID_col=field_mapping["sampleID"],
+        locus_col=field_mapping['target_id'],
+        mhap_col=field_mapping['asv'],
+        reads_col=field_mapping['reads'],
+        additional_hap_detected_cols=additional_hap_detected_cols)
     return transformed_df
 
 
@@ -72,5 +79,10 @@ def transform_experiment_info(df, field_mapping, optional_mapping,
 def transform_demultiplexed_info(df, bioinfo_id, field_mapping, additional_hap_detected_cols=None):
     """Reformat the DataFrame based on the provided field mapping."""
     transformed_df = demultiplexed_targets_to_pmo_dict(
-        df, bioinfo_id, sampleID_col=field_mapping["sampleID"], target_id_col=field_mapping['target_id'], read_count_col=field_mapping['raw_read_count'], additional_hap_detected_cols=additional_hap_detected_cols)
+        df,
+        bioinfo_id,
+        sampleID_col=field_mapping["sampleID"],
+        target_id_col=field_mapping['target_id'],
+        read_count_col=field_mapping['raw_read_count'],
+        additional_hap_detected_cols=additional_hap_detected_cols)
     return transformed_df

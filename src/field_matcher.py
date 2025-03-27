@@ -54,8 +54,9 @@ def check_for_duplicates(field_mapping):
     if 'no match' in duplicates:
         duplicates.remove('no match')
     if duplicates:
-        raise ValueError(
-            f"Duplicate target schema fields found: {duplicates}")
+        st.error(f"Duplicate target schema fields found: {duplicates}")
+#        raise ValueError(
+ #           f"Duplicate target schema fields found: {duplicates}")
 
     return True
 
@@ -115,9 +116,9 @@ def interactive_field_mapping_page_section(field_mapping, df_columns, toggle_nam
 
 def add_optional_fields(df, unused_field_names, optional_schema,
     optional_alternate_schema):
-    st.subheader("Add Optional Fields")
     mapped_fields = {key:None for key in optional_schema}
-    if unused_field_names:
+    if unused_field_names and optional_schema:
+        st.subheader("Add Optional Fields")
         new_df=df[unused_field_names]
         # Fuzzy field matching optional arguments
         mapped_fields, junk = fuzzy_field_matching_page_section(new_df,
