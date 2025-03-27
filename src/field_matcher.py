@@ -133,9 +133,9 @@ def add_optional_fields(df, unused_field_names, optional_schema,
     return mapped_fields, remaining_unused
 
 def add_additional_fields(unused_field_names):
-    st.subheader("Add Additional Fields")
     selected_additional_fields = None
     if unused_field_names:
+        st.subheader("Add Additional Fields")
         optional_additional_fields = st.toggle("Add additional fields")
         if optional_additional_fields:
             checkbox_states = {}

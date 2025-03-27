@@ -24,7 +24,7 @@ class DemultiplexPage:
             st.subheader("Transform Data")
             if st.button("Transform Data"):
                 transformed_df = transform_demultiplexed_info(
-                    df, bioinfo_ID, mapped_fields, selected_additional_fields)
+                    df, bioinfo_ID, mapped_fields, selected_optional_fields, selected_additional_fields)
                 st.session_state["demultiplexed_data"] = transformed_df
                 try:
                     st.success(

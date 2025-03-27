@@ -18,7 +18,8 @@ def transform_mhap_info(df, bioinfo_id, field_mapping, optional_mapping,
     return transformed_df
 
 
-def transform_panel_info(df, panel_id, field_mapping, target_genome_info, additional_target_info_cols=None):
+def transform_panel_info(df, panel_id, field_mapping, target_genome_info,
+    additional_target_info_cols=None):
     """Reformat the DataFrame based on the provided field mapping."""
     transformed_df = panel_info_table_to_pmo_dict(
         df,
@@ -31,7 +32,8 @@ def transform_panel_info(df, panel_id, field_mapping, target_genome_info, additi
     return transformed_df
 
 
-def transform_specimen_info(df, field_mapping, optional_field_mapping, additional_fields=None):
+def transform_specimen_info(df, field_mapping, optional_field_mapping,
+    additional_fields=None):
     print('optional field mapping is', optional_field_mapping)
     transformed_df = specimen_info_table_to_json(
         df,
@@ -76,7 +78,8 @@ def transform_experiment_info(df, field_mapping, optional_mapping,
     )
     return transformed_df
 
-def transform_demultiplexed_info(df, bioinfo_id, field_mapping, additional_hap_detected_cols=None):
+def transform_demultiplexed_info(df, bioinfo_id, field_mapping,
+    optional_mapping, additional_hap_detected_cols=None):
     """Reformat the DataFrame based on the provided field mapping."""
     transformed_df = demultiplexed_targets_to_pmo_dict(
         df,
