@@ -5,7 +5,7 @@
             "forward_primers",
             "reverse_primers"
         ],
-        "alternatives": {
+        "required_alternatives": {
             "target_id": [
                 "locus",
                 "amplicon",
@@ -18,6 +18,62 @@
             "reverse_primers": [
                 "rev_primers",
                 "ligation_arm"
+            ]
+        },
+        "optional": [
+            "forward_primers_start_col",
+            "forward_primers_end_col",
+            "reverse_primers_start_col",
+            "reverse_primers_end_col",
+            "insert_start_col",
+            "insert_end_col",
+            "chrom_col",
+            "strand_col",
+            "gene_id_col",
+            "target_type_col"
+        ],
+        "optional_alternatives": {
+            "forward_primers_start_col": [
+                "genomic_forward_primer_start",
+                "forward_primer_genomic_start_coordinate"
+            ],
+            "forward_primers_end_col": [
+                "genomic_forward_primer_end",
+                "forward_primer_genomic_end_coordinate"
+            ],
+            "reverse_primers_start_col": [
+                "genomic_reverse_primer_start",
+                "reverse_primer_genomic_start_coordinate"
+            ],
+            "reverse_primers_end_col": [
+                "genomic_reverse_primer_end",
+                "reverse_primer_genomic_end_coordinate"
+            ],
+            "insert_start_col": [
+                "genomic_insert_start",
+                "insert_genomic_start_coordinate"
+            ],
+            "insert_end_col": [
+                "genomic_insert_end",
+                "insert_genomic_end_coordinate"
+            ],
+            "chrom_col": [
+                "chromosome",
+                "amplicon_chrom",
+                "gene_chrom"
+            ],
+            "strand_col": [
+                "amplicon_strand",
+                "gene_strand",
+                "gene_genomic_strand"
+            ],
+            "gene_id_col": [
+                "gene_name",
+                "amplicon_gene"
+            ],
+            "target_type_col": [
+                "gene_type",
+                "amplicon_type"
             ]
         }
     },

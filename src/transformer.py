@@ -19,7 +19,7 @@ def transform_mhap_info(df, bioinfo_id, field_mapping, optional_mapping,
 
 
 def transform_panel_info(df, panel_id, field_mapping, target_genome_info,
-    additional_target_info_cols=None):
+    optional_fields, additional_target_info_cols=None):
     """Reformat the DataFrame based on the provided field mapping."""
     transformed_df = panel_info_table_to_pmo_dict(
         df,
@@ -28,6 +28,16 @@ def transform_panel_info(df, panel_id, field_mapping, target_genome_info,
         target_id_col=field_mapping["target_id"],
         forward_primers_seq_col=field_mapping["forward_primers"],
         reverse_primers_seq_col=field_mapping["reverse_primers"],
+        forward_primers_start_col=optional_fields["forward_primers_start_col"],
+        forward_primers_end_col=optional_fields["forward_primers_end_col"],
+        reverse_primers_start_col=optional_fields["reverse_primers_start_col"],
+        reverse_primers_end_col=optional_fields["reverse_primers_end_col"],
+        insert_start_col=optional_fields["insert_start_col"],
+        insert_end_col=optional_fields["insert_end_col"],
+        chrom_col=optional_fields["chrom_col"],
+        strand_col=optional_fields["strand_col"],
+        gene_id_col=optional_fields["gene_id_col"],
+        target_type_col=optional_fields["target_type_col"],
         additional_target_info_cols=additional_target_info_cols)
     return transformed_df
 
