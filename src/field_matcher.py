@@ -4,7 +4,6 @@ import pandas as pd
 import streamlit as st
 from src.data_loader import load_csv
 
-
 def fuzzy_match_fields(field_names, target_schema, alternate_schema_names=None):
     """
     Matches field names to the target schema using fuzzy matching, ensuring 
@@ -36,6 +35,27 @@ def fuzzy_match_fields(field_names, target_schema, alternate_schema_names=None):
     # Find unused field names
     unused_field_names = list(set(field_names)-set(matches.values()))
     return matches, unused_field_names
+
+def reverse_fuzzy_match_fields(field_names, target_schema, alternate_schema_names=None):
+    """
+    modeled after fuzzy_match_fields, except instead of finding the column that
+    best matches each argument (or its alternate) this version finds the best
+    argument to match against each column. In practice, because this version
+    is keyed by columns instead of arguments, this means that all arguments (and
+    their alternates) need to be loaded as a flattened list).
+    """
+    argument_dict={target:target for target in target_schema}
+    argument_list=target_schema[:]
+    matches={}
+    for target in alternate_schema_names:
+        for alternate in alternate_schema_names[target]:
+            argument_dict[alternate]=target
+            argument_list.append(alternate)
+    for field_name in field_names:
+        name, score = process.extractOne(field_name, argument_list)
+        matches[field_name] = argument_dict[name] #lookup the non-alternate best-matching argument
+    return matches
+
 
 def check_for_duplicates(field_mapping):
     """
@@ -120,17 +140,34 @@ def add_optional_fields(df, unused_field_names, optional_schema,
     if unused_field_names and optional_schema:
         st.subheader("Add Optional Fields")
         new_df=df[unused_field_names]
+
         # Fuzzy field matching optional arguments
-        mapped_fields, junk = fuzzy_field_matching_page_section(new_df,
-            optional_schema, optional_alternate_schema)
+        reverse_field_mapping = reverse_fuzzy_match_fields(
+        new_df.columns.tolist(), optional_schema, optional_alternate_schema)
+#        data = [{"user_column": key, "PMO Argument": value}
+#        for key, value in reverse_field_mapping.items()]
+#        df = pd.DataFrame(data)
+        st.write("Suggested Field Mapping. Check the boxes of any fields you"
+            " would like to inclue in the final PMO. You will have the"
+            " opportunity to optionally change their mappings if any of these"
+            " mappings look inaccurate:")
+#        st.dataframe(df)
+        checkbox_states = {}
+        for user_column in reverse_field_mapping:
+            pmo_argument=reverse_field_mapping[user_column]
+            checkbox_states[user_column] = st.checkbox(label=f'{user_column} --> {pmo_argument}')
+        #selected_additional_fields = [
+        #    key for key, value in checkbox_states.items() if value]
+
+
         #Interactive field mapping optional arguments
-        mapped_fields = interactive_field_mapping_page_section(
-            mapped_fields, new_df.columns.tolist(), "Manually Alter Field Mapping of optional arguments")
-    for key in mapped_fields:
-        if mapped_fields[key]=='no match':
-            mapped_fields[key]=None
-    remaining_unused=list(set(unused_field_names)-set(mapped_fields.values()))
-    return mapped_fields, remaining_unused
+#        mapped_fields = interactive_field_mapping_page_section(
+#            mapped_fields, new_df.columns.tolist(), "Manually Alter Field Mapping of optional arguments")
+#    for key in mapped_fields:
+#        if mapped_fields[key]=='no match':
+#            mapped_fields[key]=None
+#    remaining_unused=list(set(unused_field_names)-set(mapped_fields.values()))
+#    return mapped_fields, remaining_unused
 
 def add_additional_fields(unused_field_names):
     selected_additional_fields = None
@@ -171,8 +208,11 @@ def load_data(target_schema, target_alternate_schema, optional_schema,
         mapped_fields, unused_field_names = field_mapping(df, target_schema,
             target_alternate_schema)
         # Add optional fields
-        selected_optional_fields, unused_field_names = add_optional_fields(df,
-            unused_field_names, optional_schema, optional_alternate_schema)
+        add_optional_fields(df, unused_field_names, optional_schema,
+            optional_alternate_schema)
+#        selected_optional_fields, unused_field_names = add_optional_fields(df,
+#            unused_field_names, optional_schema, optional_alternate_schema)
+
         # Add additional fields
-        selected_additional_fields = add_additional_fields(unused_field_names)
+        #selected_additional_fields = add_additional_fields(unused_field_names)
     return df, mapped_fields, selected_optional_fields, selected_additional_fields
