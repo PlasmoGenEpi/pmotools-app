@@ -147,15 +147,34 @@ def add_optional_fields(df, unused_field_names, optional_schema,
 #        data = [{"user_column": key, "PMO Argument": value}
 #        for key, value in reverse_field_mapping.items()]
 #        df = pd.DataFrame(data)
-        st.write("Suggested Field Mapping. Check the boxes of any fields you"
-            " would like to inclue in the final PMO. You will have the"
-            " opportunity to optionally change their mappings if any of these"
-            " mappings look inaccurate:")
+        st.write('Some of the fields in your table may match to one of our'
+            ' suggested "optional fields".')
+        st.write('Check the boxes of any fields you would like to include in'
+            ' the final PMO.')
+        st.write('You can edit these mappings or include them without mapping'
+            " them to any of the suggested fields.")
+        st.write('Our suggested mappings are below, with your column name on'
+            ' the lefthand side and the suggested optional field name on the'
+            ' right.')
+
 #        st.dataframe(df)
         checkbox_states = {}
         for user_column in reverse_field_mapping:
             pmo_argument=reverse_field_mapping[user_column]
             checkbox_states[user_column] = st.checkbox(label=f'{user_column} --> {pmo_argument}')
+        st.subheader("Edit Selected Optional Field Mappings")
+        updated_mapping={}
+        for user_column in checkbox_states:
+            pmo_argument=reverse_field_mapping[user_column]
+            if checkbox_states[user_column]:
+                edit_column = st.toggle(f"Edit {user_column} --> {pmo_argument} mapping")
+                if edit_column:
+                    updated_mapping[user_column] = st.selectbox(
+                    f"Select optional argument match for {user_column}",
+                    options=optional_schema, index=optional_schema.index(
+                    user_column) if user_column in optional_schema else 0)
+                    no_map=st.checkbox(label=f'{user_column} has no good "optional argument" match but I still want to include it in the final PMO')
+
         #selected_additional_fields = [
         #    key for key, value in checkbox_states.items() if value]
 
