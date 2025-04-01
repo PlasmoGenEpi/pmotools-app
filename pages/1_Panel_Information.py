@@ -6,6 +6,9 @@ from src.transformer import transform_panel_info
 from src.format_page import render_header
 from src.utils import load_schema
 
+session_name='panel_info'
+title='panel information'
+
 class PanelManager:
     def __init__(self, save_dir):
         self.save_dir = save_dir
@@ -78,7 +81,7 @@ class PanelPage:
 
     def transform_and_save_data(self, df, panel_ID, field_mapping, genome_info, 
         selected_optional_fields, selected_additional_fields):
-        if all([panel_ID, genome_info["name"], genome_info["taxon_id"], genome_info["version"], genome_info["url"]]):
+        if all([panel_ID, field_mapping, genome_info["name"], genome_info["taxon_id"], genome_info["version"], genome_info["url"]]) and selected_optional_fields!='Error':
             st.subheader("Transform Data")
             if st.button("Transform Data"):
                 transformed_df = transform_panel_info(
@@ -92,17 +95,16 @@ class PanelPage:
                 except Exception as e:
                     st.error(f"Error saving panel: {e}")
 
-    def display_panel_info(self):
-        if "panel_info" in st.session_state:
-            preview = st.toggle("Preview Panel Information")
+    def display_panel_info(self, toggle_text):
+        if session_name in st.session_state:
+            preview = st.toggle(toggle_text)
             if preview:
-                st.write("Current Panel Information:")
-                st.json(st.session_state["panel_info"])
+                st.write(f"Current {title}:")
+                st.json(st.session_state[session_name])
 
     def run(self):
         # Load past panel if applicable
         self.load_saved_panel()
-
         # Input for panel ID
         panel_ID = self.panel_id_input()
 
@@ -119,7 +121,7 @@ class PanelPage:
             selected_additional_fields)
 
         # Display current panel information
-        self.display_panel_info()
+        self.display_panel_info(f"Preview {title}")
 
 
 # Initialize and run the app
@@ -134,4 +136,8 @@ if __name__ == "__main__":
     app = PanelPage(os.path.join(os.getcwd(), "saved_panels"),
                     required_fields, required_alternate_fields, optional_fields,
                     optional_alternate_fields)
+    if session_name in st.session_state:
+        st.success(f'Your {title} has already been saved during a'
+            ' previous run of this page')
+        app.display_panel_info(f"Preview previously stored {title}")
     app.run()

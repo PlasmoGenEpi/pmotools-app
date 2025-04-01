@@ -42,9 +42,11 @@ def reverse_fuzzy_match_fields(field_names, target_schema, alternate_schema_name
     best matches each argument (or its alternate) this version finds the best
     argument to match against each column. In practice, because this version
     is keyed by columns instead of arguments, this means that all arguments (and
-    their alternates) need to be loaded as a flattened list).
+    their alternates) need to be loaded as a flattened list - any matched
+    alternates are then mapped back to their 'primary' argument match.
     """
     argument_dict={target:target for target in target_schema}
+    argument_dict['no match']='no match'
     argument_list=target_schema[:]
     matches={}
     for target in alternate_schema_names:
@@ -52,12 +54,15 @@ def reverse_fuzzy_match_fields(field_names, target_schema, alternate_schema_name
             argument_dict[alternate]=target
             argument_list.append(alternate)
     for field_name in field_names:
-        name, score = process.extractOne(field_name, argument_list)
+        if process.extractOne(field_name, argument_list):
+            name, score = process.extractOne(field_name, argument_list)
+        else:
+            name, score='no match', 'no match'
         matches[field_name] = argument_dict[name] #lookup the non-alternate best-matching argument
     return matches
 
 
-def check_for_duplicates(field_mapping):
+def no_duplicates(field_mapping):
     """
     Checks if there are any duplicate values in the dictionary.
 
@@ -71,13 +76,15 @@ def check_for_duplicates(field_mapping):
     counts = Counter(list(field_mapping.values()))
     duplicates = {item for item, count in counts.items() if count > 1}
     # Check for duplicates by comparing the length of the list to the length of the set
-    if 'no match' in duplicates:
-        duplicates.remove('no match')
+    duplicates=duplicates-set(['no match', None])
     if duplicates:
-        st.error(f"Duplicate target schema fields found: {duplicates}")
+        st.error(f"These items are mapped to the same thing: {duplicates} You"
+            " need to fix your mappings so that each field from your input file"
+            " maps to a unique field name from the PMO format (or check the box"
+            ' for "no match" if there is no good match) and try again.')
 #        raise ValueError(
  #           f"Duplicate target schema fields found: {duplicates}")
-
+        return False
     return True
 
 
@@ -122,7 +129,6 @@ def fuzzy_field_matching_page_section(df, target_schema, alternate_schema_names=
 
 
 def interactive_field_mapping_page_section(field_mapping, df_columns, toggle_name="Manually Alter Field Mapping"):
-    df_columns+=['no match']
     interactive_field_mapping_on = st.toggle(
         toggle_name)
     if interactive_field_mapping_on:
@@ -130,78 +136,73 @@ def interactive_field_mapping_page_section(field_mapping, df_columns, toggle_nam
             field_mapping, df_columns)
         st.write("Updated Field Mapping:")
         st.dataframe(field_mapping_json_to_table(updated_mapping))
-        check_for_duplicates(updated_mapping)
+        no_duplicates(updated_mapping)
         return updated_mapping
     return field_mapping
 
 def add_optional_fields(df, unused_field_names, optional_schema,
     optional_alternate_schema):
     mapped_fields = {key:None for key in optional_schema}
-    if unused_field_names and optional_schema:
+    print('originally, mapped fields is', mapped_fields)
+    additional_fields=[]
+
+    if unused_field_names:# and optional_schema:
         st.subheader("Add Optional Fields")
         new_df=df[unused_field_names]
 
         # Fuzzy field matching optional arguments
         reverse_field_mapping = reverse_fuzzy_match_fields(
         new_df.columns.tolist(), optional_schema, optional_alternate_schema)
-#        data = [{"user_column": key, "PMO Argument": value}
-#        for key, value in reverse_field_mapping.items()]
-#        df = pd.DataFrame(data)
         st.write('Some of the fields in your table may match to one of our'
             ' suggested "optional fields".')
+        if optional_schema:
+            st.write(f'our "optional fields" are {optional_schema}')
+        else:
+            st.write('For this panel, we have no optional fields')
         st.write('Check the boxes of any fields you would like to include in'
-            ' the final PMO.')
+            ' the final PMO. You can also include fields that are not in our'
+            ' suggested optional fields.')
+        checkbox_states = {}
+        for user_column in reverse_field_mapping:
+            pmo_argument=reverse_field_mapping[user_column]
+            checkbox_states[user_column] = st.checkbox(label=f'{user_column}')
+        st.subheader("Edit Selected Optional Field Mappings")
         st.write('You can edit these mappings or include them without mapping'
             " them to any of the suggested fields.")
         st.write('Our suggested mappings are below, with your column name on'
             ' the lefthand side and the suggested optional field name on the'
             ' right.')
-
-#        st.dataframe(df)
-        checkbox_states = {}
-        for user_column in reverse_field_mapping:
-            pmo_argument=reverse_field_mapping[user_column]
-            checkbox_states[user_column] = st.checkbox(label=f'{user_column} --> {pmo_argument}')
-        st.subheader("Edit Selected Optional Field Mappings")
-        updated_mapping={}
+        selected_mapping={}
         for user_column in checkbox_states:
-            pmo_argument=reverse_field_mapping[user_column]
             if checkbox_states[user_column]:
-                edit_column = st.toggle(f"Edit {user_column} --> {pmo_argument} mapping")
-                if edit_column:
-                    updated_mapping[user_column] = st.selectbox(
-                    f"Select optional argument match for {user_column}",
-                    options=optional_schema, index=optional_schema.index(
-                    user_column) if user_column in optional_schema else 0)
-                    no_map=st.checkbox(label=f'{user_column} has no good "optional argument" match but I still want to include it in the final PMO')
+                selected_mapping[user_column]=reverse_field_mapping[user_column]
+                pmo_argument=reverse_field_mapping[user_column]
+                if checkbox_states[user_column]:
+                    edit_column = st.toggle(f"Edit {user_column} --> {pmo_argument} mapping")
+                    no_map=None
+                    if edit_column:
+                        selected_mapping[user_column]=st.selectbox(
+                        f"Select optional argument match for {user_column}",
+                        options=optional_schema, index=optional_schema.index(
+                        user_column) if user_column in optional_schema else 0)
+                        no_map=st.checkbox(label=f'{user_column} has no good "optional argument" match but I still want to include it in the final PMO')
+                        if no_map:
+                            selected_mapping[user_column]='no match'
+                    if no_map or reverse_field_mapping[user_column]=='no match':
+                        additional_fields.append(user_column)
+        if no_duplicates(selected_mapping):
+            for user_column, pmo_argument in selected_mapping.items():
+                if pmo_argument!='no match':
+                    mapped_fields[pmo_argument]=user_column
+                    print('after no duplicates check, mapped fields is', mapped_fields)
+        else:
+            print('duplicates found, ending optional_func, mapped fields reported as error')
+            return 'Error', 'Error'
+    print('at end of optional_func, optional fields is now', mapped_fields)
+    return mapped_fields, additional_fields
 
-        #selected_additional_fields = [
-        #    key for key, value in checkbox_states.items() if value]
 
 
-        #Interactive field mapping optional arguments
-#        mapped_fields = interactive_field_mapping_page_section(
-#            mapped_fields, new_df.columns.tolist(), "Manually Alter Field Mapping of optional arguments")
-#    for key in mapped_fields:
-#        if mapped_fields[key]=='no match':
-#            mapped_fields[key]=None
-#    remaining_unused=list(set(unused_field_names)-set(mapped_fields.values()))
-#    return mapped_fields, remaining_unused
-
-def add_additional_fields(unused_field_names):
-    selected_additional_fields = None
-    if unused_field_names:
-        st.subheader("Add Additional Fields")
-        optional_additional_fields = st.toggle("Add additional fields")
-        if optional_additional_fields:
-            checkbox_states = {}
-            st.write("Select the extra columns you would like to include:")
-            for item in unused_field_names:
-                checkbox_states[item] = st.checkbox(label=item)
-            selected_additional_fields = [
-                key for key, value in checkbox_states.items() if value]
-            st.write("You selected:", selected_additional_fields)
-    return selected_additional_fields
 
 def field_mapping(df, target_schema, target_alternate_schema):
     # Fuzzy field matching required arguments
@@ -226,12 +227,7 @@ def load_data(target_schema, target_alternate_schema, optional_schema,
             st.dataframe(df)
         mapped_fields, unused_field_names = field_mapping(df, target_schema,
             target_alternate_schema)
-        # Add optional fields
-        add_optional_fields(df, unused_field_names, optional_schema,
-            optional_alternate_schema)
-#        selected_optional_fields, unused_field_names = add_optional_fields(df,
-#            unused_field_names, optional_schema, optional_alternate_schema)
-
-        # Add additional fields
-        #selected_additional_fields = add_additional_fields(unused_field_names)
+        # Add optional and additional fields
+        selected_optional_fields, selected_additional_fields=add_optional_fields(df,
+            unused_field_names, optional_schema, optional_alternate_schema)
     return df, mapped_fields, selected_optional_fields, selected_additional_fields

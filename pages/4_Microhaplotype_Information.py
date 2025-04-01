@@ -5,6 +5,8 @@ from src.transformer import transform_mhap_info
 from src.format_page import render_header
 from src.utils import load_schema
 
+session_name="mhap_data"
+title='microhaplotype information'
 
 class MhapPage:
     def __init__(self, required_fields, required_alternate_fields,
@@ -22,19 +24,27 @@ class MhapPage:
         selected_optional_fields, selected_additional_fields):
         #there are currently no optional fields but the field is passed anyway
         #for compatibility with any future optional fields.
-        if bioinfo_ID:
+        if bioinfo_ID and field_mapping and selected_optional_fields!='Error':
             st.subheader("Transform Data")
             if st.button("Transform Data"):
                 transformed_df = transform_mhap_info(df, bioinfo_ID,
                     field_mapping, selected_optional_fields,
                     selected_additional_fields)
                 # json_data = json.dumps(transformed_df, indent=4)
-                st.session_state["mhap_data"] = transformed_df
+                st.session_state[session_name] = transformed_df
                 try:
                     st.success(
                         f"Microhaplotype Information from Bioinformatics Run '{bioinfo_ID}' has been saved!")
                 except Exception as e:
                     st.error(f"Error saving Microhaplotype Information: {e}")
+
+
+    def display_panel_info(self, toggle_text):
+        if session_name in st.session_state:
+            preview = st.toggle(toggle_text)
+            if preview:
+                st.write(f"Current {title}:")
+                st.json(st.session_state[session_name])
 
     def run(self):
         # File upload
@@ -45,6 +55,8 @@ class MhapPage:
         bioinfo_ID = self.bioinfo_id_input()
         self.transform_and_save_data(
             df, bioinfo_ID, mapped_fields, selected_optional_fields, selected_additional_fields)
+        # Display current panel information
+        self.display_panel_info(f"Preview {title}")
 
 # Initialize and run the app
 if __name__ == "__main__":
@@ -58,4 +70,8 @@ if __name__ == "__main__":
     optional_alternate_fields = schema_fields["mhap_info"]["optional_alternatives"]
     app = MhapPage(required_fields, required_alternate_fields, optional_fields,
         optional_alternate_fields)
+    if session_name in st.session_state:
+        st.success(f'Your {title} has already been saved during a'
+            ' previous run of this page')
+        app.display_panel_info(f"Preview previously stored {title}")
     app.run()
