@@ -5,7 +5,7 @@
             "forward_primers",
             "reverse_primers"
         ],
-        "alternatives": {
+        "required_alternatives": {
             "target_id": [
                 "locus",
                 "amplicon",
@@ -18,6 +18,62 @@
             "reverse_primers": [
                 "rev_primers",
                 "ligation_arm"
+            ]
+        },
+        "optional": [
+            "forward_primers_start_col",
+            "forward_primers_end_col",
+            "reverse_primers_start_col",
+            "reverse_primers_end_col",
+            "insert_start_col",
+            "insert_end_col",
+            "chrom_col",
+            "strand_col",
+            "gene_id_col",
+            "target_type_col"
+        ],
+        "optional_alternatives": {
+            "forward_primers_start_col": [
+                "genomic_forward_primer_start",
+                "forward_primer_genomic_start_coordinate"
+            ],
+            "forward_primers_end_col": [
+                "genomic_forward_primer_end",
+                "forward_primer_genomic_end_coordinate"
+            ],
+            "reverse_primers_start_col": [
+                "genomic_reverse_primer_start",
+                "reverse_primer_genomic_start_coordinate"
+            ],
+            "reverse_primers_end_col": [
+                "genomic_reverse_primer_end",
+                "reverse_primer_genomic_end_coordinate"
+            ],
+            "insert_start_col": [
+                "genomic_insert_start",
+                "insert_genomic_start_coordinate"
+            ],
+            "insert_end_col": [
+                "genomic_insert_end",
+                "insert_genomic_end_coordinate"
+            ],
+            "chrom_col": [
+                "chromosome",
+                "amplicon_chrom",
+                "gene_chrom"
+            ],
+            "strand_col": [
+                "amplicon_strand",
+                "gene_strand",
+                "gene_genomic_strand"
+            ],
+            "gene_id_col": [
+                "gene_name",
+                "amplicon_gene"
+            ],
+            "target_type_col": [
+                "gene_type",
+                "amplicon_type"
             ]
         }
     },
@@ -32,7 +88,7 @@
             "samp_collect_device",
             "project_name"
         ],
-        "alternatives": {
+        "required_alternatives": {
             "specimen_id": [
                 "sample_id",
                 "bio_id",
@@ -77,6 +133,65 @@
                 "research_project",
                 "experiment_name"
             ]
+        },
+        "optional": [
+            "alternate_identifiers",
+            "geo_admin1",
+            "geo_admin2",
+            "geo_admin3",
+            "host_taxon_id",
+            "individual_id",
+            "lat_lon",
+            "parasite_density",
+            "plate_col",
+            "plate_name",
+            "plate_row",
+            "sample_comments"
+        ],
+        "optional_alternatives": {
+            "alternate_identifiers": [
+                "alternate identifiers",
+                "alternate_IDs"
+            ],
+            "geo_admin1": [
+                "Region",
+                "State",
+                "District"
+            ],
+            "geo_admin2": [
+                "District",
+                "county"
+            ],
+            "geo_admin3": [
+                "City"
+            ],
+            "host_taxon_id": [
+                "host_species_ID",
+                "host_taxon_ID"
+            ],
+            "individual_id": [
+                "individual_ID"
+            ],
+            "lat_lon": [
+                "latitude_longitude"
+            ],
+            "parasite_density": [
+                "parasitemia",
+                "parasites/ul"
+            ],
+            "plate_col": [
+                "plate_column",
+                "column_number"
+            ],
+            "plate_name": [
+                "plate_number"
+            ],
+            "plate_row": [
+                "row_number"
+            ],
+            "sample_comments": [
+                "additional_sample_info"
+            ]
         }
     },
     "experiment_level_metadata": {
@@ -86,7 +201,7 @@
             "panel_id",
             "experiment_sample_id"
         ],
-        "alternatives": {
+        "required_alternatives": {
             "sequencing_info_id": [
                 "seq_info_id",
                 "sequencing_id",
@@ -114,6 +229,26 @@
                 "extraction_id",
                 "run_accession"
             ]
+        },
+        "optional": [
+            "accession",
+            "plate_col",
+            "plate_name",
+            "plate_row"
+        ],
+        "optional_alternatives": {
+            "accession": [
+                "Accession information"
+            ],
+            "plate_col": [
+                "plate_column"
+            ],
+            "plate_name": [
+                "name_of_plate"
+            ],
+            "plate_row": [
+                "row_of_plate"
+            ]
         }
     },
     "mhap_info": {
@@ -123,7 +258,7 @@
             "asv",
             "reads"
         ],
-        "alternatives": {
+        "required_alternatives": {
             "sampleID": [
                 "specimen_id",
                 "sample_id",
@@ -152,6 +287,10 @@
                 "c_barcodeCnt",
                 "c_readCnt"
             ]
+        },
+        "optional": [
+        ],
+        "optional_alternatives": {
         }
     },
     "demultiplexed_samples": {
@@ -160,7 +299,7 @@
             "target_id",
             "raw_read_count"
         ],
-        "alternatives": {
+        "required_alternatives": {
             "sampleID": [
                 "specimen_id",
                 "sample_id",
@@ -179,6 +318,10 @@
                 "demuliplexed",
                 "demuliplexed_read_count"
             ]
+        },
+        "optional": [
+        ],
+        "optional_alternatives": {
         }
     },
     "sequencing_info": {
