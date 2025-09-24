@@ -1,5 +1,6 @@
 import streamlit as st
 from src.format_page import render_header
+import pandas as pd
 
 
 class ProjectInfoPage:
@@ -16,21 +17,63 @@ class ProjectInfoPage:
 
     def add_optional_info(self):
         st.subheader("Add Optional Fields")
+
         bioproject = st.text_input(
             "BioProject Accession:", help='An SRA bioproject accession e.g. PRJNA33823.')
-
         chief_scientist = st.text_input(
             "Project Collector Chief Scientist:", help='Can be collection of names separated by a semicolon if multiple people involved or can just be the name of the primary person managing the specimen.')
-        contributors = st.text_input(
-            "Project Contributors:", help='A list of collaborators who contributed to this project.')
+
+        # Create two columns
+        st.text("Project Contributors:")
+        upload_as_file = st.checkbox("Upload as file")
+        if not upload_as_file:
+            # wider text box, narrower dropdown
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                contributors = st.text_area(
+                    "",
+                    help="A list of collaborators who contributed to this project. "
+                    "Separated by tab, comma, or newline (e.g., Alice  Bob Tony)"
+                )
+
+            with col2:
+                sep_dict = {'newline': '\n', ',': ',', 'tab': '\t'}
+                sep = st.selectbox(
+                    "Separator", sep_dict.keys(), help="Choose how contributors are separated"
+                )
+
+            project_contributors = [c.strip()
+                                    for c in contributors.split(sep_dict[sep]) if c.strip()]
+        else:
+            # --- Option: File upload ---
+            uploaded_file = st.file_uploader(
+                "Or upload a file (CSV or TXT)", type=["csv", "txt"]
+            )
+
+            project_contributors = []
+            if uploaded_file is not None:
+                if uploaded_file.name.endswith(".csv"):
+                    df = pd.read_csv(uploaded_file)
+                    # Assume first column has contributors
+                    project_contributors = df.iloc[:, 0].dropna().astype(
+                        str).tolist()
+                elif uploaded_file.name.endswith(".txt"):
+                    text = uploaded_file.read().decode("utf-8")
+                    project_contributors = [c.strip()
+                                            for c in text.splitlines() if c.strip()]
+
+        # --- Final contributors list ---
+        # project_contributors = file_list if uploaded_file else manual_list
+
         project_type = st.text_input(
             "Project Type:", help='the type of project conducted, e.g. TES vs surveillance vs transmission.')
+
         if bioproject:
             self.project_info["BioProject_accession"] = bioproject
         if chief_scientist:
             self.project_info["project_collector_chief_scientist"] = chief_scientist
-        if contributors:
-            self.project_info["project_contributors"] = contributors
+        if project_contributors:
+            self.project_info["project_contributors"] = project_contributors
         if project_type:
             self.project_info["project_type"] = project_type
 

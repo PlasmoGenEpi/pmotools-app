@@ -79,26 +79,31 @@
     },
     "specimen_level_metadata": {
         "required": [
-            "specimen_id",
-            "samp_taxon_id",
+            "specimen_name",
+            "specimen_taxon_id",
+            "host_taxon_id",
             "collection_date",
             "collection_country",
-            "collector",
-            "samp_store_loc",
-            "samp_collect_device",
             "project_name"
         ],
         "required_alternatives": {
-            "specimen_id": [
+            "specimen_name": [
                 "sample_id",
                 "bio_id",
                 "specimen_name",
                 "sample_accession"
             ],
-            "samp_taxon_id": [
+            "specimen_taxon_id": [
                 "taxon_id",
                 "species_id",
-                "organism_id"
+                "organism_id",
+                "sample_taxon_id"
+            ],
+            "host_taxon_id": [
+                "taxon_id",
+                "species_id",
+                "individual_taxon_id",
+                "sample_taxon_id"
             ],
             "collection_date": [
                 "date_of_collection",
@@ -113,21 +118,6 @@
                 "admin_level_0",
                 "geo_admin0"
             ],
-            "collector": [
-                "sample_collector",
-                "field_researcher",
-                "gatherer"
-            ],
-            "samp_store_loc": [
-                "site_location",
-                "storage_location",
-                "sample_storage_site"
-            ],
-            "samp_collect_device": [
-                "collection_device",
-                "sampling_tool",
-                "gathering_equipment"
-            ],
             "project_name": [
                 "study_name",
                 "research_project",
@@ -136,23 +126,36 @@
         },
         "optional": [
             "alternate_identifiers",
+            "drug_usage",
+            "env_broad_scale",
+            "env_local_scale",
+            "env_medium",
             "geo_admin1",
             "geo_admin2",
             "geo_admin3",
-            "host_taxon_id",
-            "individual_id",
+            "host_age",
+            "host_sex",
+            "host_subject_id",
             "lat_lon",
-            "parasite_density",
-            "plate_col",
-            "plate_name",
-            "plate_row",
-            "sample_comments"
+            "microscopy_parasite_density_info",
+            "specimen_collect_device",
+            "specimen_comments",
+            "specimen_store_loc",
+            "specimen_type",
+            "storage_plate_info",
+            "travel_out_six_month"
         ],
         "optional_alternatives": {
             "alternate_identifiers": [
                 "alternate identifiers",
                 "alternate_IDs"
             ],
+            "drug_usage": [
+                "treatment"
+            ],
+            "env_broad_scale": [],
+            "env_local_scale": [],
+            "env_medium": [],
             "geo_admin1": [
                 "Region",
                 "State",
@@ -163,15 +166,13 @@
                 "county"
             ],
             "geo_admin3": [
-                "City"
+                "City",
+                "health_facility"
             ],
             "host_taxon_id": [
-                "host_species_ID",
-                "host_taxon_ID"
+                "host_species"
             ],
-            "individual_id": [
-                "individual_ID"
-            ],
+            "individual_id": [],
             "lat_lon": [
                 "latitude_longitude"
             ],
@@ -288,10 +289,8 @@
                 "c_readCnt"
             ]
         },
-        "optional": [
-        ],
-        "optional_alternatives": {
-        }
+        "optional": [],
+        "optional_alternatives": {}
     },
     "demultiplexed_samples": {
         "required": [
@@ -319,10 +318,8 @@
                 "demuliplexed_read_count"
             ]
         },
-        "optional": [
-        ],
-        "optional_alternatives": {
-        }
+        "optional": [],
+        "optional_alternatives": {}
     },
     "sequencing_info": {
         "required": [

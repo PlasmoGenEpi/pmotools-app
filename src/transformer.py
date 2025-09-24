@@ -1,13 +1,13 @@
-from pmotools.json_convertors.microhaplotype_table_to_pmo_dict import microhaplotype_table_to_pmo_dict
-from pmotools.json_convertors.panel_information_to_pmo_dict import panel_info_table_to_pmo_dict
-from pmotools.json_convertors.metatable_to_json_meta import experiment_info_table_to_json, specimen_info_table_to_json
-from pmotools.json_convertors.demultiplexed_targets_to_pmo_dict import demultiplexed_targets_to_pmo_dict
+from pmotools.pmo_builder.mhap_table_to_pmo import mhap_table_to_pmo
+from pmotools.pmo_builder.panel_information_to_pmo import panel_info_table_to_pmo
+from pmotools.pmo_builder.metatable_to_pmo import library_sample_info_table_to_pmo, specimen_info_table_to_pmo
+# from pmotools.pmo_builder import demultiplexed_targets_to_pmo_dict
 
 
 def transform_mhap_info(df, bioinfo_id, field_mapping, optional_mapping,
-    additional_hap_detected_cols=None):
+                        additional_hap_detected_cols=None):
     """Reformat the DataFrame based on the provided field mapping."""
-    transformed_df = microhaplotype_table_to_pmo_dict(
+    transformed_df = mhap_table_to_pmo(
         df,
         bioinfo_id,
         sampleID_col=field_mapping["sampleID"],
@@ -19,9 +19,9 @@ def transform_mhap_info(df, bioinfo_id, field_mapping, optional_mapping,
 
 
 def transform_panel_info(df, panel_id, field_mapping, target_genome_info,
-    optional_fields, additional_target_info_cols=None):
+                         optional_fields, additional_target_info_cols=None):
     """Reformat the DataFrame based on the provided field mapping."""
-    transformed_df = panel_info_table_to_pmo_dict(
+    transformed_df = panel_info_table_to_pmo(
         df,
         panel_id,
         target_genome_info,
@@ -43,9 +43,9 @@ def transform_panel_info(df, panel_id, field_mapping, target_genome_info,
 
 
 def transform_specimen_info(df, field_mapping, optional_field_mapping,
-    additional_fields=None):
+                            additional_fields=None):
     print('optional field mapping is', optional_field_mapping)
-    transformed_df = specimen_info_table_to_json(
+    transformed_df = specimen_info_table_to_pmo(
         df,
         specimen_id_col=field_mapping["specimen_id"],
         samp_taxon_id=field_mapping["samp_taxon_id"],
@@ -72,11 +72,11 @@ def transform_specimen_info(df, field_mapping, optional_field_mapping,
     return transformed_df
 
 
-def transform_experiment_info(df, field_mapping, optional_mapping,
-    additional_fields=None):
-    transformed_df = experiment_info_table_to_json(
+def transform_library_sample_info(df, field_mapping, optional_mapping,
+                                  additional_fields=None):
+    transformed_df = library_sample_info_table_to_pmo(
         df,
-        experiment_sample_id_col=field_mapping["experiment_sample_id"],
+        library_sample_id_col=field_mapping["library_sample_sample_id"],
         sequencing_info_id=field_mapping["sequencing_info_id"],
         specimen_id=field_mapping["specimen_id"],
         panel_id=field_mapping["panel_id"],
@@ -84,18 +84,19 @@ def transform_experiment_info(df, field_mapping, optional_mapping,
         plate_col=optional_mapping["plate_col"],
         plate_name=optional_mapping["plate_name"],
         plate_row=optional_mapping["plate_row"],
-        additional_experiment_cols=additional_fields
+        additional_library_sample_cols=additional_fields
     )
     return transformed_df
 
-def transform_demultiplexed_info(df, bioinfo_id, field_mapping,
-    optional_mapping, additional_hap_detected_cols=None):
-    """Reformat the DataFrame based on the provided field mapping."""
-    transformed_df = demultiplexed_targets_to_pmo_dict(
-        df,
-        bioinfo_id,
-        sampleID_col=field_mapping["sampleID"],
-        target_id_col=field_mapping['target_id'],
-        read_count_col=field_mapping['raw_read_count'],
-        additional_hap_detected_cols=additional_hap_detected_cols)
-    return transformed_df
+
+# def transform_demultiplexed_info(df, bioinfo_id, field_mapping,
+#                                  optional_mapping, additional_hap_detected_cols=None):
+#     """Reformat the DataFrame based on the provided field mapping."""
+#     transformed_df = demultiplexed_targets_to_pmo_dict(
+#         df,
+#         bioinfo_id,
+#         sampleID_col=field_mapping["sampleID"],
+#         target_id_col=field_mapping['target_id'],
+#         read_count_col=field_mapping['raw_read_count'],
+#         additional_hap_detected_cols=additional_hap_detected_cols)
+#     return transformed_df

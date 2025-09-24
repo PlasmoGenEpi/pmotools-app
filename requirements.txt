@@ -2,3 +2,4 @@ fuzzywuzzy==0.18.0
 numpy==2.1.3
 pandas==2.2.3
 streamlit==1.40.1
+pmotools==0.1.0
