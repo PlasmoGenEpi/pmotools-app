@@ -126,6 +126,7 @@
         },
         "optional": [
             "alternate_identifiers",
+            "blood_meal",
             "drug_usage",
             "env_broad_scale",
             "env_local_scale",
@@ -137,19 +138,24 @@
             "host_sex",
             "host_subject_id",
             "lat_lon",
-            "microscopy_parasite_density_info",
+            "parasite_density",
+            "parasite_density_method",
             "specimen_collect_device",
             "specimen_comments",
             "specimen_store_loc",
-            "specimen_type",
-            "storage_plate_info",
-            "travel_out_six_month"
+            "storage_plate_col",
+            "storage_plate_name",
+            "storage_plate_row",
+            "storage_plate_position",
+            "travel_out_six_month",
+            "treatment_status"
         ],
         "optional_alternatives": {
             "alternate_identifiers": [
                 "alternate identifiers",
                 "alternate_IDs"
             ],
+            "blood_meal": [],
             "drug_usage": [
                 "treatment"
             ],
@@ -169,29 +175,53 @@
                 "City",
                 "health_facility"
             ],
-            "host_taxon_id": [
-                "host_species"
+            "host_age": [],
+            "host_sex": [
+                "male",
+                "female"
             ],
-            "individual_id": [],
+            "host_subject_id": [
+                "person",
+                "host_id",
+                "participant"
+            ],
             "lat_lon": [
                 "latitude_longitude"
             ],
             "parasite_density": [
                 "parasitemia",
+                "parasitaemia",
                 "parasites/ul"
             ],
-            "plate_col": [
-                "plate_column",
-                "column_number"
+            "parasite_density_method": [],
+            "specimen_collect_device": [
+                "instrument",
+                "collection_method",
+                "DBS"
             ],
-            "plate_name": [
-                "plate_number"
+            "specimen_comments": [
+                "info",
+                "extra_info"
             ],
-            "plate_row": [
-                "row_number"
+            "specimen_store_loc": [
+                "storage",
+                "sample_location"
             ],
-            "sample_comments": [
-                "additional_sample_info"
+            "storage_plate_col": [
+                "column"
+            ],
+            "storage_plate_name": [
+                "plate"
+            ],
+            "storage_plate_row": [
+                "row"
+            ],
+            "storage_plate_position": [],
+            "travel_out_six_month": [
+                "travel_history"
+            ],
+            "treatment_status": [
+                "treated"
             ]
         }
     },

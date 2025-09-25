@@ -4,19 +4,20 @@ from src.field_matcher import load_data
 from src.transformer import transform_specimen_info
 from src.utils import load_schema
 
-session_name='specimen_info'
-title='specimen level metadata'
+session_name = 'specimen_info'
+title = 'specimen level metadata'
+
 
 class SpecimenMetadataPage:
     def __init__(self, required_fields, required_alternate_fields,
-        optional_fields, optional_alternate_fields):
+                 optional_fields, optional_alternate_fields):
         self.required_fields = required_fields
         self.required_alternate_fields = required_alternate_fields
         self.optional_fields = optional_fields
         self.optional_alternate_fields = optional_alternate_fields
 
     def transform_and_save_data(self, df, mapped_fields, selected_optional_fields, selected_additional_fields):
-        if mapped_fields and selected_optional_fields!='Error':
+        if mapped_fields and selected_optional_fields != 'Error':
             st.subheader("Transform Data")
             if st.button("Transform Data"):
                 transformed_df = transform_specimen_info(
@@ -36,15 +37,16 @@ class SpecimenMetadataPage:
                 st.json(st.session_state[session_name])
 
     def run(self):
-        df, mapped_fields, selected_optional_fields, selected_additional_fields=load_data(
+        df, mapped_fields, selected_optional_fields, selected_additional_fields = load_data(
             required_fields, required_alternate_fields, optional_fields,
             optional_alternate_fields)
         # Transform and save data
         if mapped_fields:
             self.transform_and_save_data(df, mapped_fields,
-                selected_optional_fields, selected_additional_fields)
+                                         selected_optional_fields, selected_additional_fields)
         # Display current panel information
         self.display_panel_info(f"Preview {title}")
+
 
 if __name__ == "__main__":
     render_header()
@@ -55,9 +57,9 @@ if __name__ == "__main__":
     optional_fields = schema_fields["specimen_level_metadata"]["optional"]
     optional_alternate_fields = schema_fields["specimen_level_metadata"]["optional_alternatives"]
     app = SpecimenMetadataPage(required_fields, required_alternate_fields,
-        optional_fields, optional_alternate_fields)
+                               optional_fields, optional_alternate_fields)
     if session_name in st.session_state:
         st.success(f'Your {title} has already been saved during a'
-            ' previous run of this page')
+                   ' previous run of this page')
         app.display_panel_info(f"Preview previously stored {title}")
     app.run()

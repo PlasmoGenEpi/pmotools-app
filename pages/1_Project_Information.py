@@ -15,6 +15,36 @@ class ProjectInfoPage:
         self.project_info["project_description"] = st.text_input(
             "Project Description:", help='A short description of the project.')
 
+    def _get_contributors(self) -> list[str]:
+        st.text("Project Contributors:")
+        upload_as_file = st.checkbox("Upload as file")
+
+        if not upload_as_file:
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                contributors = st.text_area(
+                    "",
+                    help="List collaborators separated by tab, comma, or newline "
+                         "(e.g., Alice  Bob Tony)",
+                )
+            with col2:
+                sep_dict = {"newline": "\n", ",": ",", "tab": "\t"}
+                sep = st.selectbox("Separator", sep_dict.keys())
+            return [c.strip() for c in contributors.split(sep_dict[sep]) if c.strip()]
+
+        uploaded_file = st.file_uploader(
+            "Upload a CSV or TXT", type=["csv", "txt"])
+        if uploaded_file:
+            if uploaded_file.name.endswith(".csv"):
+                df = pd.read_csv(uploaded_file)
+                column = st.selectbox(
+                    "Choose column for contributors", df.columns)
+                return df[column].dropna().astype(str).tolist()
+            elif uploaded_file.name.endswith(".txt"):
+                text = uploaded_file.read().decode("utf-8")
+                return [c.strip() for c in text.splitlines() if c.strip()]
+        return []
+
     def add_optional_info(self):
         st.subheader("Add Optional Fields")
 
@@ -22,49 +52,7 @@ class ProjectInfoPage:
             "BioProject Accession:", help='An SRA bioproject accession e.g. PRJNA33823.')
         chief_scientist = st.text_input(
             "Project Collector Chief Scientist:", help='Can be collection of names separated by a semicolon if multiple people involved or can just be the name of the primary person managing the specimen.')
-
-        # Create two columns
-        st.text("Project Contributors:")
-        upload_as_file = st.checkbox("Upload as file")
-        if not upload_as_file:
-            # wider text box, narrower dropdown
-            col1, col2 = st.columns([3, 1])
-            with col1:
-                contributors = st.text_area(
-                    "",
-                    help="A list of collaborators who contributed to this project. "
-                    "Separated by tab, comma, or newline (e.g., Alice  Bob Tony)"
-                )
-
-            with col2:
-                sep_dict = {'newline': '\n', ',': ',', 'tab': '\t'}
-                sep = st.selectbox(
-                    "Separator", sep_dict.keys(), help="Choose how contributors are separated"
-                )
-
-            project_contributors = [c.strip()
-                                    for c in contributors.split(sep_dict[sep]) if c.strip()]
-        else:
-            # --- Option: File upload ---
-            uploaded_file = st.file_uploader(
-                "Or upload a file (CSV or TXT)", type=["csv", "txt"]
-            )
-
-            project_contributors = []
-            if uploaded_file is not None:
-                if uploaded_file.name.endswith(".csv"):
-                    df = pd.read_csv(uploaded_file)
-                    # Assume first column has contributors
-                    project_contributors = df.iloc[:, 0].dropna().astype(
-                        str).tolist()
-                elif uploaded_file.name.endswith(".txt"):
-                    text = uploaded_file.read().decode("utf-8")
-                    project_contributors = [c.strip()
-                                            for c in text.splitlines() if c.strip()]
-
-        # --- Final contributors list ---
-        # project_contributors = file_list if uploaded_file else manual_list
-
+        project_contributors = self._get_contributors()
         project_type = st.text_input(
             "Project Type:", help='the type of project conducted, e.g. TES vs surveillance vs transmission.')
 
