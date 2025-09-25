@@ -9,17 +9,16 @@ class BioInfoPage:
     def enter_bioinfo_method_vals(self, method):
         cols = st.columns(4)
         with cols[0]:
-            program = st.text_input(f'program', key=f"{method}_program")
+            program = st.text_input("program", key=f"{method}_program")
         with cols[1]:
-            purpose = st.text_input(f'purpose', key=f"{method}_purpose")
+            purpose = st.text_input("purpose", key=f"{method}_purpose")
         with cols[2]:
-            version = st.text_input(f'version', key=f"{method}_version")
+            version = st.text_input("version", key=f"{method}_version")
         with cols[3]:
             additional_argument = st.text_input(
-                f'additional argument (optional)', key=f"{method}_additional_argument")
-        method_dict = {"program": program,
-                       "purpose": purpose,
-                       "version": version}
+                "additional argument (optional)", key=f"{method}_additional_argument"
+            )
+        method_dict = {"program": program, "purpose": purpose, "version": version}
         if additional_argument:
             method_dict["additional_argument"] = additional_argument
         # Add user specified additional fields
@@ -28,27 +27,38 @@ class BioInfoPage:
 
     def add_additional_fields(self, method, dict):
         additional_fields_toggle = st.toggle(
-            f"Add additional fields to {method}", key=f"{method}_toggle")
+            f"Add additional fields to {method}", key=f"{method}_toggle"
+        )
         if additional_fields_toggle:
             st.write("Fill in the additional fields below:")
 
-            number_inputs = st.number_input("Number of additional inputs",
-                                            min_value=0, value=1, key=f"{method}_num_fields")
+            number_inputs = st.number_input(
+                "Number of additional inputs",
+                min_value=0,
+                value=1,
+                key=f"{method}_num_fields",
+            )
             # Inputs for names and values
             cols = st.columns(2)
             with cols[0]:
-                field_names = [st.text_input(
-                    f'Field Name {i}', key=f"field_name_{method}_{i}") for i in range(number_inputs)]
+                field_names = [
+                    st.text_input(f"Field Name {i}", key=f"field_name_{method}_{i}")
+                    for i in range(number_inputs)
+                ]
             with cols[1]:
-                field_values = [st.text_input(
-                    f'Value {i}', key=f"value_{method}_{i}") for i in range(number_inputs)]
+                field_values = [
+                    st.text_input(f"Value {i}", key=f"value_{method}_{i}")
+                    for i in range(number_inputs)
+                ]
 
             # Save the additional fields
             for i in range(number_inputs):
                 dict[field_names[i]] = field_values[i]
         return dict
 
-    def check_method_required_fields(self, dict, fields=["program", "purpose", "version"]):
+    def check_method_required_fields(
+        self, dict, fields=["program", "purpose", "version"]
+    ):
         for field in fields:
             if field not in dict.keys():
                 return False
@@ -58,20 +68,26 @@ class BioInfoPage:
         st.subheader("Add Bioinformatics Information")
 
         bioinfo_info_id = st.text_input(
-            "Bioinformatics Information ID:", help='A unique identifier for this targeted amplicon bioinformatics pipeline run.')
+            "Bioinformatics Information ID:",
+            help="A unique identifier for this targeted amplicon bioinformatics pipeline run.",
+        )
 
         # Required Methods
         st.subheader("Demultiplexing Method")
         demultiplexing_method_dict = {
-            "demultiplexing_method": self.enter_bioinfo_method_vals("demultiplexing_method")}
+            "demultiplexing_method": self.enter_bioinfo_method_vals(
+                "demultiplexing_method"
+            )
+        }
         st.subheader("Denoising Method")
         denoising_method_dict = {
-            "denoising_method": self.enter_bioinfo_method_vals("denoising_method")}
+            "denoising_method": self.enter_bioinfo_method_vals("denoising_method")
+        }
         # Put basic info into dict
         self.bioinfo_infos = {
             "demultiplexing_method": demultiplexing_method_dict,
             "denoising_method": denoising_method_dict,
-            "tar_amp_bioinformatics_info_id": bioinfo_info_id
+            "tar_amp_bioinformatics_info_id": bioinfo_info_id,
         }
 
         # # Optional
@@ -112,7 +128,13 @@ class BioInfoPage:
 
     def transform_and_save_data(self):
         bioinfo_infos = self.bioinfo_infos
-        if all([bioinfo_infos["demultiplexing_method"], bioinfo_infos["denoising_method"], bioinfo_infos["tar_amp_bioinformatics_info_id"],]):
+        if all(
+            [
+                bioinfo_infos["demultiplexing_method"],
+                bioinfo_infos["denoising_method"],
+                bioinfo_infos["tar_amp_bioinformatics_info_id"],
+            ]
+        ):
             st.subheader("Save Data")
             if st.button("Save Data"):
                 st.session_state["bioinfo_infos"] = bioinfo_infos

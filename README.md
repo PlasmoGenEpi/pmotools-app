@@ -2,9 +2,10 @@
 
 This repository contains the code for an app built with Streamlit that helps users convert their data into the PMO format using the [`pmotools-python`](https://github.com/PlasmoGenEpi/pmotools-python) package.
 
-Contents 
+Contents
 - [Features](#features)
 - [Requirements](#requirements)
+- [Setup](#setup)
 - [Usage](#usage)
 - [Developer Notes](#developer-notes)
 
@@ -17,39 +18,36 @@ Contents
 
 ## Requirements
 
-- Python 3.x
-- Streamlit
-- pmotools
-- numpy 
-- fuzzywuzzy
+- Python 3.11+
+- [uv](https://docs.astral.sh/uv/) (Python package and project manager)
 
-## Usage 
-Note : This won't work for now as pmotools-python is not pip installable yet. See Dev Notes for current set up
+## Setup
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/streamlit-pmo-converter.git
-   cd streamlit-pmo-converter
-2. Install the dependencies 
-    ```bash
-    pip install -r requirements.txt
-3. Launch the app with 
-    ```bash
-    streamlit run PMO_Builder.py
+   git clone https://github.com/PlasmoGenEpi/pmotools-python.git
+   cd pmotools-app
+   ```
+2. Install uv and sync environment (if not already installed):
+   ```bash
+   pip install uv
+   uv sync --dev
+   ```
+
+## Usage
+Run the Streamlit app with uv:
+```bash
+uv run streamlit run PMO_Builder.py
+```
 ## Developer Notes
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/streamlit-pmo-converter.git
-   cd streamlit-pmo-converter
-2. Install the dependencies 
-    ```bash
-    pip install -r requirements.txt
-3. Clone the pmotools-python repository and install 
-    ```bash
-    git clone git@github.com:PlasmoGenEpi/pmotools-python.git 
-    cd pmotools-python 
-    git checkout develop 
-    pip install -e .
-    cd ..
-3. Launch the app with 
-    ```bash
-    streamlit run PMO_Builder.py
+- Install or update dependencies:
+- Add: `uv add <package>`
+- Remove: `uv remove <package>`
+- Upgrade: `uv lock --upgrade` then `uv sync`
+- Run pre-commit hooks (linting with ruff):
+  ```bash
+  uv run pre-commit run --all-files
+  ```
+- Install pre-commit hooks (run once):
+  ```bash
+  uv run pre-commit install
+  ```

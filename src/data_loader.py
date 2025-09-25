@@ -10,7 +10,8 @@ def load_csv(file):
             df = pd.read_excel(file)
         else:
             raise ValueError(
-                "Unsupported file format. Please upload a CSV, TSV, or Excel file.")
+                "Unsupported file format. Please upload a CSV, TSV, or Excel file."
+            )
         return df
 
     except Exception as e:

@@ -8,9 +8,9 @@ def main():
     st.subheader("About the PMO Builder", divider="gray")
     st.markdown(
         """
-        The **PMO Builder** is designed to help create and manage PMO 
-        (Portable Microhaplotype Object) files from your own data to organize 
-        and store information in a standardized format. This app simplifies the 
+        The **PMO Builder** is designed to help create and manage PMO
+        (Portable Microhaplotype Object) files from your own data to organize
+        and store information in a standardized format. This app simplifies the
         conversion of your data from multiple CSV files into the relational PMO format.
         """
     )
@@ -20,9 +20,9 @@ def main():
     st.markdown(
         """
         As you move through the app you will put together the following information. Together these will make a complete PMO:
-        - **Project Information:**: Information describing the project this data belongs to. 
+        - **Project Information:**: Information describing the project this data belongs to.
         - **Specimen Information**: Metadata describing the biological specimens.
-        - **Library Sample Information**: Metadata describing each library created from a specimen. 
+        - **Library Sample Information**: Metadata describing each library created from a specimen.
         - **Panel Information**: A table including data on the targets that make up the panel.
         - **Sequencing Information**: Information on how the samples were sequenced.
         - **Bioinformatics Information**: Information on the bioinformatics pipeline used to generate the allele data.

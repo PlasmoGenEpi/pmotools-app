@@ -11,9 +11,11 @@ class ProjectInfoPage:
         st.subheader("Add Project Information")
 
         self.project_info["project_name"] = st.text_input(
-            "Project Name:", help='A unique identifier for this project.')
+            "Project Name:", help="A unique identifier for this project."
+        )
         self.project_info["project_description"] = st.text_input(
-            "Project Description:", help='A short description of the project.')
+            "Project Description:", help="A short description of the project."
+        )
 
     def _get_contributors(self) -> list[str]:
         st.text("Project Contributors:")
@@ -25,20 +27,18 @@ class ProjectInfoPage:
                 contributors = st.text_area(
                     "",
                     help="List collaborators separated by tab, comma, or newline "
-                         "(e.g., Alice  Bob Tony)",
+                    "(e.g., Alice  Bob Tony)",
                 )
             with col2:
                 sep_dict = {"newline": "\n", ",": ",", "tab": "\t"}
                 sep = st.selectbox("Separator", sep_dict.keys())
             return [c.strip() for c in contributors.split(sep_dict[sep]) if c.strip()]
 
-        uploaded_file = st.file_uploader(
-            "Upload a CSV or TXT", type=["csv", "txt"])
+        uploaded_file = st.file_uploader("Upload a CSV or TXT", type=["csv", "txt"])
         if uploaded_file:
             if uploaded_file.name.endswith(".csv"):
                 df = pd.read_csv(uploaded_file)
-                column = st.selectbox(
-                    "Choose column for contributors", df.columns)
+                column = st.selectbox("Choose column for contributors", df.columns)
                 return df[column].dropna().astype(str).tolist()
             elif uploaded_file.name.endswith(".txt"):
                 text = uploaded_file.read().decode("utf-8")
@@ -49,12 +49,17 @@ class ProjectInfoPage:
         st.subheader("Add Optional Fields")
 
         bioproject = st.text_input(
-            "BioProject Accession:", help='An SRA bioproject accession e.g. PRJNA33823.')
+            "BioProject Accession:", help="An SRA bioproject accession e.g. PRJNA33823."
+        )
         chief_scientist = st.text_input(
-            "Project Collector Chief Scientist:", help='Can be collection of names separated by a semicolon if multiple people involved or can just be the name of the primary person managing the specimen.')
+            "Project Collector Chief Scientist:",
+            help="Can be collection of names separated by a semicolon if multiple people involved or can just be the name of the primary person managing the specimen.",
+        )
         project_contributors = self._get_contributors()
         project_type = st.text_input(
-            "Project Type:", help='the type of project conducted, e.g. TES vs surveillance vs transmission.')
+            "Project Type:",
+            help="the type of project conducted, e.g. TES vs surveillance vs transmission.",
+        )
 
         if bioproject:
             self.project_info["BioProject_accession"] = bioproject
@@ -73,16 +78,21 @@ class ProjectInfoPage:
 
         if add_fields_toggle:
             st.write("Fill in the additional fields below:")
-            number_inputs = st.number_input("Number of additional inputs",
-                                            min_value=0, value=1)
+            number_inputs = st.number_input(
+                "Number of additional inputs", min_value=0, value=1
+            )
             # Inputs for names and values
             cols = st.columns(2)
             with cols[0]:
-                field_names = [st.text_input(
-                    f'Field Name {i}', key=f"field_name_{i}") for i in range(number_inputs)]
+                field_names = [
+                    st.text_input(f"Field Name {i}", key=f"field_name_{i}")
+                    for i in range(number_inputs)
+                ]
             with cols[1]:
-                field_values = [st.text_input(
-                    f'Value {i}', key=f"value_{i}") for i in range(number_inputs)]
+                field_values = [
+                    st.text_input(f"Value {i}", key=f"value_{i}")
+                    for i in range(number_inputs)
+                ]
 
             # Save the additional fields
             for i in range(number_inputs):

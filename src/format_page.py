@@ -1,5 +1,8 @@
 # utils.py
-from src.field_matcher import fuzzy_field_matching_page_section, interactive_field_mapping_page_section
+from src.field_matcher import (
+    fuzzy_field_matching_page_section,
+    interactive_field_mapping_page_section,
+)
 from src.data_loader import load_csv
 import streamlit as st
 
@@ -18,9 +21,7 @@ def render_header():
     col1, col2 = st.columns([1, 4])
 
     with col1:
-        st.image(
-            "images/PGE_logo.png"
-        )
+        st.image("images/PGE_logo.png")
 
     with col2:
         # Add title and subtitle
@@ -39,11 +40,13 @@ class BasicPage:
     def field_mapping(self, df):
         # Fuzzy field matching
         field_mapping, unused_field_names = fuzzy_field_matching_page_section(
-            df, self.target_schema)
+            df, self.target_schema
+        )
 
         # Interactive field mapping
         field_mapping = interactive_field_mapping_page_section(
-            field_mapping, df.columns.tolist())
+            field_mapping, df.columns.tolist()
+        )
         return field_mapping, unused_field_names
 
     def add_additional_fields(self, unused_field_names):
@@ -57,7 +60,8 @@ class BasicPage:
                 for item in unused_field_names:
                     checkbox_states[item] = st.checkbox(label=item)
                 selected_additional_fields = [
-                    key for key, value in checkbox_states.items() if value]
+                    key for key, value in checkbox_states.items() if value
+                ]
                 st.write("You selected:", selected_additional_fields)
         return selected_additional_fields
 
@@ -74,7 +78,6 @@ class BasicPage:
             field_mapping, unused_field_names = self.field_mapping(df)
 
             # Add additional fields
-            selected_additional_fields = self.add_additional_fields(
-                unused_field_names)
-
+            selected_additional_fields = self.add_additional_fields(unused_field_names)
+            print(selected_additional_fields)
             # TODO: Implement Transform and save data
