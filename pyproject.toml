@@ -11,3 +11,10 @@ dependencies = [
     "pmotools==0.1.0",
     "streamlit==1.40.1",
 ]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "streamlit>=1.40.1",
+]

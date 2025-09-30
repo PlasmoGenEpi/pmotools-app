@@ -5,7 +5,13 @@ import streamlit as st
 from src.data_loader import load_csv
 
 
-def fuzzy_match_fields(field_names, target_schema, alternate_schema_names=None):
+def fuzzy_match_fields(
+    field_names,
+    target_schema,
+    alternate_schema_names=None,
+    is_required: bool = True,
+    match_threshold: int = 60,
+):
     """
     Matches field names to the target schema using fuzzy matching, ensuring
     that each target schema field is only matched to one field name.
@@ -18,54 +24,54 @@ def fuzzy_match_fields(field_names, target_schema, alternate_schema_names=None):
         dict: A dictionary mapping each field name to the best-matched schema field.
         list: A list of unused field names that could not be matched.
     """
-    matches = {}
-    unused_field_names = []  # To store any unused field names
+    # Initialize all targets with None to ensure full coverage in the table
+    matches = {target: None for target in target_schema}
+    # Track remaining available fields to enforce one-to-one mapping
+    available_fields = set(field_names)
 
-    # For every target find the best matching field
-    # TODO: Think about whether to allow multiple matches from a single field.
+    # Error if not enough unique fields to match all targets
+    if is_required and len(available_fields) < len(target_schema):
+        st.error(
+            "Not enough unique input fields to match all required schema fields. "
+            f"Have {len(available_fields)} unique field(s) for {len(target_schema)} target(s)."
+        )
+
+    # For every target find the best matching unused field
     for target in target_schema:
-        best_match = process.extractOne(target, field_names)
-        if alternate_schema_names:
-            alt_targets = alternate_schema_names[target]
-            for alt_target in alt_targets:
-                alt_match = process.extractOne(alt_target, field_names)
-                if alt_match[1] > best_match[1]:
+        if not available_fields:
+            # If no fields remain, required path already surfaced a global error above
+            # For optional, we keep 'no match' as initialized
+            continue
+
+        remaining_fields = list(available_fields)
+        best_match = process.extractOne(target, remaining_fields)
+
+        if alternate_schema_names and target in alternate_schema_names:
+            for alt_target in alternate_schema_names.get(target, []):
+                alt_match = process.extractOne(alt_target, remaining_fields)
+                if alt_match and best_match and alt_match[1] > best_match[1]:
                     best_match = alt_match
+
+        if not best_match:
+            # Leave as None
+            continue
+
         best_match_field = best_match[0]
-        matches[target] = best_match_field
-    # Find unused field names
-    unused_field_names = list(set(field_names) - set(matches.values()))
+        best_score = best_match[1]
+
+        if is_required:
+            # Always take the best remaining field for required targets
+            matches[target] = best_match_field
+            available_fields.discard(best_match_field)
+        else:
+            # Only accept if above threshold; otherwise keep None
+            if best_score >= match_threshold:
+                matches[target] = best_match_field
+                available_fields.discard(best_match_field)
+
+    # Fields not used in matching
+    unused_field_names = list(available_fields)
     return matches, unused_field_names
-
-
-# def reverse_fuzzy_match_fields(field_names, target_schema, alternate_schema_names=None):
-#     """
-#     modeled after fuzzy_match_fields, except instead of finding the column that
-#     best matches each argument (or its alternate) this version finds the best
-#     argument to match against each column. In practice, because this version
-#     is keyed by columns instead of arguments, this means that all arguments (and
-#     their alternates) need to be loaded as a flattened list - any matched
-#     alternates are then mapped back to their 'primary' argument match.
-#     """
-#     matches = {}
-
-#     # Build lookup of all options -> canonical name
-#     if alternate_schema_names:
-#         all_target_options = {}
-#         for primary, alternates in alternate_schema_names.items():
-#             all_target_options[primary] = primary
-#             for alt in alternates:
-#                 all_target_options[alt] = primary
-#     else:
-#         all_target_options = {k: k for k in target_schema}
-
-#     # Do fuzzy matching
-#     for field_name in field_names:
-#         best_match, score = process.extractOne(
-#             field_name, all_target_options.keys())
-#         matches[field_name] = all_target_options[best_match]
-
-#     return matches
 
 
 def no_duplicates(field_mapping):
@@ -82,12 +88,12 @@ def no_duplicates(field_mapping):
     counts = Counter(list(field_mapping.values()))
     duplicates = {item for item, count in counts.items() if count > 1}
     # Check for duplicates by comparing the length of the list to the length of the set
-    duplicates = duplicates - set(["no match", None])
+    duplicates = duplicates - set([None])
     if duplicates:
         st.error(
             f"These items are mapped to the same thing: {duplicates} You"
             " need to fix your mappings so that each field from your input file"
-            " maps to a unique field name from the PMO format (or check the box"
+            " maps to a unique field name from the PMO format (or select"
             ' for "no match" if there is no good match) and try again.'
         )
         #        raise ValueError(
@@ -96,23 +102,44 @@ def no_duplicates(field_mapping):
     return True
 
 
-def interactive_field_mapping(field_mapping, df_columns):
+def interactive_field_mapping(field_mapping, df_columns, is_required: bool = True):
     updated_mapping = {}
+
+    # Add "no match" option to the available choices
+    if is_required:
+        options = df_columns
+    else:
+        options = ["no match"] + df_columns
 
     for field, suggested_match in field_mapping.items():
         # Use streamlit widgets to allow the user to select a match from df columns
         if isinstance(suggested_match, list):  # For multiple possible matches
-            updated_mapping[field] = st.selectbox(
+            # Find the index in the options list
+            try:
+                index = options.index(suggested_match[0]) if suggested_match else 0
+            except ValueError:
+                index = 0  # Default to "no match" if not found
+
+            selected = st.selectbox(
                 f"Select match for {field}",
-                options=df_columns,
-                index=df_columns.index(suggested_match[0]) if suggested_match else 0,
+                options=options,
+                index=index,
             )
         else:
-            updated_mapping[field] = st.selectbox(
+            # Find the index in the options list
+            try:
+                index = options.index(suggested_match) if suggested_match else 0
+            except ValueError:
+                index = 0  # Default to "no match" if not found
+
+            selected = st.selectbox(
                 f"Modify match for {field}",
-                options=df_columns,
-                index=df_columns.index(suggested_match) if suggested_match else 0,
+                options=options,
+                index=index,
             )
+
+        # Convert "no match" to None
+        updated_mapping[field] = None if selected == "no match" else selected
 
     return updated_mapping
 
@@ -124,11 +151,11 @@ def field_mapping_json_to_table(mapping):
 
 
 def fuzzy_field_matching_page_section(
-    input_fields, target_schema, alternate_schema_names=None
+    input_fields, target_schema, alternate_schema_names=None, is_required: bool = True
 ):
     st.subheader("Match Fields")
     field_mapping, unused_field_names = fuzzy_match_fields(
-        input_fields, target_schema, alternate_schema_names
+        input_fields, target_schema, alternate_schema_names, is_required=is_required
     )
     st.write("Suggested Field Mapping:")
     st.dataframe(field_mapping_json_to_table(field_mapping))
@@ -136,105 +163,86 @@ def fuzzy_field_matching_page_section(
 
 
 def interactive_field_mapping_page_section(
-    field_mapping, df_columns, toggle_name="Manually Alter Field Mapping"
+    field_mapping,
+    df_columns,
+    toggle_name="Manually Alter Field Mapping",
+    key_suffix: str = "",
+    is_required: bool = True,
 ):
-    interactive_field_mapping_on = st.toggle(toggle_name)
+    unique_key = (
+        f"interactive_field_mapping_{key_suffix}"
+        if key_suffix
+        else "interactive_field_mapping"
+    )
+    interactive_field_mapping_on = st.toggle(toggle_name, key=unique_key)
     if interactive_field_mapping_on:
-        updated_mapping = interactive_field_mapping(field_mapping, df_columns)
+        updated_mapping = interactive_field_mapping(
+            field_mapping, df_columns, is_required=is_required
+        )
         st.write("Updated Field Mapping:")
         st.dataframe(field_mapping_json_to_table(updated_mapping))
         no_duplicates(updated_mapping)
-        return updated_mapping
-    return field_mapping
+
+        # Calculate updated unused_field_names
+        used_fields = {field for field in updated_mapping.values() if field is not None}
+        updated_unused_field_names = [
+            field for field in df_columns if field not in used_fields
+        ]
+
+        return updated_mapping, updated_unused_field_names
+    return field_mapping, df_columns
 
 
-# def add_optional_fields(unused_field_names, optional_schema, optional_alternate_schema):
-#     mapped_fields = {key: None for key in optional_schema}
-#     additional_fields = []
+def additional_fields_section(unused_field_names):
+    """Show an Additional Fields section for unmatched input fields and allow selection."""
+    selected_additional_fields = []
+    if not unused_field_names:
+        return selected_additional_fields
 
-#     if unused_field_names:  # and optional_schema:
-#         st.subheader("Add Optional Fields")
-#         # new_df = df[unused_field_names]
+    st.subheader("Additional Fields")
+    st.write(
+        "The following fields from your input were not matched. Select any to include as additional fields in the final PMO file."
+    )
 
-#         # Fuzzy field matching optional arguments
-#         reverse_field_mapping = reverse_fuzzy_match_fields(
-#             unused_field_names, optional_schema, optional_alternate_schema
-#         )
-#         st.write(
-#             "Some of the fields in your table may match to one of our"
-#             ' suggested "optional fields".'
-#         )
-#         if optional_schema:
-#             st.write(f'our "optional fields" are {optional_schema}')
-#         else:
-#             st.write("For this panel, we have no optional fields")
-#         st.write(
-#             "Check the boxes of any fields you would like to include in"
-#             " the final PMO. You can also include fields that are not in our"
-#             " suggested optional fields."
-#         )
-#         checkbox_states = {}
-#         for user_column in reverse_field_mapping:
-#             pmo_argument = reverse_field_mapping[user_column]
-#             checkbox_states[user_column] = st.checkbox(label=f"{user_column}")
-#         st.subheader("Edit Selected Optional Field Mappings")
-#         st.write(
-#             "You can edit these mappings or include them without mapping"
-#             " them to any of the suggested fields."
-#         )
-#         st.write(
-#             "Our suggested mappings are below, with your column name on"
-#             " the lefthand side and the suggested optional field name on the"
-#             " right."
-#         )
-#         selected_mapping = {}
-#         for user_column in checkbox_states:
-#             if checkbox_states[user_column]:
-#                 selected_mapping[user_column] = reverse_field_mapping[user_column]
-#                 pmo_argument = reverse_field_mapping[user_column]
-#                 if checkbox_states[user_column]:
-#                     edit_column = st.toggle(
-#                         f"Edit {user_column} --> {pmo_argument} mapping"
-#                     )
-#                     no_map = None
-#                     if edit_column:
-#                         selected_mapping[user_column] = st.selectbox(
-#                             f"Select optional argument match for {user_column}",
-#                             options=optional_schema,
-#                             index=optional_schema.index(user_column)
-#                             if user_column in optional_schema
-#                             else 0,
-#                         )
-#                         no_map = st.checkbox(
-#                             label=f'{user_column} has no good "optional argument" match but I still want to include it in the final PMO'
-#                         )
-#                         if no_map:
-#                             selected_mapping[user_column] = "no match"
-#                     if no_map or reverse_field_mapping[user_column] == "no match":
-#                         additional_fields.append(user_column)
-#         if no_duplicates(selected_mapping):
-#             for user_column, pmo_argument in selected_mapping.items():
-#                 if pmo_argument != "no match":
-#                     mapped_fields[pmo_argument] = user_column
-#                     print("after no duplicates check, mapped fields is", mapped_fields)
-#         else:
-#             print(
-#                 "duplicates found, ending optional_func, mapped fields reported as error"
-#             )
-#             return "Error", "Error"
-#     print("at end of optional_func, optional fields is now", mapped_fields)
-#     return mapped_fields, additional_fields
+    cols = st.columns(2) if len(unused_field_names) <= 6 else st.columns(3)
+    for i, field in enumerate(unused_field_names):
+        with cols[i % len(cols)]:
+            include = st.checkbox(f"{field}", key=f"additional_{field}")
+            if include:
+                selected_additional_fields.append(field)
+
+    if selected_additional_fields:
+        st.success(
+            f"Selected {len(selected_additional_fields)} additional field(s): {', '.join(selected_additional_fields)}"
+        )
+
+    return selected_additional_fields
 
 
-def field_mapping(input_fields, target_schema, target_alternate_schema):
+def field_mapping(
+    input_fields,
+    target_schema,
+    target_alternate_schema,
+    key_suffix: str = "",
+    is_required: bool = True,
+):
     # Fuzzy field matching required arguments
     mapped_fields, unused_field_names = fuzzy_field_matching_page_section(
-        input_fields, target_schema, target_alternate_schema
+        input_fields, target_schema, target_alternate_schema, is_required=is_required
     )
 
     # Interactive field mapping
-    mapped_fields = interactive_field_mapping_page_section(mapped_fields, input_fields)
-    return mapped_fields, unused_field_names
+    mapped_fields, updated_unused_field_names = interactive_field_mapping_page_section(
+        mapped_fields, input_fields, key_suffix=key_suffix, is_required=is_required
+    )
+    # Use updated unused_field_names if interactive mapping was used, otherwise use original
+    final_unused_field_names = (
+        updated_unused_field_names
+        if updated_unused_field_names != input_fields
+        else unused_field_names
+    )
+
+    return mapped_fields, final_unused_field_names
 
 
 def load_data(
@@ -243,6 +251,7 @@ def load_data(
     optional_field_schema,
     optional_field_alternate_schema,
 ):
+    # Load file
     st.subheader("Upload File")
     uploaded_file = st.file_uploader(
         "Upload a TSV file", type=["csv", "tsv", "xlsx", "xls", "txt"]
@@ -259,16 +268,28 @@ def load_data(
         if interactive_preview:
             st.write("Uploaded File Preview:")
             st.dataframe(df)
+
+        # Required fields
         st.subheader("Required Fields")
         mapped_fields, unused_field_names = field_mapping(
-            df.columns.tolist(), target_schema, target_alternate_schema
+            df.columns.tolist(),
+            target_schema,
+            target_alternate_schema,
+            key_suffix="required",
+            is_required=True,
         )
-        # Add optional and additional fields
+        # Optional fields
         st.subheader("Optional Fields")
-        mapped_fields, unused_field_names = field_mapping(
-            unused_field_names, optional_field_schema, optional_field_alternate_schema
+        mapped_optional_fields, unused_field_names = field_mapping(
+            unused_field_names,
+            optional_field_schema,
+            optional_field_alternate_schema,
+            key_suffix="optional",
+            is_required=False,
         )
-        # selected_optional_fields, selected_additional_fields = add_optional_fields(
-        #     unused_field_names, optional_field_schema, optional_field_alternate_schema)
-        # field_mapping()
+        # Additional fields
+        selected_additional_fields = additional_fields_section(unused_field_names)
+        # For output, set selected_optional_fields to the optional mapping result
+        selected_optional_fields = mapped_optional_fields
+
     return df, mapped_fields, selected_optional_fields, selected_additional_fields

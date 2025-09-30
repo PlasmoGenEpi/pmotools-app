@@ -57,31 +57,46 @@ def transform_panel_info(
 def transform_specimen_info(
     df, field_mapping, optional_field_mapping, additional_fields=None
 ):
-    print("optional field mapping is", optional_field_mapping)
     transformed_df = specimen_info_table_to_pmo(
         df,
-        specimen_id_col=field_mapping["specimen_id"],
-        samp_taxon_id=field_mapping["samp_taxon_id"],
-        collection_date=field_mapping["collection_date"],
-        collection_country=field_mapping["collection_country"],
-        collector=field_mapping["collector"],
-        samp_store_loc=field_mapping["samp_store_loc"],
-        samp_collect_device=field_mapping["samp_collect_device"],
-        project_name=field_mapping["project_name"],
-        alternate_identifiers=optional_field_mapping["alternate_identifiers"],
-        geo_admin1=optional_field_mapping["geo_admin1"],
-        geo_admin2=optional_field_mapping["geo_admin2"],
-        geo_admin3=optional_field_mapping["geo_admin3"],
-        host_taxon_id=optional_field_mapping["host_taxon_id"],
-        individual_id=optional_field_mapping["individual_id"],
-        lat_lon=optional_field_mapping["lat_lon"],
-        parasite_density=optional_field_mapping["parasite_density"],
-        plate_col=optional_field_mapping["plate_col"],
-        plate_name=optional_field_mapping["plate_name"],
-        plate_row=optional_field_mapping["plate_row"],
-        sample_comments=optional_field_mapping["sample_comments"],
+        specimen_name_col=field_mapping["specimen_name"],
+        specimen_taxon_id_col=field_mapping["specimen_taxon_id"],
+        host_taxon_id_col=field_mapping["host_taxon_id"],
+        collection_date_col=field_mapping["collection_date"],
+        collection_country_col=field_mapping["collection_country"],
+        project_name_col=field_mapping["project_name"],
+        # optional fields - only pass if not None
+        drug_usage_col=optional_field_mapping.get("drug_usage"),
+        env_broad_scale_col=optional_field_mapping.get("env_broad_scale"),
+        env_local_scale_col=optional_field_mapping.get("env_local_scale"),
+        env_medium_col=optional_field_mapping.get("env_medium"),
+        geo_admin1_col=optional_field_mapping.get("geo_admin1"),
+        geo_admin2_col=optional_field_mapping.get("geo_admin2"),
+        geo_admin3_col=optional_field_mapping.get("geo_admin3"),
+        host_age_col=optional_field_mapping.get("host_age"),
+        host_sex_col=optional_field_mapping.get("host_sex"),
+        host_subject_id=optional_field_mapping.get("host_subject_id"),
+        lat_lon_col=optional_field_mapping.get("lat_lon"),
+        parasite_density_col=optional_field_mapping.get("parasite_density"),
+        parasite_density_method_col=optional_field_mapping.get(
+            "parasite_density_method"
+        ),
+        storage_plate_col_col=optional_field_mapping.get("storage_plate_col"),
+        storage_plate_name_col=optional_field_mapping.get("storage_plate_name"),
+        storage_plate_row_col=optional_field_mapping.get("storage_plate_row"),
+        storage_plate_position_col=optional_field_mapping.get("storage_plate_position"),
+        specimen_collect_device_col=optional_field_mapping.get(
+            "specimen_collect_device"
+        ),
+        specimen_comments_col=optional_field_mapping.get("specimen_comments"),
+        specimen_store_loc_col=optional_field_mapping.get("specimen_store_loc"),
         additional_specimen_cols=additional_fields,
+        list_values_specimen_columns=optional_field_mapping.get(
+            "alternate_identifiers"
+        ),
+        list_values_specimen_columns_delimiter=",",
     )
+    # TODO: make sure list values are handled correctly
     return transformed_df
 
 
