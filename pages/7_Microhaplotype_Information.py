@@ -8,6 +8,8 @@ session_name = "mhap_data"
 title = "microhaplotype information"
 
 
+# TODO: add masking delim box
+# TODO: add additional haplotype detected columns to be specified.
 class MhapPage:
     def __init__(
         self,

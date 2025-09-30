@@ -8,17 +8,33 @@ from pmotools.pmo_builder.metatable_to_pmo import (
 
 
 def transform_mhap_info(
-    df, bioinfo_id, field_mapping, optional_mapping, additional_hap_detected_cols=None
+    df, bioinfo_id, field_mapping, optional_mapping, additional_mhap_detected_cols=None
 ):
     """Reformat the DataFrame based on the provided field mapping."""
     transformed_df = mhap_table_to_pmo(
         df,
         bioinfo_id,
-        sampleID_col=field_mapping["sampleID"],
-        locus_col=field_mapping["target_id"],
-        mhap_col=field_mapping["asv"],
+        library_sample_name_col=field_mapping["library_sample_name"],
+        target_name_col=field_mapping["target_name"],
+        seq_col=field_mapping["seq"],
         reads_col=field_mapping["reads"],
-        additional_hap_detected_cols=additional_hap_detected_cols,
+        umis_col=optional_mapping.get("umis"),
+        chrom_col=optional_mapping.get("chrom"),
+        start_col=optional_mapping.get("start"),
+        end_col=optional_mapping.get("end"),
+        ref_seq_col=optional_mapping.get("ref_seq"),
+        strand_col=optional_mapping.get("strand"),
+        alt_annotations_col=optional_mapping.get("alt_annotations"),
+        masking_seq_start_col=optional_mapping.get("masking_seq_start"),
+        masking_seq_segment_size_col=optional_mapping.get("masking_seq_segment_size"),
+        masking_replacement_size_col=optional_mapping.get("masking_replacement_size"),
+        microhaplotype_name_col=optional_mapping.get("microhaplotype_name"),
+        pseudocigar_col=optional_mapping.get("pseudocigar"),
+        quality_col=optional_mapping.get("quality"),
+        additional_representative_mhap_cols=optional_mapping.get(
+            "additional_representative_mhap"
+        ),
+        additional_mhap_detected_cols=additional_mhap_detected_cols,
     )
     return transformed_df
 

@@ -314,31 +314,33 @@
     },
     "mhap_info": {
         "required": [
-            "sampleID",
-            "target_id",
-            "asv",
+            "library_sample_name",
+            "target_name",
+            "seq",
             "reads"
         ],
         "required_alternatives": {
-            "sampleID": [
-                "specimen_id",
+            "library_sample_name": [
+                "library_sample_id",
                 "sample_id",
-                "biosample_id"
+                "biosample_id",
+                "specimen_id"
             ],
-            "target_id": [
+            "target_name": [
+                "target_id",
                 "locus",
                 "marker_id",
                 "amplicon",
                 "locus_id",
                 "p_targetName"
             ],
-            "asv": [
+            "seq": [
+                "asv",
                 "amplicon_sequence_variant",
                 "otu",
                 "sequence_variant",
                 "microhaplotype",
                 "allele",
-                "seq",
                 "sequence"
             ],
             "reads": [
@@ -349,8 +351,84 @@
                 "c_readCnt"
             ]
         },
-        "optional": [],
-        "optional_alternatives": {}
+        "optional": [
+            "umis",
+            "chrom",
+            "start",
+            "end",
+            "ref_seq",
+            "strand",
+            "alt_annotations",
+            "masking_seq_start",
+            "masking_seq_segment_size",
+            "masking_replacement_size",
+            "microhaplotype_name",
+            "pseudocigar",
+            "quality",
+            "additional_representative_mhap",
+            "additional_mhap_detected"
+        ],
+        "optional_alternatives": {
+            "umis": [
+                "umi",
+                "unique_molecular_identifiers"
+            ],
+            "chrom": [
+                "chromosome",
+                "chr"
+            ],
+            "start": [
+                "start_position",
+                "genomic_start"
+            ],
+            "end": [
+                "end_position",
+                "genomic_end"
+            ],
+            "ref_seq": [
+                "reference_sequence",
+                "reference_seq"
+            ],
+            "strand": [
+                "strand_orientation"
+            ],
+            "alt_annotations": [
+                "alternative_annotations",
+                "annotations"
+            ],
+            "masking_seq_start": [
+                "masking_start",
+                "mask_start"
+            ],
+            "masking_seq_segment_size": [
+                "masking_segment_size",
+                "mask_segment_size"
+            ],
+            "masking_replacement_size": [
+                "masking_replacement",
+                "mask_replacement"
+            ],
+            "microhaplotype_name": [
+                "mhap_name",
+                "haplotype_name"
+            ],
+            "pseudocigar": [
+                "cigar",
+                "alignment_cigar"
+            ],
+            "quality": [
+                "quality_score",
+                "phred_quality"
+            ],
+            "additional_representative_mhap": [
+                "representative_mhap",
+                "rep_mhap"
+            ],
+            "additional_mhap_detected": [
+                "mhap_detected",
+                "detected_mhap"
+            ]
+        }
     },
     "demultiplexed_samples": {
         "required": [
