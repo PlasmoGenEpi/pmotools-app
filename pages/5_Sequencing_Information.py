@@ -6,69 +6,96 @@ class SeqInfoPage:
     def __init__(self):
         self.seq_info = {}
 
-    def add_required_seq_information(self):
+    def add_sequencing_information(self):
         st.subheader("Add Sequencing Information")
 
-        self.seq_info["sequencing_info_id"] = st.text_input(
-            "Sequencing Information ID:",
+        self.seq_info["sequencing_info_name"] = st.text_input(
+            "Sequencing Information Name:",
             help="A unique identifier for this sequencing info.",
         )
-        seq_instrument = st.text_input(
-            "Sequencing Instrument:",
-            help="The sequencing instrument used to sequence the run, e.g. ILLUMINA, Illumina MiSeq.",
+        seq_platform = st.text_input(
+            "Sequencing Platform:",
+            help="The sequencing platform used to sequence the run, e.g. ILLUMINA, Illumina MiSeq.",
         )
-        seq_date = st.date_input(
-            "Sequencing Date:",
-            help="The date of sequencing, should be YYYY-MM or YYYY-MM-DD.",
+        seq_instrument_model = st.text_input(
+            "Sequencing Instrument Model:",
+            help="The sequencing instrument model used to sequence the run, e.g. Illumina MiSeq.",
         )
-        nucl_acid_ext = st.text_input(
-            "Nucleic Acid Extraction:",
-            help="Link to a reference or kit that describes the recovery of nucleic acids from the sample.",
-        )
-        nucl_acid_amp = st.text_input(
-            "Nucleic Acid Amplification:",
-            help="Link to a reference or kit that describes the enzymatic amplification of nucleic acids.",
-        )
-        nucl_acid_ext_date = st.date_input(
-            "Nucleic Acid Extraction Date:",
-            help="The date of the nucleoacide extraction.",
-        )
-        nucl_acid_amp_date = st.date_input(
-            "Nucleic Acid Amplification Date:",
-            help="The date of the nucleoacide amplification.",
-        )
-        pcr_cond = st.text_input(
-            "PCR Conditions:",
-            help="The method/conditions for PCR, List PCR cycles used to amplify the target.",
-        )
-        lib_screen = st.text_input(
-            "Library Screen:",
-            help="Describe enrichment, screening, or normalization methods applied during amplification or library preparation, e.g. size selection 390bp, diluted to 1 ng DNA/sample.",
-        )
-        lib_layout = st.text_input(
+        library_layout = st.text_input(
             "Library Layout:",
             help="Specify the configuration of reads, e.g. paired-end.",
         )
-        lib_kit = st.text_input(
-            "Library Kit:",
-            help="Name, version, and applicable cell or cycle numbers for the kit used to prepare libraries and load cells or chips for sequencing. If possible, include a part number, e.g. MiSeq Reagent Kit v3 (150-cycle), MS-102-3001.",
+        library_strategy = st.text_input(
+            "Library Strategy:",
+            help="The strategy used to prepare the library, e.g. WGS, WES, amplicon, etc.",
         )
-        seq_center = st.text_input(
-            "Sequencing Center:",
-            help="Name of facility where sequencing was performed (lab, core facility, or company).",
+        library_source = st.text_input(
+            "Library Source:",
+            help="The source of the library, e.g. DNA, RNA, etc.",
+        )
+        library_selection = st.text_input(
+            "Library Selection:",
+            help="The selection method used to prepare the library, e.g. PCR, etc.",
+        )
+        # Optional fields - each field is individually optional
+        st.subheader("Optional Fields")
+        st.write(
+            "The following fields are optional. Fill in only the ones you have information for."
         )
 
-        # self.seq_info["sequencing_info_id"] = sequencing_info_id
-        self.seq_info["seq_instrument"] = seq_instrument
+        library_kit = st.text_input(
+            "Library Kit (Optional):",
+            help="Name, version, and applicable cell or cycle numbers for the kit used to prepare libraries and load cells or chips for sequencing. If possible, include a part number, e.g. MiSeq Reagent Kit v3 (150-cycle), MS-102-3001.",
+        )
+        library_screen = st.text_input(
+            "Library Screen (Optional):",
+            help="Describe enrichment, screening, or normalization methods applied during amplification or library preparation, e.g. size selection 390bp, diluted to 1 ng DNA/sample.",
+        )
+        nucl_acid_amp = st.text_input(
+            "Nucleic Acid Amplification (Optional):",
+            help="Link to a reference or kit that describes the enzymatic amplification of nucleic acids.",
+        )
+        nucl_acid_ext = st.text_input(
+            "Nucleic Acid Extraction (Optional):",
+            help="Link to a reference or kit that describes the recovery of nucleic acids from the sample.",
+        )
+        nucl_acid_ext_date = st.date_input(
+            "Nucleic Acid Extraction Date (Optional):",
+            help="The date of the nucleoacide extraction.",
+        )
+        nucl_acid_amp_date = st.date_input(
+            "Nucleic Acid Amplification Date (Optional):",
+            help="The date of the nucleoacide amplification.",
+        )
+        pcr_cond = st.text_input(
+            "PCR Conditions (Optional):",
+            help="The method/conditions for PCR, List PCR cycles used to amplify the target.",
+        )
+        seq_center = st.text_input(
+            "Sequencing Center (Optional):",
+            help="Name of facility where sequencing was performed (lab, core facility, or company).",
+        )
+        seq_date = st.date_input(
+            "Sequencing Date (Optional):",
+            help="The date of sequencing, should be YYYY-MM or YYYY-MM-DD.",
+        )
+
+        # Store the values in seq_info
+        self.seq_info["sequencing_info_name"] = self.seq_info["sequencing_info_name"]
+        self.seq_info["seq_platform"] = seq_platform
+        self.seq_info["seq_instrument_model"] = seq_instrument_model
         self.seq_info["seq_date"] = str(seq_date)
         self.seq_info["nucl_acid_ext"] = nucl_acid_ext
         self.seq_info["nucl_acid_amp"] = nucl_acid_amp
         self.seq_info["nucl_acid_ext_date"] = str(nucl_acid_ext_date)
         self.seq_info["nucl_acid_amp_date"] = str(nucl_acid_amp_date)
         self.seq_info["pcr_cond"] = pcr_cond
-        self.seq_info["lib_screen"] = lib_screen
-        self.seq_info["lib_layout"] = lib_layout
-        self.seq_info["lib_kit"] = lib_kit
+        self.seq_info["library_screen"] = library_screen
+        self.seq_info["library_layout"] = library_layout
+        self.seq_info["library_kit"] = library_kit
+        self.seq_info["library_strategy"] = library_strategy
+        self.seq_info["library_source"] = library_source
+        self.seq_info["library_selection"] = library_selection
         self.seq_info["seq_center"] = seq_center
 
     def add_additional_fields(self):
@@ -101,27 +128,30 @@ class SeqInfoPage:
 
     def transform_and_save_data(self):
         seq_info = self.seq_info
+        # Only require the essential fields - all others are optional
         if all(
             [
-                seq_info["sequencing_info_id"],
-                seq_info["seq_instrument"],
-                seq_info["seq_date"],
-                seq_info["nucl_acid_ext"],
-                seq_info["nucl_acid_amp"],
-                seq_info["nucl_acid_ext_date"],
-                seq_info["nucl_acid_amp_date"],
-                seq_info["pcr_cond"],
-                seq_info["lib_screen"],
-                seq_info["lib_layout"],
-                seq_info["lib_kit"],
-                seq_info["seq_center"],
+                seq_info.get("sequencing_info_name"),
+                seq_info.get("seq_platform"),
+                seq_info.get("seq_instrument_model"),
+                seq_info.get("library_layout"),
+                seq_info.get("library_strategy"),
+                seq_info.get("library_source"),
+                seq_info.get("library_selection"),
             ]
         ):
             st.subheader("Save Data")
             if st.button("Save Data"):
-                st.session_state["seq_info"] = {
-                    seq_info["sequencing_info_id"]: seq_info
+                # Filter out empty optional fields before saving
+                filtered_seq_info = {
+                    k: v for k, v in seq_info.items() if v is not None and v != ""
                 }
+                st.session_state["seq_info"] = {
+                    seq_info["sequencing_info_name"]: filtered_seq_info
+                }
+                st.success("Sequencing information saved successfully!")
+        else:
+            st.warning("Please fill in all required fields before saving.")
 
     def display_info(self):
         if "seq_info" in st.session_state:
@@ -132,7 +162,7 @@ class SeqInfoPage:
                 st.json(st.session_state["seq_info"])
 
     def run(self):
-        self.add_required_seq_information()
+        self.add_sequencing_information()
         self.add_additional_fields()
         self.transform_and_save_data()
         self.display_info()

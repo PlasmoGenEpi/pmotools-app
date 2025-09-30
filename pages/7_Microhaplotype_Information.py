@@ -37,8 +37,6 @@ class MhapPage:
         selected_optional_fields,
         selected_additional_fields,
     ):
-        # there are currently no optional fields but the field is passed anyway
-        # for compatibility with any future optional fields.
         if bioinfo_ID and field_mapping and selected_optional_fields != "Error":
             st.subheader("Transform Data")
             if st.button("Transform Data"):
@@ -49,7 +47,6 @@ class MhapPage:
                     selected_optional_fields,
                     selected_additional_fields,
                 )
-                # json_data = json.dumps(transformed_df, indent=4)
                 st.session_state[session_name] = transformed_df
                 try:
                     st.success(
