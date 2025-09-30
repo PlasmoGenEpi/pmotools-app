@@ -1,59 +1,78 @@
 {
     "panel_info": {
         "required": [
-            "target_id",
-            "forward_primers",
-            "reverse_primers"
+            "target_name",
+            "forward_primer_seq",
+            "reverse_primer_seq"
         ],
         "required_alternatives": {
-            "target_id": [
+            "target_name": [
+                "target_id",
                 "locus",
                 "amplicon",
                 "mip_id"
             ],
-            "forward_primers": [
+            "forward_primer_seq": [
+                "forward_primer",
+                "forward_primers",
+                "fwd_primer",
                 "fwd_primers",
                 "extension_arm"
             ],
-            "reverse_primers": [
+            "reverse_primer_seq": [
+                "reverse_primer",
+                "reverse_primers",
+                "rev_primer",
                 "rev_primers",
                 "ligation_arm"
             ]
         },
         "optional": [
-            "forward_primers_start_col",
-            "forward_primers_end_col",
-            "reverse_primers_start_col",
-            "reverse_primers_end_col",
-            "insert_start_col",
-            "insert_end_col",
+            "reaction_name",
+            "forward_primers_start",
+            "forward_primers_end",
+            "reverse_primers_start",
+            "reverse_primers_end",
+            "insert_start",
+            "insert_end",
             "chrom_col",
-            "strand_col",
-            "gene_id_col",
-            "target_type_col"
+            "strand",
+            "ref_seq",
+            "gene_name",
+            "target_attributes"
         ],
         "optional_alternatives": {
-            "forward_primers_start_col": [
+            "reaction_name": [
+                "reaction_id",
+                "pcr_reaction_name"
+            ],
+            "forward_primers_start": [
+                "forward_primers_start_col",
                 "genomic_forward_primer_start",
                 "forward_primer_genomic_start_coordinate"
             ],
-            "forward_primers_end_col": [
+            "forward_primers_end": [
+                "forward_primers_end_col",
                 "genomic_forward_primer_end",
                 "forward_primer_genomic_end_coordinate"
             ],
-            "reverse_primers_start_col": [
+            "reverse_primers_start": [
+                "reverse_primers_start_col",
                 "genomic_reverse_primer_start",
                 "reverse_primer_genomic_start_coordinate"
             ],
-            "reverse_primers_end_col": [
+            "reverse_primers_end": [
+                "reverse_primers_end_col",
                 "genomic_reverse_primer_end",
                 "reverse_primer_genomic_end_coordinate"
             ],
-            "insert_start_col": [
+            "insert_start": [
+                "insert_start_col",
                 "genomic_insert_start",
                 "insert_genomic_start_coordinate"
             ],
-            "insert_end_col": [
+            "insert_end": [
+                "insert_end_col",
                 "genomic_insert_end",
                 "insert_genomic_end_coordinate"
             ],
@@ -62,18 +81,26 @@
                 "amplicon_chrom",
                 "gene_chrom"
             ],
-            "strand_col": [
+            "strand": [
+                "strand_col",
                 "amplicon_strand",
                 "gene_strand",
                 "gene_genomic_strand"
             ],
-            "gene_id_col": [
-                "gene_name",
+            "ref_seq": [
+                "reference_sequence",
+                "reference_seq",
+                "ref_sequence"
+            ],
+            "gene_name": [
+                "gene_id_col",
                 "amplicon_gene"
             ],
-            "target_type_col": [
+            "target_attributes": [
+                "target_type_col",
                 "gene_type",
-                "amplicon_type"
+                "amplicon_type",
+                "attributes"
             ]
         }
     },
@@ -225,59 +252,62 @@
             ]
         }
     },
-    "experiment_level_metadata": {
+    "library_sample_level_metadata": {
         "required": [
-            "sequencing_info_id",
-            "specimen_id",
-            "panel_id",
-            "experiment_sample_id"
+            "library_sample_name",
+            "sequencing_info_name",
+            "specimen_name",
+            "panel_name"
         ],
         "required_alternatives": {
-            "sequencing_info_id": [
+            "library_sample_name": [
+                "library_sample_id",
+                "sample_name",
+                "library_id",
+                "experiment_sample_id"
+            ],
+            "sequencing_info_name": [
+                "sequencing_info_id",
                 "seq_info_id",
                 "sequencing_id",
                 "sequence_record_id",
                 "sequencing_run",
                 "seq_run"
             ],
-            "specimen_id": [
+            "specimen_name": [
+                "specimen_id",
                 "sample_id",
                 "bio_id",
                 "specimen_code",
                 "sample_accession"
             ],
-            "panel_id": [
+            "panel_name": [
+                "panel_id",
                 "test_panel_id",
                 "assay_id",
-                "panel",
-                "panel_name"
-            ],
-            "experiment_sample_id": [
-                "exp_sample_id",
-                "test_sample_id",
-                "lab_sample_id",
-                "sequencing_id",
-                "extraction_id",
-                "run_accession"
+                "panel"
             ]
         },
         "optional": [
             "accession",
-            "plate_col",
-            "plate_name",
-            "plate_row"
+            "library_prep_plate_name",
+            "library_prep_plate_col",
+            "library_prep_plate_row"
         ],
         "optional_alternatives": {
             "accession": [
                 "Accession information"
             ],
-            "plate_col": [
-                "plate_column"
-            ],
-            "plate_name": [
+            "library_prep_plate_name": [
+                "plate_name",
                 "name_of_plate"
             ],
-            "plate_row": [
+            "library_prep_plate_col": [
+                "plate_col",
+                "plate_column"
+            ],
+            "library_prep_plate_row": [
+                "plate_row",
                 "row_of_plate"
             ]
         }

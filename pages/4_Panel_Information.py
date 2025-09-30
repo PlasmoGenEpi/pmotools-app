@@ -75,7 +75,7 @@ class PanelPage:
         st.subheader("Add Genome Information")
         genome_name = st.text_input("Name:", help="Name of the genome.")
         taxon_id = st.text_input("Taxon ID:", help="The NCBI taxonomy number.")
-        version = st.text_input("Version:", help="The genome version.")
+        version = st.text_input("Genome Version:", help="The genome version.")
         genome_url = st.text_input("URL:", help="A link to the genome file.")
         gff_url = st.text_input(
             "GFF URL (Optional):", help="A link to the genome’s annotation file"
@@ -84,7 +84,7 @@ class PanelPage:
             "name": genome_name,
             "taxon_id": taxon_id,
             "url": genome_url,
-            "version": version,
+            "genome_version": version,
         }
         if gff_url:
             genome_info["gff_url"] = gff_url
@@ -106,7 +106,7 @@ class PanelPage:
                     field_mapping,
                     genome_info["name"],
                     genome_info["taxon_id"],
-                    genome_info["version"],
+                    genome_info["genome_version"],
                     genome_info["url"],
                 ]
             )

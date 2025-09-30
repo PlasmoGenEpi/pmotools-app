@@ -8,7 +8,8 @@ import streamlit as st
 import os
 
 # Constants
-LOGO_PATH = "images/PGE_logo.png"
+PGE_LOGO_PATH = "images/PGE_logo.png"
+PMO_LOGO_PATH = "images/PMO_logo_light.png"
 PAGE_TITLE = "PMO Builder"
 PAGE_ICON = "📂"
 LAYOUT = "wide"
@@ -41,10 +42,10 @@ def render_header() -> None:
 def _render_logo() -> None:
     """Render the PGE logo with error handling."""
     try:
-        if os.path.exists(LOGO_PATH):
-            st.image(LOGO_PATH)
+        if os.path.exists(PGE_LOGO_PATH):
+            st.image(PGE_LOGO_PATH)
         else:
-            st.warning(f"Logo not found at {LOGO_PATH}")
+            st.warning(f"Logo not found at {PGE_LOGO_PATH}")
     except Exception as e:
         st.error(f"Error loading logo: {e}")
 
