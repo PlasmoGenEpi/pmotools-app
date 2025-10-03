@@ -22,7 +22,6 @@ def check_all(check_dict):
     populate if the page doesn't exist
     """
     all_passed = True
-    st.write(st.session_state)
     for check_key, source_page in check_dict.items():
         if check_key in st.session_state:
             st.success(f"Data from {source_page} tab has been successfully" " loaded")
