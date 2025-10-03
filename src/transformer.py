@@ -107,9 +107,9 @@ def transform_specimen_info(
         specimen_comments_col=optional_field_mapping.get("specimen_comments"),
         specimen_store_loc_col=optional_field_mapping.get("specimen_store_loc"),
         additional_specimen_cols=additional_fields,
-        list_values_specimen_columns=optional_field_mapping.get(
-            "alternate_identifiers"
-        ),
+        list_values_specimen_columns=optional_field_mapping.get("alternate_identifiers")
+        if optional_field_mapping.get("alternate_identifiers") is not None
+        else [],
         list_values_specimen_columns_delimiter=",",
     )
     # TODO: make sure list values are handled correctly

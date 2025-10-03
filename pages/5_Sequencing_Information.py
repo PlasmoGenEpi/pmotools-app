@@ -128,30 +128,29 @@ class SeqInfoPage:
 
     def transform_and_save_data(self):
         seq_info = self.seq_info
-        # Only require the essential fields - all others are optional
-        if all(
-            [
-                seq_info.get("sequencing_info_name"),
-                seq_info.get("seq_platform"),
-                seq_info.get("seq_instrument_model"),
-                seq_info.get("library_layout"),
-                seq_info.get("library_strategy"),
-                seq_info.get("library_source"),
-                seq_info.get("library_selection"),
-            ]
-        ):
-            st.subheader("Save Data")
-            if st.button("Save Data"):
-                # Filter out empty optional fields before saving
-                filtered_seq_info = {
-                    k: v for k, v in seq_info.items() if v is not None and v != ""
-                }
-                st.session_state["seq_info"] = {
-                    seq_info["sequencing_info_name"]: filtered_seq_info
-                }
+        st.subheader("Save Data")
+        if st.button("Save Data"):
+            # Only require the essential fields - all others are optional
+            sequencing_info = []
+            if all(
+                [
+                    seq_info.get("sequencing_info_name"),
+                    seq_info.get("seq_platform"),
+                    seq_info.get("seq_instrument_model"),
+                    seq_info.get("library_layout"),
+                    seq_info.get("library_strategy"),
+                    seq_info.get("library_source"),
+                    seq_info.get("library_selection"),
+                ]
+            ):
+                sequencing_info.append(seq_info)
+                # Remove empty optional fields
+                sequencing_info = [
+                    {k: v for k, v in info.items() if v is not None and v != ""}
+                    for info in sequencing_info
+                ]
+                st.session_state["seq_info"] = sequencing_info
                 st.success("Sequencing information saved successfully!")
-        else:
-            st.warning("Please fill in all required fields before saving.")
 
     def display_info(self):
         if "seq_info" in st.session_state:

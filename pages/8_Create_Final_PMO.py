@@ -2,15 +2,17 @@ import streamlit as st
 import json
 import os
 from src.format_page import render_header
+from pmotools.pmo_builder.merge_to_pmo import merge_to_pmo
 
 check_dict = {
     "panel_info": "Panel Information",
     "specimen_info": "Specimen Level Metadata",
-    "experiment_info": "Experiment Level Metadata",
+    "library_sample_info": "Library Sample Level Metadata",
     "mhap_data": "Microhaplotype Information",
-    "demultiplexed_data": "Demultiplexed Samples",
+    # "demultiplexed_data": "Demultiplexed Samples",
     "seq_info": "Sequencing Information",
-    "bioinfo_infos": "Bioinformatics Information",
+    "bioinfo_methods_list": "Bioinformatics Information",
+    "bioinfo_run_infos": "Bioinformatics Information",
 }
 
 
@@ -20,10 +22,10 @@ def check_all(check_dict):
     populate if the page doesn't exist
     """
     all_passed = True
+    st.write(st.session_state)
     for check_key, source_page in check_dict.items():
         if check_key in st.session_state:
             st.success(f"Data from {source_page} tab has been successfully" " loaded")
-            print("key is", check_key, "keys are", st.session_state[check_key].keys())
         else:
             st.error(
                 f"Data from {source_page} tab not found. Please fill out"
@@ -38,21 +40,45 @@ def merge_data():
     # MERGE DATA
     st.subheader("Merge Components to Final PMO")
     panel_info = st.session_state["panel_info"]
-    # panel_id = ", ".join(panel_info["panel_info"].keys())
-    # bioinfo_id = ", ".join(
-    # st.session_state["mhap_data"]["microhaplotypes_detected"].keys()
-    # )
-    formatted_pmo = {
-        "experiment_infos": st.session_state["experiment_info"],
-        "sequencing_infos": st.session_state["seq_info"],
-        "specimen_infos": st.session_state["specimen_info"],
-        "taramp_bioinformatics_infos": st.session_state["bioinfo_infos"],
-        **st.session_state["mhap_data"],
-        **panel_info,
-        **st.session_state["demultiplexed_data"],
-    }
-    file_string = json.dumps(formatted_pmo, indent=4)
-    st.download_button("Download Final PMO", file_string, file_name="final_pmo.json")
+
+    # Get bioinformatics methods and runs
+    bioinfo_methods = st.session_state.get("bioinfo_methods_list", [])
+    bioinfo_runs = st.session_state.get("bioinfo_run_infos", [])
+
+    if st.button("Merge Data"):
+        try:
+            st.session_state["formatted_pmo"] = merge_to_pmo(
+                specimen_info=st.session_state["specimen_info"],
+                library_sample_info=st.session_state["library_sample_info"],
+                sequencing_info=st.session_state["seq_info"],
+                panel_info=panel_info,
+                mhap_info=st.session_state["mhap_data"],
+                bioinfo_method_info=bioinfo_methods,
+                bioinfo_run_info=bioinfo_runs,
+                project_info=st.session_state["project_info"],
+            )
+            st.success("Data merged successfully!")
+        except Exception as e:
+            st.error(f"Error merging data: {e}")
+
+    # Download button - only show if PMO has been created
+    if "formatted_pmo" in st.session_state:
+        st.subheader("Download PMO File")
+        # Convert the PMO data to JSON string
+        pmo_json = json.dumps(st.session_state["formatted_pmo"], indent=2)
+
+        # Create download button
+        st.download_button(
+            label="Download PMO JSON File",
+            data=pmo_json,
+            file_name="pmo_data.json",
+            mime="application/json",
+            help="Download the merged PMO data as a JSON file",
+        )
+
+        # Optional: Show preview of the data
+        with st.expander("Preview PMO Data"):
+            st.json(st.session_state["formatted_pmo"])
 
 
 # Initialize and run the app
