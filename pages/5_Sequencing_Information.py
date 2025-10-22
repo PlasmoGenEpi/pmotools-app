@@ -61,10 +61,12 @@ class SeqInfoPage:
         )
         nucl_acid_ext_date = st.date_input(
             "Nucleic Acid Extraction Date (Optional):",
+            value=None,
             help="The date of the nucleoacide extraction.",
         )
         nucl_acid_amp_date = st.date_input(
             "Nucleic Acid Amplification Date (Optional):",
+            value=None,
             help="The date of the nucleoacide amplification.",
         )
         pcr_cond = st.text_input(
@@ -77,6 +79,7 @@ class SeqInfoPage:
         )
         seq_date = st.date_input(
             "Sequencing Date (Optional):",
+            value=None,
             help="The date of sequencing, should be YYYY-MM or YYYY-MM-DD.",
         )
 
@@ -84,11 +87,17 @@ class SeqInfoPage:
         self.seq_info["sequencing_info_name"] = self.seq_info["sequencing_info_name"]
         self.seq_info["seq_platform"] = seq_platform
         self.seq_info["seq_instrument_model"] = seq_instrument_model
-        self.seq_info["seq_date"] = str(seq_date)
+
+        # Only store date values if they are not None
+        if seq_date is not None:
+            self.seq_info["seq_date"] = str(seq_date)
+        if nucl_acid_ext_date is not None:
+            self.seq_info["nucl_acid_ext_date"] = str(nucl_acid_ext_date)
+        if nucl_acid_amp_date is not None:
+            self.seq_info["nucl_acid_amp_date"] = str(nucl_acid_amp_date)
+
         self.seq_info["nucl_acid_ext"] = nucl_acid_ext
         self.seq_info["nucl_acid_amp"] = nucl_acid_amp
-        self.seq_info["nucl_acid_ext_date"] = str(nucl_acid_ext_date)
-        self.seq_info["nucl_acid_amp_date"] = str(nucl_acid_amp_date)
         self.seq_info["pcr_cond"] = pcr_cond
         self.seq_info["library_screen"] = library_screen
         self.seq_info["library_layout"] = library_layout
