@@ -5,10 +5,9 @@ from src.format_page import render_header
 class BioInfoPage:
     # Constants
     REQUIRED_FIELDS = ["program", "program_version"]
-    METHOD_TYPES = ["demultiplexing_method", "denoising_method"]
 
     def __init__(self):
-        self.bioinfo_infos = {}
+        self.bioinfo_method_infos = {}
         self._initialize_session_state()
 
     def _initialize_session_state(self):
@@ -99,7 +98,19 @@ class BioInfoPage:
         self._save_bioinfo_runs(bioinfo_run_vals)
         return bioinfo_run_vals
 
-    def _create_method_input_fields(self, method):
+    def _show_methods_count(self):
+        """Show current methods count."""
+        if st.session_state["bioinfo_methods_list"]:
+            st.info(f"Current methods: {len(st.session_state['bioinfo_methods_list'])}")
+
+    def _get_method_name_input(self):
+        """Get optional method name input."""
+        return st.text_input(
+            "Bioinformatics Method Name (Optional):",
+            help="A unique identifier for this bioinformatics method.",
+        )
+
+    def _create_method_step_input_fields(self, method):
         """Create input fields for a bioinformatics method."""
         # First row of columns
         cols1 = st.columns(2)
@@ -119,8 +130,8 @@ class BioInfoPage:
         # Second row of columns
         cols2 = st.columns(2)
         with cols2[0]:
-            description = st.text_input(
-                "description (optional)",
+            program_description = st.text_input(
+                "program description (optional)",
                 key=f"{method}_description",
                 help="Brief description of what this method does or how it was used",
             )
@@ -141,33 +152,24 @@ class BioInfoPage:
         return {
             "program": program,
             "program_version": version,
-            "description": description,
+            "program_description": program_description,
             "additional_argument": additional_argument,
             "program_url": program_url,
         }
 
-    def _build_method_dict(self, method, inputs):
+    def _build_method_step_dict(self, method, inputs):
         """Build method dictionary from inputs, filtering out empty values."""
-        method_dict = {
+        step_dict = {
             "program": inputs["program"],
             "program_version": inputs["program_version"],
         }
 
         # Add optional fields only if they have values
-        for field in ["additional_argument", "description", "program_url"]:
+        for field in ["additional_argument", "program_description", "program_url"]:
             if inputs[field] and inputs[field].strip():
-                method_dict[field] = inputs[field]
+                step_dict[field] = inputs[field]
 
-        return method_dict
-
-    def enter_bioinfo_method_vals(self, method):
-        """Enter bioinformatics method values."""
-        inputs = self._create_method_input_fields(method)
-        method_dict = self._build_method_dict(method, inputs)
-
-        # Add user specified additional fields
-        method_dict = self.add_additional_fields(method, method_dict)
-        return method_dict
+        return step_dict
 
     def _create_additional_fields_inputs(self, method, number_inputs):
         """Create input fields for additional custom fields."""
@@ -212,6 +214,73 @@ class BioInfoPage:
 
         return method_dict
 
+    def enter_bioinfo_method_step_info(self, method):
+        """Enter bioinformatics method values."""
+        inputs = self._create_method_step_input_fields(method)
+        method_dict = self._build_method_step_dict(method, inputs)
+
+        # Add user specified additional fields
+        method_dict = self.add_additional_fields(method, method_dict)
+        return method_dict
+
+    def _create_bioinformatics_methods_steps(self):
+        """Create the bioinformatics methods section with at least one required."""
+        st.subheader("Bioinformatics Method Steps")
+        st.write(
+            "Add at least one bioinformatics step to this method. You can add multiple steps as needed."
+        )
+
+        number_of_steps = st.number_input(
+            "Number of bioinformatics steps:",
+            min_value=1,
+            value=1,
+            help="You must add at least one bioinformatics step.",
+            key="num_bioinformatics_methods",
+        )
+
+        method_steps = []
+        for i in range(number_of_steps):
+            st.write(f"**Step {i+1}**")
+
+            method_data = self.enter_bioinfo_method_step_info(f"method_{i}")
+            method_steps.append(method_data)
+
+        return method_steps
+
+    def _build_bioinfo_infos_method_dict(self, method_name, methods):
+        """Build the bioinfo_infos dictionary."""
+        # bioinfo_infos = methods.copy()
+        method_dict = {"methods": methods}
+        # Only add bioinformatics_method_name if it's populated
+        if method_name and method_name.strip():
+            method_dict["bioinformatics_method_name"] = method_name
+
+        return method_dict
+
+    def add_bioinfo_methods_information(self):
+        """Add bioinformatics method information section."""
+        st.subheader("Add Bioinformatics Method Information", divider="gray")
+
+        self._show_methods_count()
+
+        # Toggle to show/hide the add method form
+        add_method_toggle = st.checkbox(
+            "Add New Bioinformatics Method",
+            help="Check this box to add a new bioinformatics method",
+            key="add_new_bioinfo_method_checkbox",
+        )
+
+        if add_method_toggle:
+            method_name = self._get_method_name_input()
+            method_steps = self._create_bioinformatics_methods_steps()
+
+            self.bioinfo_method_infos = self._build_bioinfo_infos_method_dict(
+                method_name, method_steps
+            )
+        else:
+            # Set empty structure when not adding methods
+            self.bioinfo_method_infos = {}
+
     def check_method_required_fields(self, method_dict, fields=None):
         """Check if required fields are present and not empty."""
         if fields is None:
@@ -228,205 +297,73 @@ class BioInfoPage:
 
         return (True, []) if not missing_fields else (False, missing_fields)
 
-    def _show_methods_count(self):
-        """Show current methods count."""
-        if st.session_state["bioinfo_methods_list"]:
-            st.info(f"Current methods: {len(st.session_state['bioinfo_methods_list'])}")
+    def _validate_bioinformatics_methods(self, bioinfo_method_infos):
+        """Validate all bioinformatics methods."""
+        methods_validation = {}
+        all_methods_valid = True
 
-    def _get_method_name_input(self):
-        """Get optional method name input."""
-        return st.text_input(
-            "Bioinformatics Method Name (Optional):",
-            help="A unique identifier for this bioinformatics method.",
-        )
-
-    def _create_required_methods_section(self):
-        """Create the required methods section (demultiplexing and denoising)."""
-        st.subheader("Demultiplexing Method")
-        demultiplexing_method_data = self.enter_bioinfo_method_vals(
-            "demultiplexing_method"
-        )
-
-        st.subheader("Denoising Method")
-        denoising_method_data = self.enter_bioinfo_method_vals("denoising_method")
-
-        return demultiplexing_method_data, denoising_method_data
-
-    def _create_custom_methods_section(self):
-        """Create the custom methods section."""
-        st.subheader("Additional Methods (Optional)")
-        add_custom_methods = st.checkbox(
-            "Add Custom Methods",
-            help="Add your own custom bioinformatics methods",
-            key="add_custom_methods_checkbox",
-        )
-
-        custom_methods = {}
-        if add_custom_methods:
-            st.write("Add your own custom bioinformatics methods:")
-            number_custom_methods = st.number_input(
-                "Number of custom methods",
-                min_value=1,
-                value=1,
-                help="How many custom methods would you like to add?",
-                key="num_custom_methods",
-            )
-
-            for i in range(number_custom_methods):
-                method_name = st.text_input(
-                    f"Method Name {i+1}:",
-                    key=f"custom_method_name_{i}",
-                    help="Enter a descriptive name for your custom method (e.g., 'Quality Filtering', 'Taxonomic Assignment')",
-                )
-
-                if method_name:
-                    st.write(f"**{method_name}**")
-                    custom_method_data = self.enter_bioinfo_method_vals(
-                        f"custom_method_{i}"
-                    )
-                    custom_methods[method_name] = custom_method_data
-
-        return custom_methods
-
-    def _build_bioinfo_infos_dict(
-        self, method_name, demultiplexing_data, denoising_data, custom_methods
-    ):
-        """Build the bioinfo_infos dictionary."""
-        bioinfo_infos = {
-            "demultiplexing_method": demultiplexing_data,
-            "denoising_method": denoising_data,
-            **custom_methods,  # Spread custom methods into the main dict
-        }
-
-        # Only add bioinformatics_method_name if it's populated
-        if method_name and method_name.strip():
-            bioinfo_infos["bioinformatics_method_name"] = method_name
-
-        return bioinfo_infos
-
-    def add_bioinfo_information(self):
-        """Add bioinformatics method information section."""
-        st.subheader("Add Bioinformatics Method Information", divider="gray")
-
-        self._show_methods_count()
-
-        # Toggle to show/hide the add method form
-        add_method_toggle = st.checkbox(
-            "Add New Bioinformatics Method",
-            help="Check this box to add a new bioinformatics method",
-            key="add_new_bioinfo_method_checkbox",
-        )
-
-        if add_method_toggle:
-            method_name = self._get_method_name_input()
-            (
-                demultiplexing_data,
-                denoising_data,
-            ) = self._create_required_methods_section()
-            custom_methods = self._create_custom_methods_section()
-
-            self.bioinfo_infos = self._build_bioinfo_infos_dict(
-                method_name, demultiplexing_data, denoising_data, custom_methods
-            )
-        else:
-            # Set empty structure when not adding methods
-            self.bioinfo_infos = {}
-
-    def _validate_required_methods(self, bioinfo_infos):
-        """Validate demultiplexing and denoising methods."""
-        (
-            demultiplexing_valid,
-            demultiplexing_missing,
-        ) = self.check_method_required_fields(
-            bioinfo_infos.get("demultiplexing_method", {})
-        )
-        denoising_valid, denoising_missing = self.check_method_required_fields(
-            bioinfo_infos.get("denoising_method", {})
-        )
-        return (demultiplexing_valid, demultiplexing_missing), (
-            denoising_valid,
-            denoising_missing,
-        )
-
-    def _validate_custom_methods(self, bioinfo_infos):
-        """Validate custom methods."""
-        custom_methods_validation = {}
-        custom_methods_valid = True
-
-        for method_name, method_data in bioinfo_infos.items():
-            if method_name not in self.METHOD_TYPES + ["bioinformatics_method_name"]:
+        # Check that at least one method is provided
+        method_count = 0
+        for method_name, method_data in bioinfo_method_infos.items():
+            if method_name != "bioinformatics_method_name" and isinstance(
+                method_data, dict
+            ):
+                method_count += 1
                 method_valid, method_missing = self.check_method_required_fields(
                     method_data
                 )
-                custom_methods_validation[method_name] = (method_valid, method_missing)
+                methods_validation[method_name] = (method_valid, method_missing)
                 if not method_valid:
-                    custom_methods_valid = False
+                    all_methods_valid = False
 
-        return custom_methods_validation, custom_methods_valid
+        if method_count == 0:
+            all_methods_valid = False
+            methods_validation["_no_methods"] = (
+                False,
+                ["At least one bioinformatics method is required"],
+            )
 
-    def _save_valid_method(self, bioinfo_infos):
+        return methods_validation, all_methods_valid
+
+    def _save_valid_method(self, bioinfo_method_infos):
         """Save a valid bioinformatics method."""
-        st.session_state["bioinfo_methods_list"].append(bioinfo_infos)
+        st.session_state["bioinfo_methods_list"].append(bioinfo_method_infos)
         st.success("Bioinformatics method added successfully!")
         st.info(
             f"Total available methods: {len(st.session_state['bioinfo_methods_list'])}"
         )
         st.rerun()
 
-    def _display_validation_errors(
-        self, demultiplexing_result, denoising_result, custom_methods_validation
-    ):
+    def _display_validation_errors(self, methods_validation):
         """Display validation errors for invalid methods."""
-        demultiplexing_valid, demultiplexing_missing = demultiplexing_result
-        denoising_valid, denoising_missing = denoising_result
-
-        if not demultiplexing_valid:
-            st.error(
-                f"Demultiplexing method is missing required fields: {', '.join(demultiplexing_missing)}"
-            )
-
-        if not denoising_valid:
-            st.error(
-                f"Denoising method is missing required fields: {', '.join(denoising_missing)}"
-            )
-
-        for method_name, (
-            method_valid,
-            method_missing,
-        ) in custom_methods_validation.items():
+        for method_name, (method_valid, method_missing) in methods_validation.items():
             if not method_valid:
-                st.error(
-                    f"Custom method '{method_name}' is missing required fields: {', '.join(method_missing)}"
-                )
+                if method_name == "_no_methods":
+                    st.error("At least one bioinformatics method is required.")
+                else:
+                    st.error(
+                        f"Method '{method_name}' is missing required fields: {', '.join(method_missing)}"
+                    )
 
         st.warning("Please fill in all required fields before saving.")
 
     def transform_and_save_data(self):
         """Transform and save bioinformatics method data."""
-        bioinfo_infos = self.bioinfo_infos
+        bioinfo_method_infos = self.bioinfo_method_infos
 
         # Only show save button if there's data to save
-        if bioinfo_infos and st.button(
-            "Save Bioinformatic Method Info", key="save_bioinfo_method_infos"
-        ):
+        # TODO: make this button only appear when add method toggle is on
+        if st.button("Save Bioinformatics Method", key="save_bioinfo_method_infos"):
             # Validate all methods
-            demultiplexing_result, denoising_result = self._validate_required_methods(
-                bioinfo_infos
-            )
             (
-                custom_methods_validation,
-                custom_methods_valid,
-            ) = self._validate_custom_methods(bioinfo_infos)
+                methods_validation,
+                all_methods_valid,
+            ) = self._validate_bioinformatics_methods(bioinfo_method_infos)
 
-            demultiplexing_valid, _ = demultiplexing_result
-            denoising_valid, _ = denoising_result
-
-            if demultiplexing_valid and denoising_valid and custom_methods_valid:
-                self._save_valid_method(bioinfo_infos)
+            if all_methods_valid:
+                self._save_valid_method(bioinfo_method_infos)
             else:
-                self._display_validation_errors(
-                    demultiplexing_result, denoising_result, custom_methods_validation
-                )
+                self._display_validation_errors(methods_validation)
 
         self._remove_methods_section()
 
@@ -540,7 +477,7 @@ class BioInfoPage:
     def run(self):
         # Add bioinformatics information
         self.add_bioinfo_run_vals()
-        self.add_bioinfo_information()
+        self.add_bioinfo_methods_information()
         self.transform_and_save_data()
         self.display_info()
 
