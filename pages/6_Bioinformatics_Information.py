@@ -52,7 +52,8 @@ class BioInfoPage:
 
     def enter_bioinfo_run_vals(self, i=None):
         """Enter bioinformatics run values."""
-        cols1 = st.columns(2)
+        cols1 = st.columns(3)
+
         with cols1[0]:
             bioinfo_run_name = st.text_input(
                 "Bioinformatics Run Name:",
@@ -62,10 +63,20 @@ class BioInfoPage:
         with cols1[1]:
             bioinfo_methods_id = self._get_method_selection(i)
 
-        return {
+        with cols1[2]:
+            bioinfo_run_date = st.date_input(
+                "Bioinformatics Run Date (Optional):",
+                value=None,
+                help="The date the bioinformatics pipeline was run.",
+            )
+        bioinfo_run_dict = {
             "bioinformatics_run_name": bioinfo_run_name,
             "bioinformatics_methods_id": bioinfo_methods_id,
         }
+        if bioinfo_run_date:
+            bioinfo_run_dict["run_date"] = bioinfo_run_date
+
+        return bioinfo_run_date
 
     def _save_bioinfo_runs(self, bioinfo_run_vals):
         """Save bioinformatics run values to session state."""
@@ -122,7 +133,7 @@ class BioInfoPage:
             )
         with cols1[1]:
             version = st.text_input(
-                "version",
+                "program version",
                 key=f"{method}_version",
                 help="Version number of the program (e.g., '1.16.0', '11.0.667')",
             )
@@ -304,15 +315,16 @@ class BioInfoPage:
 
         # Check that at least one method is provided
         method_count = 0
-        for method_name, method_data in bioinfo_method_infos.items():
-            if method_name != "bioinformatics_method_name" and isinstance(
-                method_data, dict
-            ):
-                method_count += 1
+        if "methods" in bioinfo_method_infos.keys():
+            for method_data in bioinfo_method_infos["methods"]:
+                # if method_name != "bioinformatics_method_name" and isinstance(
+                #     method_data, dict
+                # ):
                 method_valid, method_missing = self.check_method_required_fields(
                     method_data
                 )
-                methods_validation[method_name] = (method_valid, method_missing)
+                methods_validation[method_count] = (method_valid, method_missing)
+                method_count += 1
                 if not method_valid:
                     all_methods_valid = False
 
@@ -336,13 +348,13 @@ class BioInfoPage:
 
     def _display_validation_errors(self, methods_validation):
         """Display validation errors for invalid methods."""
-        for method_name, (method_valid, method_missing) in methods_validation.items():
+        for method_id, (method_valid, method_missing) in methods_validation.items():
             if not method_valid:
-                if method_name == "_no_methods":
+                if method_id == "_no_methods":
                     st.error("At least one bioinformatics method is required.")
                 else:
                     st.error(
-                        f"Method '{method_name}' is missing required fields: {', '.join(method_missing)}"
+                        f"Step '{method_id+1}' is missing required fields: {', '.join(method_missing)}"
                     )
 
         st.warning("Please fill in all required fields before saving.")
