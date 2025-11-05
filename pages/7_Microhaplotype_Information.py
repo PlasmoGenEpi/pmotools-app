@@ -1,14 +1,16 @@
 import streamlit as st
-from src.format_page import render_header
 from src.field_matcher import load_data
-from src.transformer import transform_specimen_info
+from src.transformer import transform_mhap_info
+from src.format_page import render_header
 from src.utils import load_schema
 
-session_name = "specimen_info"
-title = "specimen level metadata"
+session_name = "mhap_data"
+title = "microhaplotype information"
 
 
-class SpecimenMetadataPage:
+# TODO: add masking delim box
+# TODO: add additional haplotype detected columns to be specified.
+class MhapPage:
     def __init__(
         self,
         required_fields,
@@ -21,23 +23,37 @@ class SpecimenMetadataPage:
         self.optional_fields = optional_fields
         self.optional_alternate_fields = optional_alternate_fields
 
+    def bioinfo_id_input(self):
+        st.subheader("Bioinformatics ID")
+        return st.text_input(
+            "Enter bioinfo ID:", help="Identifier for the bioinformatics run."
+        )
+
     def transform_and_save_data(
-        self, df, mapped_fields, selected_optional_fields, selected_additional_fields
+        self,
+        df,
+        bioinfo_ID,
+        field_mapping,
+        selected_optional_fields,
+        selected_additional_fields,
     ):
-        if mapped_fields and selected_optional_fields != "Error":
+        if bioinfo_ID and field_mapping and selected_optional_fields != "Error":
             st.subheader("Transform Data")
             if st.button("Transform Data"):
-                transformed_df = transform_specimen_info(
-                    df.astype(object),
-                    mapped_fields,
+                transformed_df = transform_mhap_info(
+                    df,
+                    bioinfo_ID,
+                    field_mapping,
                     selected_optional_fields,
                     selected_additional_fields,
                 )
                 st.session_state[session_name] = transformed_df
                 try:
-                    st.success("Specimen Information has been saved!")
+                    st.success(
+                        f"Microhaplotype Information from Bioinformatics Run '{bioinfo_ID}' has been saved!"
+                    )
                 except Exception as e:
-                    st.error(f"Error saving Specimen Information: {e}")
+                    st.error(f"Error saving Microhaplotype Information: {e}")
 
     def display_panel_info(self, toggle_text):
         if session_name in st.session_state:
@@ -47,6 +63,7 @@ class SpecimenMetadataPage:
                 st.json(st.session_state[session_name])
 
     def run(self):
+        # File upload
         (
             df,
             mapped_fields,
@@ -58,28 +75,30 @@ class SpecimenMetadataPage:
             optional_fields,
             optional_alternate_fields,
         )
-        # Transform and save data
-        if mapped_fields:
-            self.transform_and_save_data(
-                df, mapped_fields, selected_optional_fields, selected_additional_fields
-            )
+        # Enter bioinformatics ID
+        bioinfo_ID = self.bioinfo_id_input()
+        self.transform_and_save_data(
+            df,
+            bioinfo_ID,
+            mapped_fields,
+            selected_optional_fields,
+            selected_additional_fields,
+        )
         # Display current panel information
         self.display_panel_info(f"Preview {title}")
 
 
+# Initialize and run the app
 if __name__ == "__main__":
     render_header()
-    st.subheader("Specimen Level Metadata Converter", divider="gray")
+    st.subheader("Microhaplotype Information Converter", divider="gray")
     schema_fields = load_schema()
-    required_fields = schema_fields["specimen_level_metadata"]["required"]
-    required_alternate_fields = schema_fields["specimen_level_metadata"][
-        "required_alternatives"
-    ]
-    optional_fields = schema_fields["specimen_level_metadata"]["optional"]
-    optional_alternate_fields = schema_fields["specimen_level_metadata"][
-        "optional_alternatives"
-    ]
-    app = SpecimenMetadataPage(
+
+    required_fields = schema_fields["mhap_info"]["required"]
+    required_alternate_fields = schema_fields["mhap_info"]["required_alternatives"]
+    optional_fields = schema_fields["mhap_info"]["optional"]
+    optional_alternate_fields = schema_fields["mhap_info"]["optional_alternatives"]
+    app = MhapPage(
         required_fields,
         required_alternate_fields,
         optional_fields,
