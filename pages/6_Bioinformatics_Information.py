@@ -76,7 +76,7 @@ class BioInfoPage:
         if bioinfo_run_date:
             bioinfo_run_dict["run_date"] = bioinfo_run_date
 
-        return bioinfo_run_date
+        return bioinfo_run_dict
 
     def _save_bioinfo_runs(self, bioinfo_run_vals):
         """Save bioinformatics run values to session state."""
@@ -400,8 +400,54 @@ class BioInfoPage:
             indices_to_remove, reverse=True
         )  # Sort descending for safe removal
 
+    def _update_run_info_indices(self, removed_indices):
+        """Update bioinformatics run info indices after method removal."""
+        if "bioinfo_run_infos" not in st.session_state:
+            return
+
+        updated_run_infos = []
+        affected_runs = []
+
+        for i, run_info in enumerate(st.session_state["bioinfo_run_infos"]):
+            current_method_id = run_info.get("bioinformatics_methods_id", 0)
+            run_name = run_info.get("bioinformatics_run_name", f"Run {i+1}")
+
+            # Check if this run was using one of the removed methods
+            if current_method_id in removed_indices:
+                affected_runs.append(run_name)
+
+            # Count how many removed indices are less than the current method ID
+            # This tells us how much to subtract from the current method ID
+            adjustment = sum(
+                1 for removed_idx in removed_indices if removed_idx < current_method_id
+            )
+
+            # Update the method ID
+            new_method_id = current_method_id - adjustment
+
+            # If the new method ID is out of bounds, set it to a valid value
+            max_method_id = len(st.session_state["bioinfo_methods_list"]) - 1
+            if new_method_id > max_method_id:
+                new_method_id = max(0, max_method_id)
+
+            # Update the run info
+            updated_run_info = run_info.copy()
+            updated_run_info["bioinformatics_methods_id"] = new_method_id
+            updated_run_infos.append(updated_run_info)
+
+        st.session_state["bioinfo_run_infos"] = updated_run_infos
+
+        # Show warning if any runs were affected
+        if affected_runs:
+            st.warning(
+                f"Updated method references for affected runs: {', '.join(affected_runs)}"
+            )
+
     def _remove_selected_methods(self, indices_to_remove):
         """Remove methods at specified indices."""
+        # Store original indices before removal for updating run info
+        original_indices = sorted(indices_to_remove)
+
         for idx in indices_to_remove:
             if 0 <= idx < len(st.session_state["bioinfo_methods_list"]):
                 removed_method = st.session_state["bioinfo_methods_list"].pop(idx)
@@ -409,6 +455,9 @@ class BioInfoPage:
                     "bioinformatics_method_name", f"Method {idx}"
                 )
                 st.success(f"Removed method: {method_name}")
+
+        # Update run info indices after method removal
+        self._update_run_info_indices(original_indices)
 
         st.info(f"Remaining methods: {len(st.session_state['bioinfo_methods_list'])}")
         st.rerun()

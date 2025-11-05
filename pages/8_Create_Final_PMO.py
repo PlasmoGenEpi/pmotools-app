@@ -63,8 +63,9 @@ def merge_data():
     # Download button - only show if PMO has been created
     if "formatted_pmo" in st.session_state:
         st.subheader("Download PMO File")
+        st.write(st.session_state["formatted_pmo"])
         # Convert the PMO data to JSON string
-        pmo_json = json.dumps(st.session_state["formatted_pmo"], indent=2)
+        pmo_json = json.dumps(st.session_state["formatted_pmo"], indent=2, default=str)
 
         # Create download button
         st.download_button(

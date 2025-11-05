@@ -20,7 +20,7 @@ def main():
     st.markdown(
         """
         As you move through the app you will put together the following information. Together these will make a complete PMO:
-        - **Project Information:**: Information describing the project this data belongs to.
+        - **Project Information**: Information describing the project this data belongs to.
         - **Specimen Information**: Metadata describing the biological specimens.
         - **Library Sample Information**: Metadata describing each library created from a specimen.
         - **Panel Information**: A table including data on the targets that make up the panel.
