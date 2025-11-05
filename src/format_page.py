@@ -9,7 +9,7 @@ import os
 
 # Constants
 PGE_LOGO_PATH = "images/PGE_logo.png"
-PMO_LOGO_PATH = "images/PMO_logo_light.png"
+PMO_LOGO_PATH = "images/PMO_logo.png"
 PAGE_TITLE = "PMO Builder"
 PAGE_ICON = "📂"
 LAYOUT = "wide"
