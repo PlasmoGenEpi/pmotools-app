@@ -2,9 +2,9 @@ name: Quick Tests
 
 on:
   pull_request:
-    branches: [ main, master ]
+    branches: [ main, develop ]
   push:
-    branches: [ main, master ]
+    branches: [ main, develop ]
 
 jobs:
   quick-test:
@@ -25,8 +25,8 @@ jobs:
 
     - name: Install dependencies
       run: |
-        uv sync --dev
+        uv sync --extra test
 
     - name: Run tests
       run: |
-        uv run pytest tests/ -v
+        uv run --extra test pytest tests/ -v
