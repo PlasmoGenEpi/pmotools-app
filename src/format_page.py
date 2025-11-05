@@ -8,12 +8,12 @@ import streamlit as st
 import os
 
 # Constants
-PGE_LOGO_PATH = "images/PGE_logo.png"
-PMO_LOGO_PATH = "images/PMO_logo.png"
+PGE_LOGO_PATH = "images/PMO_logo.png"
+PMO_LOGO_PATH = "images/PGE_logo.png"
 PAGE_TITLE = "PMO Builder"
 PAGE_ICON = "📂"
 LAYOUT = "wide"
-LOGO_COLUMN_RATIO = [1, 4]
+LOGO_COLUMN_RATIO = [1, 6]
 
 
 def render_header() -> None:
@@ -21,13 +21,16 @@ def render_header() -> None:
     Render a header with a logo alongside text.
 
     Sets up the page configuration and displays the PMO Builder header
-    with the PGE logo and title information.
+    with the PGE logo and title information. Also adds PGE logo to sidebar bottom.
     """
     st.set_page_config(
         page_title=PAGE_TITLE,
         page_icon=PAGE_ICON,
         layout=LAYOUT,
     )
+
+    # Add PGE logo to bottom of sidebar
+    _render_sidebar_logo()
 
     # Create two columns for layout: logo + text
     col1, col2 = st.columns(LOGO_COLUMN_RATIO)
@@ -39,13 +42,49 @@ def render_header() -> None:
         _render_title_section()
 
 
+def _render_sidebar_logo() -> None:
+    """Render the PGE logo at the bottom of the sidebar."""
+    # Add CSS to position logo at bottom of sidebar using flexbox
+    st.markdown(
+        """
+        <style>
+        [data-testid="stSidebar"][aria-expanded="true"] > div:first-child {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .sidebar-logo-bottom {
+            margin-top: auto;
+            padding-top: 2rem;
+            padding-bottom: 1rem;
+            border-top: 1px solid rgba(250, 250, 250, 0.2);
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    try:
+        if os.path.exists(PGE_LOGO_PATH):
+            # Use a container div to position at bottom
+            st.sidebar.markdown(
+                '<div class="sidebar-logo-bottom">', unsafe_allow_html=True
+            )
+            st.sidebar.image(PGE_LOGO_PATH, use_container_width=True)
+            st.sidebar.markdown("</div>", unsafe_allow_html=True)
+        else:
+            st.sidebar.warning(f"Logo not found at {PGE_LOGO_PATH}")
+    except Exception as e:
+        st.sidebar.error(f"Error loading logo: {e}")
+
+
 def _render_logo() -> None:
     """Render the PGE logo with error handling."""
     try:
-        if os.path.exists(PGE_LOGO_PATH):
-            st.image(PGE_LOGO_PATH)
+        if os.path.exists(PMO_LOGO_PATH):
+            st.image(PMO_LOGO_PATH)
         else:
-            st.warning(f"Logo not found at {PGE_LOGO_PATH}")
+            st.warning(f"Logo not found at {PMO_LOGO_PATH}")
     except Exception as e:
         st.error(f"Error loading logo: {e}")
 
