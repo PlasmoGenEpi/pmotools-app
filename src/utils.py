@@ -9,6 +9,6 @@ def save_to_csv(df, output_path):
 
 def load_schema():
     # Load schema field names from JSON
-    with open('conf/schema.json', 'r') as file:
+    with open("conf/schema.json", "r") as file:
         schema_fields = json.load(file)
     return schema_fields
