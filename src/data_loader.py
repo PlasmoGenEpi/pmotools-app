@@ -2,10 +2,11 @@ import pandas as pd
 
 
 def load_csv(file):
-    """Load a CSV file into a pandas DataFrame."""
+    """Load a CSV file into a pandas DataFrame with automatic separator detection."""
     try:
         if file.name.endswith((".csv", ".tsv", ".txt")):
-            df = pd.read_csv(file, sep="\t")
+            # Use pandas' automatic separator detection
+            df = pd.read_csv(file, sep=None, engine="python")
         elif file.name.endswith((".xlsx", ".xls")):
             df = pd.read_excel(file)
         else:
