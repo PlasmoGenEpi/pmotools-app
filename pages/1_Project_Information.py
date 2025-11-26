@@ -276,14 +276,14 @@ class ProjectInfoPage:
 
     def transform_and_save_data(self) -> None:
         """Save project data if validation passes."""
-        if not self._validate_required_fields():
-            st.warning(
-                "Please fill in all required fields (Project Name and Description)."
-            )
-            return
-
         st.subheader("Save Data")
         if st.button("Save Data", type="primary"):
+            if not self._validate_required_fields():
+                st.error(
+                    "Please fill in all required fields (Project Name and Description)."
+                )
+                return
+
             st.session_state["project_info"] = [self.project_info]
             st.success("Project information saved successfully!")
 
