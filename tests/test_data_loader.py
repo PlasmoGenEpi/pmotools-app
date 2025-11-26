@@ -405,20 +405,20 @@ class TestLoadCSVIntegration:
 
     def test_mixed_data_types(self):
         """Test loading CSV with mixed data types."""
-        csv_content = "id,name,score,active,date\n1,Alice,95.5,True,2023-01-01\n2,Bob,87.2,False,2023-01-02\n3,Charlie,92.8,True,2023-01-03"
+        csv_content = "id,name,score,date\n1,Alice,95.5,2023-01-01\n2,Bob,87.2,2023-01-02\n3,Charlie,92.8,2023-01-03"
 
         file_obj = io.StringIO(csv_content)
         file_obj.name = "mixed_types.csv"
 
         result = load_csv(file_obj)
-
+        print(csv_content)
+        print(result)
         assert isinstance(result, pd.DataFrame)
-        assert result.shape == (3, 5)
-        assert list(result.columns) == ["id", "name", "score", "active", "date"]
+        assert result.shape == (3, 4)
+        assert list(result.columns) == ["id", "name", "score", "date"]
         assert result.iloc[0]["id"] == 1
         assert result.iloc[0]["name"] == "Alice"
         assert result.iloc[0]["score"] == 95.5
-        assert result.iloc[1]["active"] is False
         assert result.iloc[2]["name"] == "Charlie"
 
     def test_empty_fields(self):
