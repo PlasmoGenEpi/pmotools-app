@@ -130,13 +130,18 @@ def transform_library_sample_info(
         sequencing_info_name_col=field_mapping["sequencing_info_name"],
         specimen_name_col=field_mapping["specimen_name"],
         panel_name_col=field_mapping["panel_name"],
-        accession_col=optional_mapping.get("accession"),
-        library_prep_plate_col_col=optional_mapping.get("library_prep_plate_col"),
+        alternate_identifiers_col=optional_mapping.get("alternate_identifiers"),
+        experiment_accession_col=optional_mapping.get("experiment_accession"),
+        fastqs_loc_col=optional_mapping.get("fastqs_loc"),
         library_prep_plate_name_col=optional_mapping.get("library_prep_plate_name"),
+        library_prep_plate_col_col=optional_mapping.get("library_prep_plate_col"),
         library_prep_plate_row_col=optional_mapping.get("library_prep_plate_row"),
         library_prep_plate_position_col=optional_mapping.get(
             "library_prep_plate_position"
         ),
+        parasite_density_col=optional_mapping.get("parasite_density"),
+        parasite_density_method_col=optional_mapping.get("parasite_density_method"),
+        run_accession_col=optional_mapping.get("run_accession"),
         additional_library_sample_info_cols=additional_fields,
     )
     return transformed_df

@@ -298,14 +298,28 @@
             ]
         },
         "optional": [
-            "accession",
+            "alternate_identifiers",
+            "experiment_accession",
+            "fastqs_loc",
             "library_prep_plate_name",
             "library_prep_plate_col",
-            "library_prep_plate_row"
+            "library_prep_plate_row",
+            "library_prep_plate_position",
+            "parasite_density",
+            "parasite_density_method",
+            "run_accession"
         ],
         "optional_alternatives": {
-            "accession": [
+            "alternate_identifiers": [
+                "alternate identifiers",
+                "alternate_IDs"
+            ],
+            "experiment_accession": [
                 "Accession information"
+            ],
+            "fastqs_loc": [
+                "fastqs_location",
+                "fastq_files"
             ],
             "library_prep_plate_name": [
                 "plate_name",
@@ -318,6 +332,21 @@
             "library_prep_plate_row": [
                 "plate_row",
                 "row_of_plate"
+            ],
+            "library_prep_plate_position": [
+                "plate_position",
+                "position_on_plate"
+            ],
+            "parasite_density": [
+                "parasite_density",
+                "parasites/ul"
+            ],
+            "parasite_density_method": ["method"],
+            "run_accession": [
+                "accession",
+                "run_accession",
+                "run_id",
+                "run_accession_number"
             ]
         }
     },
