@@ -161,20 +161,24 @@
             "geo_admin1",
             "geo_admin2",
             "geo_admin3",
+            "gravid",
+            "gravidity",
+            "has_travel_out_six_month",
             "host_age",
             "host_sex",
             "host_subject_id",
             "lat_lon",
             "parasite_density",
             "parasite_density_method",
-            "specimen_collect_device",
-            "specimen_comments",
-            "specimen_store_loc",
+            "specimen_accession",
             "storage_plate_col",
             "storage_plate_name",
             "storage_plate_row",
             "storage_plate_position",
-            "travel_out_six_month",
+            "specimen_collect_device",
+            "specimen_comments",
+            "specimen_store_loc",
+            "specimen_type",
             "treatment_status"
         ],
         "optional_alternatives": {
@@ -202,7 +206,10 @@
                 "City",
                 "health_facility"
             ],
-            "host_age": [],
+            "gravid": ["pregnant","pregnancy_status"],
+            "gravidity": ["n_pregnancies","n_pregnancies_at_collection"],
+            "has_travel_out_six_month": ["travel","any_trips"],
+            "host_age": ["age","age_at_collection"],
             "host_sex": [
                 "male",
                 "female"
@@ -221,6 +228,7 @@
                 "parasites/ul"
             ],
             "parasite_density_method": [],
+            "specimen_accession": ["sample_accession","SRR","SRA_accession"],
             "specimen_collect_device": [
                 "instrument",
                 "collection_method",
@@ -234,6 +242,7 @@
                 "storage",
                 "sample_location"
             ],
+            "specimen_type": ["sample_type"],
             "storage_plate_col": [
                 "column"
             ],

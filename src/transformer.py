@@ -82,6 +82,8 @@ def transform_specimen_info(
         collection_country_col=field_mapping["collection_country"],
         project_name_col=field_mapping["project_name"],
         # optional fields - only pass if not None
+        alternate_identifiers_col=optional_field_mapping.get("alternate_identifiers"),
+        blood_meal_col=optional_field_mapping.get("blood_meal"),
         drug_usage_col=optional_field_mapping.get("drug_usage"),
         env_broad_scale_col=optional_field_mapping.get("env_broad_scale"),
         env_local_scale_col=optional_field_mapping.get("env_local_scale"),
@@ -89,6 +91,11 @@ def transform_specimen_info(
         geo_admin1_col=optional_field_mapping.get("geo_admin1"),
         geo_admin2_col=optional_field_mapping.get("geo_admin2"),
         geo_admin3_col=optional_field_mapping.get("geo_admin3"),
+        gravid_col=optional_field_mapping.get("gravid"),
+        gravidity_col=optional_field_mapping.get("gravidity"),
+        has_travel_out_six_month_col=optional_field_mapping.get(
+            "has_travel_out_six_month"
+        ),
         host_age_col=optional_field_mapping.get("host_age"),
         host_sex_col=optional_field_mapping.get("host_sex"),
         host_subject_id=optional_field_mapping.get("host_subject_id"),
@@ -106,13 +113,11 @@ def transform_specimen_info(
         ),
         specimen_comments_col=optional_field_mapping.get("specimen_comments"),
         specimen_store_loc_col=optional_field_mapping.get("specimen_store_loc"),
+        specimen_type_col=optional_field_mapping.get("specimen_type"),
+        treatment_status_col=optional_field_mapping.get("treatment_status"),
         additional_specimen_cols=additional_fields,
-        list_values_specimen_columns=optional_field_mapping.get("alternate_identifiers")
-        if optional_field_mapping.get("alternate_identifiers") is not None
-        else [],
         list_values_specimen_columns_delimiter=",",
     )
-    # TODO: make sure list values are handled correctly
     return transformed_df
 
 
