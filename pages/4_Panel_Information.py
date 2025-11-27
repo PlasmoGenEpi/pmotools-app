@@ -1,6 +1,7 @@
 import streamlit as st
 import json
 import os
+import pandas as pd
 from src.field_matcher import load_data
 from src.transformer import transform_panel_info
 from src.format_page import render_header
@@ -68,8 +69,76 @@ class PanelPage:
                 st.warning("No saved panels found.")
 
     def panel_id_input(self):
-        st.subheader("Panel ID")
-        return st.text_input("Enter panel ID:", help="Identifier for the panel.")
+        st.subheader("Panel Name")
+
+        # Get unique panel names from library_sample_info if available
+        suggested_panels = []
+        if "library_sample_info" in st.session_state:
+            library_sample_info = st.session_state["library_sample_info"]
+            try:
+                # Handle DataFrame
+                if isinstance(library_sample_info, pd.DataFrame):
+                    if "panel_name" in library_sample_info.columns:
+                        suggested_panels = sorted(
+                            library_sample_info["panel_name"].dropna().unique().tolist()
+                        )
+                # Handle dict (could be a dict representation of DataFrame or nested structure)
+                elif isinstance(library_sample_info, dict):
+                    # Check if it's a dict with 'panel_name' as a key containing a list/Series
+                    if "panel_name" in library_sample_info:
+                        panel_data = library_sample_info["panel_name"]
+                        if isinstance(panel_data, (list, pd.Series)):
+                            if isinstance(panel_data, pd.Series):
+                                suggested_panels = sorted(
+                                    panel_data.dropna().unique().tolist()
+                                )
+                            else:
+                                suggested_panels = sorted(
+                                    list(set([p for p in panel_data if p]))
+                                )
+                    # Check if values in dict are DataFrames with panel_name column
+                    else:
+                        for value in library_sample_info.values():
+                            if (
+                                isinstance(value, pd.DataFrame)
+                                and "panel_name" in value.columns
+                            ):
+                                suggested_panels.extend(
+                                    value["panel_name"].dropna().unique().tolist()
+                                )
+                        suggested_panels = sorted(list(set(suggested_panels)))
+                # Handle list of dicts
+                elif isinstance(library_sample_info, list):
+                    panel_names = [
+                        item.get("panel_name")
+                        for item in library_sample_info
+                        if isinstance(item, dict) and item.get("panel_name")
+                    ]
+                    suggested_panels = sorted(list(set(panel_names)))
+            except Exception:
+                # If extraction fails, just continue without suggestions
+                pass
+
+        # If we have suggested panels, show a selectbox with option to enter custom
+        if suggested_panels:
+            panel_options = suggested_panels + ["Enter custom panel name"]
+            selected_option = st.selectbox(
+                "Select panel name or enter custom:",
+                panel_options,
+                index=0,  # Default to first panel
+                help=f"Suggested panel names from library sample info: {', '.join(suggested_panels)}",
+            )
+
+            if selected_option == "Enter custom panel name":
+                return st.text_input(
+                    "Enter panel name:", help="Identifier name for the panel."
+                )
+            else:
+                return selected_option
+        else:
+            return st.text_input(
+                "Enter panel name:", help="Identifier name for the panel."
+            )
 
     def add_genome_information(self):
         st.subheader("Add Genome Information")
