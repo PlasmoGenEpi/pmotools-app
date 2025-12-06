@@ -25,10 +25,11 @@ def main():
         - **Library Sample Information**: Metadata describing each library created from a specimen.
         - **Panel Information**: A table including data on the targets that make up the panel.
         - **Sequencing Information**: Information on how the samples were sequenced.
-        - **Bioinformatics Information**: Information on the bioinformatics pipeline used to generate the allele data.
         - **Microhaplotype Information**: A table containing the alleles called for each of the samples for each of the targets and the reads associated.
+        - **Bioinformatics Information**: Information on the bioinformatics pipeline used to generate the allele data.
 
-        More information on the file format can be found [here](https://plasmogenepi.github.io/PMO_Docs/format/FormatOverview.html)
+
+        More information on the file format can be found [here](https://plasmogenepi.github.io/PMO_Docs/)
         """
     )
 

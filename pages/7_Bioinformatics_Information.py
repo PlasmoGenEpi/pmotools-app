@@ -153,13 +153,40 @@ class BioinformaticsRunManager:
         )
         return int(selected_option.split(":")[0])
 
-    def _enter_run_values(self, i=None):
+    def _get_unique_bioinfo_run_names(self):
+        """Extract unique bioinformatics run names from microhaplotype_info."""
+        unique_names = []
+        if "microhaplotype_info" in st.session_state:
+            microhaplotype_info = st.session_state["microhaplotype_info"]
+            try:
+                # microhaplotype_info is a dict with "detected_microhaplotypes" key
+                if isinstance(microhaplotype_info, dict):
+                    if "detected_microhaplotypes" in microhaplotype_info:
+                        detected_mhaps = microhaplotype_info["detected_microhaplotypes"]
+                        if isinstance(detected_mhaps, list):
+                            # Extract bioinformatics_run_name from each dict in the list
+                            run_names = [
+                                item.get("bioinformatics_run_name")
+                                for item in detected_mhaps
+                                if isinstance(item, dict)
+                                and item.get("bioinformatics_run_name")
+                            ]
+                            unique_names = sorted(list(set(run_names)))
+            except Exception:
+                # If extraction fails, just continue without pre-filling
+                pass
+        return unique_names
+
+    def _enter_run_values(self, i=None, prefill_name=None):
         """Enter bioinformatics run values."""
         cols1 = st.columns(3)
 
         with cols1[0]:
+            # Pre-fill with suggested name if provided
+            default_value = prefill_name if prefill_name else ""
             bioinfo_run_name = st.text_input(
                 "Bioinformatics Run Name:",
+                value=default_value,
                 help="Name of the bioinformatics run (required).",
                 key=f"run_name_{i}" if i is not None else None,
             )
@@ -202,13 +229,33 @@ class BioinformaticsRunManager:
 
     def add_runs(self):
         """Add bioinformatics run values section."""
+        # Get unique bioinformatics run names from microhaplotype_info
+        unique_run_names = self._get_unique_bioinfo_run_names()
+
+        # Set default number of runs based on unique names found
+        default_num_runs = len(unique_run_names) if unique_run_names else 1
+
+        if unique_run_names:
+            st.info(
+                f"Found {len(unique_run_names)} unique bioinformatics run name(s) in microhaplotype data. "
+                f"Pre-filled below. You can modify the number of runs or names as needed."
+            )
+
         number_inputs = st.number_input(
             "Number of bioinformatics runs",
             min_value=0,
-            value=1,
+            value=default_num_runs,
             key="num_bioinfo_runs",
         )
-        bioinfo_run_vals = [self._enter_run_values(i=i) for i in range(number_inputs)]
+
+        # Pre-fill run names from unique values
+        bioinfo_run_vals = [
+            self._enter_run_values(
+                i=i,
+                prefill_name=unique_run_names[i] if i < len(unique_run_names) else None,
+            )
+            for i in range(number_inputs)
+        ]
 
         self._save_runs(bioinfo_run_vals)
         return bioinfo_run_vals

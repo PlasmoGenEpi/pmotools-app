@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 from src.format_page import render_header
 
 
@@ -19,6 +20,87 @@ class SeqInfoPage:
                 "To add another sequencing run, enter the information above and click the 'Add Sequencing Information' button again."
             )
 
+    def _get_sequencing_info_name_input(self):
+        """Get sequencing information name - either from library_sample_info or manual entry."""
+        # Get unique sequencing info names from library_sample_info if available
+        suggested_names = []
+        if "library_sample_info" in st.session_state:
+            library_sample_info = st.session_state["library_sample_info"]
+            try:
+                # Handle DataFrame
+                if isinstance(library_sample_info, pd.DataFrame):
+                    if "sequencing_info_name" in library_sample_info.columns:
+                        suggested_names = sorted(
+                            library_sample_info["sequencing_info_name"]
+                            .dropna()
+                            .unique()
+                            .tolist()
+                        )
+                # Handle dict
+                elif isinstance(library_sample_info, dict):
+                    if "sequencing_info_name" in library_sample_info:
+                        seq_data = library_sample_info["sequencing_info_name"]
+                        if isinstance(seq_data, (list, pd.Series)):
+                            if isinstance(seq_data, pd.Series):
+                                suggested_names = sorted(
+                                    seq_data.dropna().unique().tolist()
+                                )
+                            else:
+                                suggested_names = sorted(
+                                    list(set([s for s in seq_data if s]))
+                                )
+                    else:
+                        # Check if values in dict are DataFrames with sequencing_info_name column
+                        for value in library_sample_info.values():
+                            if (
+                                isinstance(value, pd.DataFrame)
+                                and "sequencing_info_name" in value.columns
+                            ):
+                                suggested_names.extend(
+                                    value["sequencing_info_name"]
+                                    .dropna()
+                                    .unique()
+                                    .tolist()
+                                )
+                        suggested_names = sorted(list(set(suggested_names)))
+                # Handle list of dicts
+                elif isinstance(library_sample_info, list):
+                    seq_names = [
+                        item.get("sequencing_info_name")
+                        for item in library_sample_info
+                        if isinstance(item, dict) and item.get("sequencing_info_name")
+                    ]
+                    suggested_names = sorted(list(set(seq_names)))
+            except Exception:
+                # If extraction fails, just continue without suggestions
+                pass
+
+        # If we have suggested names, show a selectbox with option to enter custom
+        if suggested_names:
+            name_options = suggested_names + ["Enter custom name"]
+            selected_option = st.selectbox(
+                "Select sequencing information name or enter custom:",
+                name_options,
+                index=0,  # Default to first suggested name
+                help=f"Suggested names from library sample info: {', '.join(suggested_names)}",
+                key="seq_info_name_select",
+            )
+
+            if selected_option == "Enter custom name":
+                return st.text_input(
+                    "Enter sequencing information name:",
+                    help="A unique identifier for this sequencing info.",
+                    key="seq_info_name_text",
+                )
+            else:
+                return selected_option
+        else:
+            return st.text_input(
+                "Sequencing Information Name:",
+                help="A unique identifier for this sequencing info.",
+                key="seq_info_name_text",
+            )
+
     def add_sequencing_information(self):
         """Add sequencing information section - one run at a time."""
         st.subheader("Add Sequencing Information")
@@ -26,11 +108,7 @@ class SeqInfoPage:
 
         seq_info = {}
 
-        seq_info["sequencing_info_name"] = st.text_input(
-            "Sequencing Information Name:",
-            help="A unique identifier for this sequencing info.",
-            key="seq_info_name",
-        )
+        seq_info["sequencing_info_name"] = self._get_sequencing_info_name_input()
         seq_info["seq_platform"] = st.text_input(
             "Sequencing Platform:",
             help="The sequencing platform used to sequence the run, e.g. ILLUMINA, Illumina MiSeq.",
