@@ -27,7 +27,8 @@ def main():
         - **Sequencing Information**: Information on how the samples were sequenced.
         - **Microhaplotype Information**: A table containing the alleles called for each of the samples for each of the targets and the reads associated.
         - **Bioinformatics Information**: Information on the bioinformatics pipeline used to generate the allele data.
-
+        Optionally, you can also add:
+        - **Read Counts per Stage**: A table containing the raw read counts per sample and a table containing the read counts for each stage of the bioinformatics pipeline per sample per target.
 
         More information on the file format can be found [here](https://plasmogenepi.github.io/PMO_Docs/)
         """

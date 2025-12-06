@@ -1,5 +1,8 @@
 from pmotools.pmo_builder.mhap_table_to_pmo import mhap_table_to_pmo
 from pmotools.pmo_builder.panel_information_to_pmo import panel_info_table_to_pmo
+from pmotools.pmo_builder.read_count_by_stage_table_to_pmo import (
+    read_count_by_stage_table_to_pmo,
+)
 from pmotools.pmo_builder.metatable_to_pmo import (
     library_sample_info_table_to_pmo,
     specimen_info_table_to_pmo,
@@ -149,14 +152,25 @@ def transform_library_sample_info(
     return transformed_df
 
 
-# def transform_demultiplexed_info(df, bioinfo_id, field_mapping,
-#                                  optional_mapping, additional_hap_detected_cols=None):
-#     """Reformat the DataFrame based on the provided field mapping."""
-#     transformed_df = demultiplexed_targets_to_pmo_dict(
-#         df,
-#         bioinfo_id,
-#         sampleID_col=field_mapping["sampleID"],
-#         target_id_col=field_mapping['target_id'],
-#         read_count_col=field_mapping['raw_read_count'],
-#         additional_hap_detected_cols=additional_hap_detected_cols)
-#     return transformed_df
+def transform_read_counts_per_stage(
+    raw_counts_df,
+    reads_by_stage_df,
+    bioinfo_run_name,
+    raw_counts_field_mapping,
+    reads_by_stage_field_mapping,
+    raw_counts_selected_additional_fields=None,
+    reads_by_stage_selected_additional_fields=None,
+):
+    transformed_df = read_count_by_stage_table_to_pmo(
+        bioinformatics_run_name=bioinfo_run_name,
+        total_raw_count_table=raw_counts_df,
+        reads_by_stage_table=reads_by_stage_df,
+        library_sample_name_col=raw_counts_field_mapping["library_sample_name"],
+        total_raw_count_col=raw_counts_field_mapping["total_raw_count"],
+        target_name_col=reads_by_stage_field_mapping["target_name"],
+        stage_col=reads_by_stage_field_mapping["stage"],
+        read_count_col=reads_by_stage_field_mapping["read_count"],
+        additional_library_sample_cols=raw_counts_selected_additional_fields,
+        additional_target_cols=reads_by_stage_selected_additional_fields,
+    )
+    return transformed_df

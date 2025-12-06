@@ -9,9 +9,9 @@ check_dict = {
     "specimen_info": "Specimen Level Metadata",
     "library_sample_info": "Library Sample Level Metadata",
     "microhaplotype_info": "Microhaplotype Information",
-    # "demultiplexed_data": "Demultiplexed Samples",
     "seq_info": "Sequencing Information",
     "bioinfo_run_infos": "Bioinformatics Runs Information",
+    "read_counts_per_stage": "Read Counts per Stage",
 }
 
 
@@ -42,7 +42,10 @@ def merge_data():
     # Get bioinformatics methods and runs
     bioinfo_methods = st.session_state.get("bioinfo_methods_list", [])
     bioinfo_runs = st.session_state.get("bioinfo_run_infos", [])
-
+    if "read_counts_per_stage" in st.session_state:
+        read_counts_per_stage = st.session_state["read_counts_per_stage"]
+    else:
+        read_counts_per_stage = None
     if st.button("Merge Data"):
         try:
             st.session_state["formatted_pmo"] = merge_to_pmo(
@@ -54,6 +57,7 @@ def merge_data():
                 bioinfo_method_info=bioinfo_methods,
                 bioinfo_run_info=bioinfo_runs,
                 project_info=st.session_state["project_info"],
+                read_counts_by_stage_info=read_counts_per_stage,
             )
             st.success("Data merged successfully!")
         except Exception as e:
