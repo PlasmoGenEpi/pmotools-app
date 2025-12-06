@@ -168,21 +168,42 @@ class PanelPage:
         selected_optional_fields,
         selected_additional_fields,
     ):
-        if (
-            all(
-                [
-                    panel_ID,
-                    field_mapping,
-                    genome_info["name"],
-                    genome_info["taxon_id"],
-                    genome_info["genome_version"],
-                    genome_info["url"],
-                ]
-            )
-            and selected_optional_fields != "Error"
-        ):
-            st.subheader("Transform Data")
-            if st.button("Transform Data"):
+        st.subheader("Transform Data")
+        if st.button("Transform Data"):
+            # Validate required fields
+            errors = []
+
+            if not panel_ID or not panel_ID.strip():
+                errors.append("Panel ID is required.")
+
+            if not field_mapping:
+                errors.append(
+                    "Field mapping is required. Please upload a file and map the fields."
+                )
+
+            if not genome_info.get("name") or not genome_info["name"].strip():
+                errors.append("Genome name is required.")
+
+            if not genome_info.get("taxon_id") or not genome_info["taxon_id"].strip():
+                errors.append("Taxon ID is required.")
+
+            if (
+                not genome_info.get("genome_version")
+                or not genome_info["genome_version"].strip()
+            ):
+                errors.append("Genome version is required.")
+
+            if not genome_info.get("url") or not genome_info["url"].strip():
+                errors.append("Genome URL is required.")
+
+            if selected_optional_fields == "Error":
+                errors.append("There was an error with the optional fields selection.")
+
+            if errors:
+                for error in errors:
+                    st.error(error)
+            else:
+                # All validations passed, proceed with transformation
                 transformed_df = transform_panel_info(
                     df,
                     panel_ID,
@@ -191,7 +212,6 @@ class PanelPage:
                     selected_optional_fields,
                     selected_additional_fields,
                 )
-                # json_data = json.dumps(transformed_df, indent=4)
                 st.session_state["panel_info"] = transformed_df
                 try:
                     self.panel_manager.save_panel(panel_ID, transformed_df)

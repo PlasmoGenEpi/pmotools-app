@@ -1,16 +1,14 @@
 import streamlit as st
+from src.format_page import render_header
 from src.field_matcher import load_data
 from src.transformer import transform_mhap_info
-from src.format_page import render_header
 from src.utils import load_schema
 
-session_name = "mhap_data"
+session_name = "microhaplotype_info"
 title = "microhaplotype information"
 
 
-# TODO: add masking delim box
-# TODO: add additional haplotype detected columns to be specified.
-class MhapPage:
+class MicrohaplotypeInfoPage:
     def __init__(
         self,
         required_fields,
@@ -23,39 +21,85 @@ class MhapPage:
         self.optional_fields = optional_fields
         self.optional_alternate_fields = optional_alternate_fields
 
-    def bioinfo_id_input(self):
+    def bioinfo_id_input(self, df):
+        """Get bioinformatics ID from user - either from a column or as a string."""
         st.subheader("Bioinformatics ID")
-        return st.text_input(
-            "Enter bioinfo ID:", help="Identifier for the bioinformatics run."
-        )
+
+        if df is not None and not df.empty:
+            # Option to select from column or enter manually
+            input_method = st.radio(
+                "Select bioinformatics ID source:",
+                ["Select from column", "Enter manually"],
+                horizontal=True,
+                key="bioinfo_id_method",
+            )
+
+            if input_method == "Select from column":
+                column = st.selectbox(
+                    "Select column containing bioinformatics ID:",
+                    df.columns.tolist(),
+                    key="bioinfo_id_column",
+                )
+                return column
+            else:
+                return st.text_input(
+                    "Enter bioinformatics ID:",
+                    help="Identifier for the bioinformatics run.",
+                    key="bioinfo_id_text",
+                )
+        else:
+            # No file uploaded, only allow manual entry
+            return st.text_input(
+                "Enter bioinformatics ID:",
+                help="Identifier for the bioinformatics run.",
+                key="bioinfo_id_text",
+            )
 
     def transform_and_save_data(
         self,
         df,
-        bioinfo_ID,
-        field_mapping,
+        bioinfo_id,
+        mapped_fields,
         selected_optional_fields,
         selected_additional_fields,
     ):
-        if bioinfo_ID and field_mapping and selected_optional_fields != "Error":
-            st.subheader("Transform Data")
-            if st.button("Transform Data"):
+        st.subheader("Transform Data")
+        if st.button("Transform Data"):
+            # Validate required fields
+            errors = []
+
+            if not bioinfo_id or (
+                isinstance(bioinfo_id, str) and not bioinfo_id.strip()
+            ):
+                errors.append("Bioinformatics ID is required.")
+
+            if not mapped_fields:
+                errors.append(
+                    "Field mapping is required. Please upload a file and map the fields."
+                )
+
+            if selected_optional_fields == "Error":
+                errors.append("There was an error with the optional fields selection.")
+
+            if errors:
+                for error in errors:
+                    st.error(error)
+            else:
+                # All validations passed, proceed with transformation
                 transformed_df = transform_mhap_info(
-                    df,
-                    bioinfo_ID,
-                    field_mapping,
+                    df.astype(object) if df is not None else None,
+                    bioinfo_id,
+                    mapped_fields,
                     selected_optional_fields,
                     selected_additional_fields,
                 )
                 st.session_state[session_name] = transformed_df
                 try:
-                    st.success(
-                        f"Microhaplotype Information from Bioinformatics Run '{bioinfo_ID}' has been saved!"
-                    )
+                    st.success("Microhaplotype Information has been saved!")
                 except Exception as e:
                     st.error(f"Error saving Microhaplotype Information: {e}")
 
-    def display_panel_info(self, toggle_text):
+    def display_microhaplotype_info(self, toggle_text):
         if session_name in st.session_state:
             preview = st.toggle(toggle_text)
             if preview:
@@ -63,7 +107,6 @@ class MhapPage:
                 st.json(st.session_state[session_name])
 
     def run(self):
-        # File upload
         (
             df,
             mapped_fields,
@@ -75,30 +118,29 @@ class MhapPage:
             optional_fields,
             optional_alternate_fields,
         )
-        # Enter bioinformatics ID
-        bioinfo_ID = self.bioinfo_id_input()
+        # Get bioinformatics ID input
+        bioinfo_id = self.bioinfo_id_input(df)
+        # Transform and save data
         self.transform_and_save_data(
             df,
-            bioinfo_ID,
+            bioinfo_id,
             mapped_fields,
             selected_optional_fields,
             selected_additional_fields,
         )
         # Display current panel information
-        self.display_panel_info(f"Preview {title}")
+        self.display_microhaplotype_info(f"Preview {title}")
 
 
-# Initialize and run the app
 if __name__ == "__main__":
     render_header()
     st.subheader("Microhaplotype Information Converter", divider="gray")
     schema_fields = load_schema()
-
     required_fields = schema_fields["mhap_info"]["required"]
     required_alternate_fields = schema_fields["mhap_info"]["required_alternatives"]
     optional_fields = schema_fields["mhap_info"]["optional"]
     optional_alternate_fields = schema_fields["mhap_info"]["optional_alternatives"]
-    app = MhapPage(
+    app = MicrohaplotypeInfoPage(
         required_fields,
         required_alternate_fields,
         optional_fields,
@@ -108,5 +150,5 @@ if __name__ == "__main__":
         st.success(
             f"Your {title} has already been saved during a" " previous run of this page"
         )
-        app.display_panel_info(f"Preview previously stored {title}")
+        app.display_microhaplotype_info(f"Preview previously stored {title}")
     app.run()

@@ -11,8 +11,7 @@ check_dict = {
     "mhap_data": "Microhaplotype Information",
     # "demultiplexed_data": "Demultiplexed Samples",
     "seq_info": "Sequencing Information",
-    "bioinfo_methods_list": "Bioinformatics Information",
-    "bioinfo_run_infos": "Bioinformatics Information",
+    "bioinfo_run_infos": "Bioinformatics Runs Information",
 }
 
 
@@ -24,7 +23,7 @@ def check_all(check_dict):
     all_passed = True
     for check_key, source_page in check_dict.items():
         if check_key in st.session_state:
-            st.success(f"Data from {source_page} tab has been successfully" " loaded")
+            st.success(f"Data from {source_page} tab has been successfully loaded.")
         else:
             st.error(
                 f"Data from {source_page} tab not found. Please fill out"
