@@ -6,6 +6,7 @@ from src.field_matcher import load_data
 from src.transformer import transform_panel_info
 from src.format_page import render_header
 from src.utils import load_schema
+from pmotools.pmo_builder.panel_information_to_pmo import merge_panel_info_dicts
 
 session_name = "panel_info"
 title = "panel information"
@@ -60,11 +61,41 @@ class PanelPage:
         if use_past:
             saved_panels = self.panel_manager.get_saved_panels()
             if saved_panels:
-                selected_panel = st.selectbox("Select a saved panel:", saved_panels)
-                if st.button("Load Panel"):
-                    panel_data = self.panel_manager.load_panel(selected_panel)
-                    st.session_state["panel_info"] = panel_data
-                    st.success(f"Loaded panel: {selected_panel}")
+                selected_panels = st.multiselect(
+                    "Select saved panel(s) to load:",
+                    saved_panels,
+                    help="Select one or more panels. If multiple are selected, they will be merged together.",
+                )
+                if st.button("Load Panel(s)"):
+                    if not selected_panels:
+                        st.warning("Please select at least one panel to load.")
+                    elif len(selected_panels) == 1:
+                        # Single panel - just load it
+                        panel_data = self.panel_manager.load_panel(selected_panels[0])
+                        st.session_state["panel_info"] = panel_data
+                        st.success(f"Loaded panel: {selected_panels[0]}")
+                    else:
+                        # Multiple panels - merge them
+                        if merge_panel_info_dicts is None:
+                            st.error(
+                                "The merge_panel_info_dicts function could not be imported from pmotools. "
+                                "Please ensure pmotools is installed and the function is available."
+                            )
+                        else:
+                            try:
+                                # Load all selected panels
+                                panel_dicts = [
+                                    self.panel_manager.load_panel(panel_name)
+                                    for panel_name in selected_panels
+                                ]
+                                # Merge the panels
+                                merged_panel_data = merge_panel_info_dicts(panel_dicts)
+                                st.session_state["panel_info"] = merged_panel_data
+                                st.success(
+                                    f"Successfully merged {len(selected_panels)} panel(s): {', '.join(selected_panels)}"
+                                )
+                            except Exception as e:
+                                st.error(f"Error merging panels: {e}")
             else:
                 st.warning("No saved panels found.")
 
