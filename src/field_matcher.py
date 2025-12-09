@@ -193,7 +193,7 @@ def interactive_field_mapping_page_section(
     return field_mapping, df_columns
 
 
-def additional_fields_section(unused_field_names):
+def additional_fields_section(unused_field_names, key_suffix=None):
     """Show an Additional Fields section for unmatched input fields and allow selection."""
     selected_additional_fields = []
     if not unused_field_names:
@@ -207,7 +207,12 @@ def additional_fields_section(unused_field_names):
     cols = st.columns(2) if len(unused_field_names) <= 6 else st.columns(3)
     for i, field in enumerate(unused_field_names):
         with cols[i % len(cols)]:
-            include = st.checkbox(f"{field}", key=f"additional_{field}")
+            checkbox_key = (
+                f"additional_{key_suffix}_{field}"
+                if key_suffix
+                else f"additional_{field}"
+            )
+            include = st.checkbox(f"{field}", key=checkbox_key)
             if include:
                 selected_additional_fields.append(field)
 
@@ -250,11 +255,15 @@ def load_data(
     target_alternate_schema,
     optional_field_schema,
     optional_field_alternate_schema,
+    key_suffix="",
 ):
     # Load file
     st.subheader("Upload File")
+    file_uploader_key = f"file_uploader_{key_suffix}" if key_suffix else None
     uploaded_file = st.file_uploader(
-        "Upload a TSV file", type=["csv", "tsv", "xlsx", "xls", "txt"]
+        "Upload a TSV file",
+        type=["csv", "tsv", "xlsx", "xls", "txt"],
+        key=file_uploader_key,
     )
     df, mapped_fields, selected_optional_fields, selected_additional_fields = (
         None,
@@ -264,31 +273,40 @@ def load_data(
     )
     if uploaded_file:
         df = load_csv(uploaded_file)
-        interactive_preview = st.toggle("Preview File")
+        preview_toggle_key = f"preview_toggle_{key_suffix}" if key_suffix else None
+        interactive_preview = st.toggle("Preview File", key=preview_toggle_key)
         if interactive_preview:
             st.write("Uploaded File Preview:")
             st.dataframe(df)
 
         # Required fields
         st.subheader("Required Fields")
+        required_key_suffix = f"{key_suffix}_required" if key_suffix else "required"
         mapped_fields, unused_field_names = field_mapping(
             df.columns.tolist(),
             target_schema,
             target_alternate_schema,
-            key_suffix="required",
+            key_suffix=required_key_suffix,
             is_required=True,
         )
-        # Optional fields
-        st.subheader("Optional Fields")
-        mapped_optional_fields, unused_field_names = field_mapping(
-            unused_field_names,
-            optional_field_schema,
-            optional_field_alternate_schema,
-            key_suffix="optional",
-            is_required=False,
-        )
+        if optional_field_schema:
+            # Optional fields
+            st.subheader("Optional Fields")
+            optional_key_suffix = f"{key_suffix}_optional" if key_suffix else "optional"
+            mapped_optional_fields, unused_field_names = field_mapping(
+                unused_field_names,
+                optional_field_schema,
+                optional_field_alternate_schema,
+                key_suffix=optional_key_suffix,
+                is_required=False,
+            )
+        else:
+            mapped_optional_fields = None
         # Additional fields
-        selected_additional_fields = additional_fields_section(unused_field_names)
+        additional_key_suffix = f"{key_suffix}_additional" if key_suffix else None
+        selected_additional_fields = additional_fields_section(
+            unused_field_names, key_suffix=additional_key_suffix
+        )
         # For output, set selected_optional_fields to the optional mapping result
         selected_optional_fields = mapped_optional_fields
 

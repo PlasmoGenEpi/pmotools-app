@@ -8,7 +8,6 @@ session_name = "library_sample_info"
 title = "library sample level metadata"
 
 
-# TODO: Allow plate position to be specified instead of row and col.
 class LibrarySampleMetadataPageMetadataPage:
     def __init__(
         self,

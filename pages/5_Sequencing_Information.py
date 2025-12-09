@@ -1,178 +1,322 @@
 import streamlit as st
+import pandas as pd
 from src.format_page import render_header
 
 
 class SeqInfoPage:
     def __init__(self):
-        self.seq_info = {}
+        self._initialize_session_state()
+
+    def _initialize_session_state(self):
+        """Initialize session state variables if they don't exist."""
+        if "seq_info" not in st.session_state:
+            st.session_state["seq_info"] = []
+
+    def _show_runs_count(self):
+        """Show current sequencing runs count."""
+        if st.session_state.get("seq_info"):
+            st.info(f"Current sequencing runs: {len(st.session_state['seq_info'])}")
+            st.info(
+                "To add another sequencing run, enter the information above and click the 'Add Sequencing Information' button again."
+            )
+
+    def _get_sequencing_info_name_input(self):
+        """Get sequencing information name - either from library_sample_info or manual entry."""
+        # Get unique sequencing info names from library_sample_info if available
+        suggested_names = []
+        if "library_sample_info" in st.session_state:
+            library_sample_info = st.session_state["library_sample_info"]
+            try:
+                # Handle DataFrame
+                if isinstance(library_sample_info, pd.DataFrame):
+                    if "sequencing_info_name" in library_sample_info.columns:
+                        suggested_names = sorted(
+                            library_sample_info["sequencing_info_name"]
+                            .dropna()
+                            .unique()
+                            .tolist()
+                        )
+                # Handle dict
+                elif isinstance(library_sample_info, dict):
+                    if "sequencing_info_name" in library_sample_info:
+                        seq_data = library_sample_info["sequencing_info_name"]
+                        if isinstance(seq_data, (list, pd.Series)):
+                            if isinstance(seq_data, pd.Series):
+                                suggested_names = sorted(
+                                    seq_data.dropna().unique().tolist()
+                                )
+                            else:
+                                suggested_names = sorted(
+                                    list(set([s for s in seq_data if s]))
+                                )
+                    else:
+                        # Check if values in dict are DataFrames with sequencing_info_name column
+                        for value in library_sample_info.values():
+                            if (
+                                isinstance(value, pd.DataFrame)
+                                and "sequencing_info_name" in value.columns
+                            ):
+                                suggested_names.extend(
+                                    value["sequencing_info_name"]
+                                    .dropna()
+                                    .unique()
+                                    .tolist()
+                                )
+                        suggested_names = sorted(list(set(suggested_names)))
+                # Handle list of dicts
+                elif isinstance(library_sample_info, list):
+                    seq_names = [
+                        item.get("sequencing_info_name")
+                        for item in library_sample_info
+                        if isinstance(item, dict) and item.get("sequencing_info_name")
+                    ]
+                    suggested_names = sorted(list(set(seq_names)))
+            except Exception:
+                # If extraction fails, just continue without suggestions
+                pass
+
+        # If we have suggested names, show a selectbox with option to enter custom
+        if suggested_names:
+            name_options = suggested_names + ["Enter custom name"]
+            selected_option = st.selectbox(
+                "Select sequencing information name or enter custom:",
+                name_options,
+                index=0,  # Default to first suggested name
+                help=f"Suggested names from library sample info: {', '.join(suggested_names)}",
+                key="seq_info_name_select",
+            )
+
+            if selected_option == "Enter custom name":
+                return st.text_input(
+                    "Enter sequencing information name:",
+                    help="A unique identifier for this sequencing info.",
+                    key="seq_info_name_text",
+                )
+            else:
+                return selected_option
+        else:
+            return st.text_input(
+                "Sequencing Information Name:",
+                help="A unique identifier for this sequencing info.",
+                key="seq_info_name_text",
+            )
 
     def add_sequencing_information(self):
+        """Add sequencing information section - one run at a time."""
         st.subheader("Add Sequencing Information")
+        self._show_runs_count()
 
-        self.seq_info["sequencing_info_name"] = st.text_input(
-            "Sequencing Information Name:",
-            help="A unique identifier for this sequencing info.",
-        )
-        seq_platform = st.text_input(
+        seq_info = {}
+
+        seq_info["sequencing_info_name"] = self._get_sequencing_info_name_input()
+        seq_info["seq_platform"] = st.text_input(
             "Sequencing Platform:",
             help="The sequencing platform used to sequence the run, e.g. ILLUMINA, Illumina MiSeq.",
+            key="seq_platform",
         )
-        seq_instrument_model = st.text_input(
+        seq_info["seq_instrument_model"] = st.text_input(
             "Sequencing Instrument Model:",
             help="The sequencing instrument model used to sequence the run, e.g. Illumina MiSeq.",
+            key="seq_instrument_model",
         )
-        library_layout = st.text_input(
+        seq_info["library_layout"] = st.text_input(
             "Library Layout:",
             help="Specify the configuration of reads, e.g. paired-end.",
+            key="library_layout",
         )
-        library_strategy = st.text_input(
+        seq_info["library_strategy"] = st.text_input(
             "Library Strategy:",
             help="The strategy used to prepare the library, e.g. WGS, WES, amplicon, etc.",
+            key="library_strategy",
         )
-        library_source = st.text_input(
+        seq_info["library_source"] = st.text_input(
             "Library Source:",
             help="The source of the library, e.g. DNA, RNA, etc.",
+            key="library_source",
         )
-        library_selection = st.text_input(
+        seq_info["library_selection"] = st.text_input(
             "Library Selection:",
             help="The selection method used to prepare the library, e.g. PCR, etc.",
-        )
-        # Optional fields - each field is individually optional
-        st.subheader("Optional Fields")
-        st.write(
-            "The following fields are optional. Fill in only the ones you have information for."
+            key="library_selection",
         )
 
-        library_kit = st.text_input(
+        # Optional fields
+        st.write("**Optional Fields:**")
+        seq_info["library_kit"] = st.text_input(
             "Library Kit (Optional):",
-            help="Name, version, and applicable cell or cycle numbers for the kit used to prepare libraries and load cells or chips for sequencing. If possible, include a part number, e.g. MiSeq Reagent Kit v3 (150-cycle), MS-102-3001.",
+            help="Name, version, and applicable cell or cycle numbers for the kit used to prepare libraries and load cells or chips for sequencing.",
+            key="library_kit",
         )
-        library_screen = st.text_input(
+        seq_info["library_screen"] = st.text_input(
             "Library Screen (Optional):",
-            help="Describe enrichment, screening, or normalization methods applied during amplification or library preparation, e.g. size selection 390bp, diluted to 1 ng DNA/sample.",
+            help="Describe enrichment, screening, or normalization methods applied during amplification or library preparation.",
+            key="library_screen",
         )
-        nucl_acid_amp = st.text_input(
+        seq_info["nucl_acid_amp"] = st.text_input(
             "Nucleic Acid Amplification (Optional):",
             help="Link to a reference or kit that describes the enzymatic amplification of nucleic acids.",
+            key="nucl_acid_amp",
         )
-        nucl_acid_ext = st.text_input(
+        seq_info["nucl_acid_ext"] = st.text_input(
             "Nucleic Acid Extraction (Optional):",
             help="Link to a reference or kit that describes the recovery of nucleic acids from the sample.",
+            key="nucl_acid_ext",
         )
-        nucl_acid_ext_date = st.date_input(
+        seq_info["nucl_acid_ext_date"] = st.date_input(
             "Nucleic Acid Extraction Date (Optional):",
             value=None,
             help="The date of the nucleoacide extraction.",
+            key="nucl_acid_ext_date",
         )
-        nucl_acid_amp_date = st.date_input(
+        seq_info["nucl_acid_amp_date"] = st.date_input(
             "Nucleic Acid Amplification Date (Optional):",
             value=None,
             help="The date of the nucleoacide amplification.",
+            key="nucl_acid_amp_date",
         )
-        pcr_cond = st.text_input(
+        seq_info["pcr_cond"] = st.text_input(
             "PCR Conditions (Optional):",
             help="The method/conditions for PCR, List PCR cycles used to amplify the target.",
+            key="pcr_cond",
         )
-        seq_center = st.text_input(
+        seq_info["seq_center"] = st.text_input(
             "Sequencing Center (Optional):",
             help="Name of facility where sequencing was performed (lab, core facility, or company).",
+            key="seq_center",
         )
-        seq_date = st.date_input(
+        seq_info["seq_date"] = st.date_input(
             "Sequencing Date (Optional):",
             value=None,
             help="The date of sequencing, should be YYYY-MM or YYYY-MM-DD.",
+            key="seq_date",
         )
 
-        # Store the values in seq_info
-        self.seq_info["sequencing_info_name"] = self.seq_info["sequencing_info_name"]
-        self.seq_info["seq_platform"] = seq_platform
-        self.seq_info["seq_instrument_model"] = seq_instrument_model
+        # Convert date objects to strings if they exist
+        if seq_info["seq_date"] is not None:
+            seq_info["seq_date"] = str(seq_info["seq_date"])
+        if seq_info["nucl_acid_ext_date"] is not None:
+            seq_info["nucl_acid_ext_date"] = str(seq_info["nucl_acid_ext_date"])
+        if seq_info["nucl_acid_amp_date"] is not None:
+            seq_info["nucl_acid_amp_date"] = str(seq_info["nucl_acid_amp_date"])
 
-        # Only store date values if they are not None
-        if seq_date is not None:
-            self.seq_info["seq_date"] = str(seq_date)
-        if nucl_acid_ext_date is not None:
-            self.seq_info["nucl_acid_ext_date"] = str(nucl_acid_ext_date)
-        if nucl_acid_amp_date is not None:
-            self.seq_info["nucl_acid_amp_date"] = str(nucl_acid_amp_date)
+        # Remove empty optional fields
+        cleaned_seq_info = {
+            k: v for k, v in seq_info.items() if v is not None and v != ""
+        }
 
-        self.seq_info["nucl_acid_ext"] = nucl_acid_ext
-        self.seq_info["nucl_acid_amp"] = nucl_acid_amp
-        self.seq_info["pcr_cond"] = pcr_cond
-        self.seq_info["library_screen"] = library_screen
-        self.seq_info["library_layout"] = library_layout
-        self.seq_info["library_kit"] = library_kit
-        self.seq_info["library_strategy"] = library_strategy
-        self.seq_info["library_source"] = library_source
-        self.seq_info["library_selection"] = library_selection
-        self.seq_info["seq_center"] = seq_center
+        return cleaned_seq_info
 
-    def add_additional_fields(self):
-        st.title("Add Additional Fields")
+    def _validate_sequencing_info(self, seq_info):
+        """Validate that all required fields are filled."""
+        errors = []
+        required_fields = [
+            "sequencing_info_name",
+            "seq_platform",
+            "seq_instrument_model",
+            "library_layout",
+            "library_strategy",
+            "library_source",
+            "library_selection",
+        ]
 
-        # Add a toggle to enable additional fields
-        add_fields_toggle = st.checkbox("Add Additional Fields")
+        missing_fields = []
+        for field in required_fields:
+            if not seq_info.get(field) or not str(seq_info[field]).strip():
+                missing_fields.append(field)
 
-        if add_fields_toggle:
-            st.write("Fill in the additional fields below:")
-            number_inputs = st.number_input(
-                "Number of additional inputs", min_value=0, value=1
-            )
-            # Inputs for names and values
-            cols = st.columns(2)
-            with cols[0]:
-                field_names = [
-                    st.text_input(f"Field Name {i}", key=f"field_name_{i}")
-                    for i in range(number_inputs)
-                ]
-            with cols[1]:
-                field_values = [
-                    st.text_input(f"Value {i}", key=f"value_{i}")
-                    for i in range(number_inputs)
-                ]
+        if missing_fields:
+            if len(missing_fields) == 1:
+                errors.append(f"Missing required field: {missing_fields[0]}.")
+            else:
+                errors.append(f"Missing required fields: {', '.join(missing_fields)}.")
 
-            # Save the additional fields
-            for i in range(number_inputs):
-                self.seq_info[field_names[i]] = field_values[i]
+        return len(errors) == 0, errors
 
-    def transform_and_save_data(self):
-        seq_info = self.seq_info
-        st.subheader("Save Data")
-        if st.button("Save Data"):
-            # Only require the essential fields - all others are optional
-            sequencing_info = []
-            if all(
-                [
-                    seq_info.get("sequencing_info_name"),
-                    seq_info.get("seq_platform"),
-                    seq_info.get("seq_instrument_model"),
-                    seq_info.get("library_layout"),
-                    seq_info.get("library_strategy"),
-                    seq_info.get("library_source"),
-                    seq_info.get("library_selection"),
-                ]
-            ):
-                sequencing_info.append(seq_info)
-                # Remove empty optional fields
-                sequencing_info = [
-                    {k: v for k, v in info.items() if v is not None and v != ""}
-                    for info in sequencing_info
-                ]
-                st.session_state["seq_info"] = sequencing_info
+    def _save_sequencing_info(self, seq_info):
+        """Save sequencing information to session state."""
+        if st.button("Add Sequencing Information", key="save_seq_info"):
+            is_valid, errors = self._validate_sequencing_info(seq_info)
+
+            if not is_valid:
+                for error in errors:
+                    st.error(error)
+                st.warning("Please fill in all required fields before saving.")
+            else:
+                # Append to existing list in session state
+                st.session_state["seq_info"].append(seq_info)
                 st.success("Sequencing information saved successfully!")
+                st.info(f"Total sequencing runs: {len(st.session_state['seq_info'])}")
+                st.rerun()
+
+    def _remove_sequencing_runs(self):
+        """Allow removal of sequencing runs."""
+        if not st.session_state.get("seq_info"):
+            return
+
+        st.subheader("Remove Sequencing Runs")
+        remove_toggle = st.checkbox(
+            "Remove Existing Sequencing Runs",
+            help="Check this box to remove existing sequencing runs",
+            key="remove_seq_runs_checkbox",
+        )
+
+        if remove_toggle:
+            seq_info_list = st.session_state["seq_info"]
+            if not seq_info_list:
+                st.warning("No sequencing runs available to remove.")
+                return
+
+            # Create options for removal
+            remove_options = []
+            for idx, seq_info in enumerate(seq_info_list):
+                name = seq_info.get("sequencing_info_name", f"Run {idx+1}")
+                remove_options.append(f"{idx}: {name}")
+
+            selected_to_remove = st.multiselect(
+                "Select sequencing runs to remove:",
+                options=remove_options,
+                help="Select one or more sequencing runs to remove",
+                key="select_seq_runs_to_remove",
+            )
+
+            if selected_to_remove and st.button(
+                "Remove Selected Runs",
+                type="secondary",
+                key="remove_selected_seq_runs",
+            ):
+                # Extract indices and remove in reverse order
+                indices_to_remove = sorted(
+                    [int(opt.split(":")[0]) for opt in selected_to_remove], reverse=True
+                )
+
+                for idx in indices_to_remove:
+                    if 0 <= idx < len(st.session_state["seq_info"]):
+                        removed = st.session_state["seq_info"].pop(idx)
+                        name = removed.get("sequencing_info_name", f"Run {idx+1}")
+                        st.success(f"Removed sequencing run: {name}")
+
+                st.info(
+                    f"Remaining sequencing runs: {len(st.session_state['seq_info'])}"
+                )
+                st.rerun()
 
     def display_info(self):
-        if "seq_info" in st.session_state:
+        """Display preview of sequencing information."""
+        if st.session_state.get("seq_info"):
             st.subheader("Preview Sequencing Information")
             preview_toggle = st.toggle("Preview Sequencing Information")
             if preview_toggle:
-                st.write("Current Sequencing Information:")
-                st.json(st.session_state["seq_info"])
+                st.write(f"Total sequencing runs: {len(st.session_state['seq_info'])}")
+                for idx, seq_info in enumerate(st.session_state["seq_info"]):
+                    st.write(f"**Sequencing Run {idx+1}:**")
+                    st.json(seq_info)
+                    if idx < len(st.session_state["seq_info"]) - 1:
+                        st.write("---")
 
     def run(self):
-        self.add_sequencing_information()
-        self.add_additional_fields()
-        self.transform_and_save_data()
+        seq_info = self.add_sequencing_information()
+        self._save_sequencing_info(seq_info)
+        self._remove_sequencing_runs()
         self.display_info()
 
 
@@ -181,4 +325,8 @@ if __name__ == "__main__":
     render_header()
     st.subheader("Sequencing Information", divider="gray")
     app = SeqInfoPage()
+    if "seq_info" in st.session_state and st.session_state["seq_info"]:
+        st.success(
+            f"You have {len(st.session_state['seq_info'])} sequencing run(s) saved."
+        )
     app.run()

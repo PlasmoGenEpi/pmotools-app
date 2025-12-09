@@ -8,11 +8,10 @@ check_dict = {
     "panel_info": "Panel Information",
     "specimen_info": "Specimen Level Metadata",
     "library_sample_info": "Library Sample Level Metadata",
-    "mhap_data": "Microhaplotype Information",
-    # "demultiplexed_data": "Demultiplexed Samples",
+    "microhaplotype_info": "Microhaplotype Information",
     "seq_info": "Sequencing Information",
-    "bioinfo_methods_list": "Bioinformatics Information",
-    "bioinfo_run_infos": "Bioinformatics Information",
+    "bioinfo_run_infos": "Bioinformatics Runs Information",
+    "read_counts_per_stage": "Read Counts per Stage",
 }
 
 
@@ -24,7 +23,7 @@ def check_all(check_dict):
     all_passed = True
     for check_key, source_page in check_dict.items():
         if check_key in st.session_state:
-            st.success(f"Data from {source_page} tab has been successfully" " loaded")
+            st.success(f"Data from {source_page} tab has been successfully loaded.")
         else:
             st.error(
                 f"Data from {source_page} tab not found. Please fill out"
@@ -43,7 +42,10 @@ def merge_data():
     # Get bioinformatics methods and runs
     bioinfo_methods = st.session_state.get("bioinfo_methods_list", [])
     bioinfo_runs = st.session_state.get("bioinfo_run_infos", [])
-
+    if "read_counts_per_stage" in st.session_state:
+        read_counts_per_stage = st.session_state["read_counts_per_stage"]
+    else:
+        read_counts_per_stage = None
     if st.button("Merge Data"):
         try:
             st.session_state["formatted_pmo"] = merge_to_pmo(
@@ -51,10 +53,11 @@ def merge_data():
                 library_sample_info=st.session_state["library_sample_info"],
                 sequencing_info=st.session_state["seq_info"],
                 panel_info=panel_info,
-                mhap_info=st.session_state["mhap_data"],
+                mhap_info=st.session_state["microhaplotype_info"],
                 bioinfo_method_info=bioinfo_methods,
                 bioinfo_run_info=bioinfo_runs,
                 project_info=st.session_state["project_info"],
+                read_counts_by_stage_info=read_counts_per_stage,
             )
             st.success("Data merged successfully!")
         except Exception as e:

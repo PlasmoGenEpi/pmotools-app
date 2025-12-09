@@ -115,29 +115,34 @@
         ],
         "required_alternatives": {
             "specimen_name": [
+                "specimen_name",
+                "specimen_id",
                 "sample_id",
                 "bio_id",
-                "specimen_name",
                 "sample_accession"
             ],
             "specimen_taxon_id": [
+                "specimen_taxon_id",
                 "taxon_id",
                 "species_id",
                 "organism_id",
                 "sample_taxon_id"
             ],
             "host_taxon_id": [
+                "host_taxon_id",
                 "taxon_id",
                 "species_id",
                 "individual_taxon_id",
                 "sample_taxon_id"
             ],
             "collection_date": [
+                "collection_date",
                 "date_of_collection",
                 "sampling_date",
                 "gathering_date"
             ],
             "collection_country": [
+                "collection_country",
                 "country_of_collection",
                 "sampling_country",
                 "origin_country",
@@ -146,6 +151,7 @@
                 "geo_admin0"
             ],
             "project_name": [
+                "project_name",
                 "study_name",
                 "research_project",
                 "experiment_name"
@@ -161,20 +167,24 @@
             "geo_admin1",
             "geo_admin2",
             "geo_admin3",
+            "gravid",
+            "gravidity",
+            "has_travel_out_six_month",
             "host_age",
             "host_sex",
             "host_subject_id",
             "lat_lon",
             "parasite_density",
             "parasite_density_method",
-            "specimen_collect_device",
-            "specimen_comments",
-            "specimen_store_loc",
+            "specimen_accession",
             "storage_plate_col",
             "storage_plate_name",
             "storage_plate_row",
             "storage_plate_position",
-            "travel_out_six_month",
+            "specimen_collect_device",
+            "specimen_comments",
+            "specimen_store_loc",
+            "specimen_type",
             "treatment_status"
         ],
         "optional_alternatives": {
@@ -182,72 +192,134 @@
                 "alternate identifiers",
                 "alternate_IDs"
             ],
-            "blood_meal": [],
-            "drug_usage": [
-                "treatment"
+            "blood_meal": [
+                "blood_meal",
+                "blood_meal_status"
             ],
-            "env_broad_scale": [],
-            "env_local_scale": [],
-            "env_medium": [],
+            "drug_usage": [
+                "drug_usage",
+                "drug_usage_status",
+                "treatment",
+                "treatment_status",
+                "drug_usage_status",
+                "treatment_status"
+            ],
+            "env_broad_scale": [
+                "environmental_broad_scale"
+            ],
+            "env_local_scale": [
+                "environmental_local_scale"
+            ],
+            "env_medium": [
+                "environmental_medium"
+            ],
             "geo_admin1": [
+                "geo_admin1",
                 "Region",
                 "State",
                 "District"
             ],
             "geo_admin2": [
+                "geo_admin2",
                 "District",
                 "county"
             ],
             "geo_admin3": [
+                "geo_admin3",
                 "City",
                 "health_facility"
             ],
-            "host_age": [],
+            "gravid": [
+                "gravid",
+                "pregnant",
+                "pregnancy_status"
+            ],
+            "gravidity": [
+                "gravidity",
+                "n_pregnancies",
+                "n_pregnancies_at_collection"
+            ],
+            "has_travel_out_six_month": [
+                "has_travel_out_six_month",
+                "travel",
+                "any_trips",
+                "travel_history"
+            ],
+            "host_age": [
+                "age",
+                "age_at_collection"
+            ],
             "host_sex": [
+                "host_sex",
                 "male",
                 "female"
             ],
             "host_subject_id": [
+                "host_subject_id",
                 "person",
                 "host_id",
                 "participant"
             ],
             "lat_lon": [
+                "lat_lon",
                 "latitude_longitude"
             ],
             "parasite_density": [
+                "parasite_density",
                 "parasitemia",
                 "parasitaemia",
                 "parasites/ul"
             ],
-            "parasite_density_method": [],
+            "parasite_density_method": [
+                "parasite_density_method"
+            ],
+            "specimen_accession": [
+                "sample_accession",
+                "SRR",
+                "SRA_accession"
+            ],
             "specimen_collect_device": [
+                "specimen_collect_device",
                 "instrument",
                 "collection_method",
                 "DBS"
             ],
             "specimen_comments": [
+                "specimen_comments",
                 "info",
                 "extra_info"
             ],
             "specimen_store_loc": [
+                "specimen_store_loc",
                 "storage",
                 "sample_location"
             ],
+            "specimen_type": [
+                "specimen_type",
+                "sample_type"
+            ],
             "storage_plate_col": [
+                "storage_plate_col",
                 "column"
             ],
             "storage_plate_name": [
+                "storage_plate_name",
                 "plate"
             ],
             "storage_plate_row": [
+                "storage_plate_row",
                 "row"
             ],
-            "storage_plate_position": [],
+            "storage_plate_position": [
+                "storage_plate_position",
+                "position"
+            ],
             "travel_out_six_month": [
+                "travel_out_six_month",
                 "travel_history"
             ],
             "treatment_status": [
+                "treatment_status",
                 "treated"
             ]
         }
@@ -262,11 +334,13 @@
         "required_alternatives": {
             "library_sample_name": [
                 "library_sample_id",
+                "library_sample_name",
                 "sample_name",
                 "library_id",
                 "experiment_sample_id"
             ],
             "sequencing_info_name": [
+                "sequencing_info_name",
                 "sequencing_info_id",
                 "seq_info_id",
                 "sequencing_id",
@@ -275,6 +349,7 @@
                 "seq_run"
             ],
             "specimen_name": [
+                "specimen_name",
                 "specimen_id",
                 "sample_id",
                 "bio_id",
@@ -283,32 +358,71 @@
             ],
             "panel_name": [
                 "panel_id",
+                "panel_name",
                 "test_panel_id",
                 "assay_id",
                 "panel"
             ]
         },
         "optional": [
-            "accession",
+            "alternate_identifiers",
+            "experiment_accession",
+            "fastqs_loc",
             "library_prep_plate_name",
             "library_prep_plate_col",
-            "library_prep_plate_row"
+            "library_prep_plate_row",
+            "library_prep_plate_position",
+            "parasite_density",
+            "parasite_density_method",
+            "run_accession"
         ],
         "optional_alternatives": {
-            "accession": [
+            "alternate_identifiers": [
+                "alternate identifiers",
+                "alternate_IDs"
+            ],
+            "experiment_accession": [
+                "experiment_accession",
                 "Accession information"
             ],
+            "fastqs_loc": [
+                "fastqs_loc",
+                "fastqs_location",
+                "fastq_files"
+            ],
             "library_prep_plate_name": [
+                "library_prep_plate_name",
                 "plate_name",
                 "name_of_plate"
             ],
             "library_prep_plate_col": [
+                "library_prep_plate_col",
                 "plate_col",
                 "plate_column"
             ],
             "library_prep_plate_row": [
+                "library_prep_plate_row",
                 "plate_row",
                 "row_of_plate"
+            ],
+            "library_prep_plate_position": [
+                "library_prep_plate_position",
+                "plate_position",
+                "position_on_plate"
+            ],
+            "parasite_density": [
+                "parasite_density",
+                "parasites/ul"
+            ],
+            "parasite_density_method": [
+                "parasite_density_method",
+                "method"
+            ],
+            "run_accession": [
+                "accession",
+                "run_accession",
+                "run_id",
+                "run_accession_number"
             ]
         }
     },
@@ -321,12 +435,14 @@
         ],
         "required_alternatives": {
             "library_sample_name": [
+                "library_sample_name",
                 "library_sample_id",
                 "sample_id",
                 "biosample_id",
                 "specimen_id"
             ],
             "target_name": [
+                "target_name",
                 "target_id",
                 "locus",
                 "marker_id",
@@ -335,6 +451,7 @@
                 "p_targetName"
             ],
             "seq": [
+                "seq",
                 "asv",
                 "amplicon_sequence_variant",
                 "otu",
@@ -344,6 +461,7 @@
                 "sequence"
             ],
             "reads": [
+                "reads",
                 "read_count",
                 "sequence_reads",
                 "read_depth",
@@ -370,41 +488,51 @@
         ],
         "optional_alternatives": {
             "umis": [
+                "umis",
                 "umi",
                 "unique_molecular_identifiers"
             ],
             "chrom": [
+                "chrom",
                 "chromosome",
                 "chr"
             ],
             "start": [
+                "start",
                 "start_position",
                 "genomic_start"
             ],
             "end": [
+                "end",
                 "end_position",
                 "genomic_end"
             ],
             "ref_seq": [
+                "ref_seq",
                 "reference_sequence",
                 "reference_seq"
             ],
             "strand": [
+                "strand",
                 "strand_orientation"
             ],
             "alt_annotations": [
+                "alt_annotations",
                 "alternative_annotations",
                 "annotations"
             ],
             "masking_seq_start": [
+                "masking_seq_start",
                 "masking_start",
                 "mask_start"
             ],
             "masking_seq_segment_size": [
+                "masking_seq_segment_size",
                 "masking_segment_size",
                 "mask_segment_size"
             ],
             "masking_replacement_size": [
+                "masking_replacement_size",
                 "masking_replacement",
                 "mask_replacement"
             ],
@@ -479,5 +607,60 @@
             "denoising_method",
             "tar_amp_bioinformatics_info_id"
         ]
+    },
+    "read_counts_perstage": {
+        "raw_counts":{
+            "required": [
+                "library_sample_name",
+                "total_raw_count"
+            ],
+            "required_alternatives":{
+                "library_sample_name": [
+                    "library_sample_id",
+                    "sample_id",
+                    "biosample_id",
+                    "specimen_id"
+                ],
+                "total_raw_count": [
+                    "read_count",
+                    "sequence_reads",
+                    "read_depth",
+                    "demuliplexed",
+                    "demuliplexed_read_count"
+                ]
+            }
+        },
+        "reads_by_stage":{
+            "required": [
+                "library_sample_name",
+                "target_name",
+                "stage",
+                "read_count"
+            ],
+            "required_alternatives": {
+                "library_sample_name": [
+                    "library_sample_id",
+                    "sample_id",
+                    "biosample_id"
+                ],
+                "target_name": [
+                    "locus",
+                    "marker_id",
+                    "amplicon",
+                    "locus_id"
+                ],
+                "stage": [
+                    "stage",
+                    "pipeline_stage"
+                ],
+                "read_count": [
+                    "read_count",
+                    "sequence_reads",
+                    "read_depth",
+                    "demuliplexed",
+                    "demuliplexed_read_count"
+                ]
+            }
+        }
     }
 }
