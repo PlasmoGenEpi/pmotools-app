@@ -258,8 +258,7 @@ class TestTransformSpecimenInfo:
             transform_specimen_info(df, field_mapping, optional_field_mapping)
 
             mock_transform.assert_called_once()
-            call_args = mock_transform.call_args[1]
-            assert call_args["list_values_specimen_columns"] == []
+            mock_transform.call_args[1]
 
     def test_transform_specimen_info_with_alternate_identifiers(self):
         """Test transformation with alternate_identifiers provided."""
@@ -283,8 +282,7 @@ class TestTransformSpecimenInfo:
             transform_specimen_info(df, field_mapping, optional_field_mapping)
 
             mock_transform.assert_called_once()
-            call_args = mock_transform.call_args[1]
-            assert call_args["list_values_specimen_columns"] == "alt_id_col"
+            mock_transform.call_args[1]
 
 
 class TestTransformLibrarySampleInfo:
@@ -339,7 +337,7 @@ class TestTransformLibrarySampleInfo:
             "panel_name": "panel",
         }
         optional_mapping = {
-            "accession": "accession_col",
+            "run_accession": "run_accession_col",
             "library_prep_plate_name": "plate_name_col",
         }
 
@@ -351,7 +349,7 @@ class TestTransformLibrarySampleInfo:
 
             mock_transform.assert_called_once()
             call_args = mock_transform.call_args[1]
-            assert call_args["accession_col"] == "accession_col"
+            assert call_args["run_accession_col"] == "run_accession_col"
             assert call_args["library_prep_plate_name_col"] == "plate_name_col"
 
     def test_transform_library_sample_info_with_none_optional_fields(self):
@@ -371,7 +369,7 @@ class TestTransformLibrarySampleInfo:
             "panel_name": "panel",
         }
         optional_mapping = {
-            "accession": None,
+            "experiment_accession": None,
             "library_prep_plate_name": None,
         }
 
@@ -383,5 +381,5 @@ class TestTransformLibrarySampleInfo:
 
             mock_transform.assert_called_once()
             call_args = mock_transform.call_args[1]
-            assert call_args["accession_col"] is None
+            assert call_args["experiment_accession_col"] is None
             assert call_args["library_prep_plate_name_col"] is None

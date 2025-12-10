@@ -1,10 +1,12 @@
 import streamlit as st
 import json
 import os
+import pandas as pd
 from src.field_matcher import load_data
 from src.transformer import transform_panel_info
 from src.format_page import render_header
 from src.utils import load_schema
+from pmotools.pmo_builder.panel_information_to_pmo import merge_panel_info_dicts
 
 session_name = "panel_info"
 title = "panel information"
@@ -59,17 +61,115 @@ class PanelPage:
         if use_past:
             saved_panels = self.panel_manager.get_saved_panels()
             if saved_panels:
-                selected_panel = st.selectbox("Select a saved panel:", saved_panels)
-                if st.button("Load Panel"):
-                    panel_data = self.panel_manager.load_panel(selected_panel)
-                    st.session_state["panel_info"] = panel_data
-                    st.success(f"Loaded panel: {selected_panel}")
+                selected_panels = st.multiselect(
+                    "Select saved panel(s) to load:",
+                    saved_panels,
+                    help="Select one or more panels. If multiple are selected, they will be merged together.",
+                )
+                if st.button("Load Panel(s)"):
+                    if not selected_panels:
+                        st.warning("Please select at least one panel to load.")
+                    elif len(selected_panels) == 1:
+                        # Single panel - just load it
+                        panel_data = self.panel_manager.load_panel(selected_panels[0])
+                        st.session_state["panel_info"] = panel_data
+                        st.success(f"Loaded panel: {selected_panels[0]}")
+                    else:
+                        # Multiple panels - merge them
+                        if merge_panel_info_dicts is None:
+                            st.error(
+                                "The merge_panel_info_dicts function could not be imported from pmotools. "
+                                "Please ensure pmotools is installed and the function is available."
+                            )
+                        else:
+                            try:
+                                # Load all selected panels
+                                panel_dicts = [
+                                    self.panel_manager.load_panel(panel_name)
+                                    for panel_name in selected_panels
+                                ]
+                                # Merge the panels
+                                merged_panel_data = merge_panel_info_dicts(panel_dicts)
+                                st.session_state["panel_info"] = merged_panel_data
+                                st.success(
+                                    f"Successfully merged {len(selected_panels)} panel(s): {', '.join(selected_panels)}"
+                                )
+                            except Exception as e:
+                                st.error(f"Error merging panels: {e}")
             else:
                 st.warning("No saved panels found.")
 
     def panel_id_input(self):
-        st.subheader("Panel ID")
-        return st.text_input("Enter panel ID:", help="Identifier for the panel.")
+        st.subheader("Panel Name")
+
+        # Get unique panel names from library_sample_info if available
+        suggested_panels = []
+        if "library_sample_info" in st.session_state:
+            library_sample_info = st.session_state["library_sample_info"]
+            try:
+                # Handle DataFrame
+                if isinstance(library_sample_info, pd.DataFrame):
+                    if "panel_name" in library_sample_info.columns:
+                        suggested_panels = sorted(
+                            library_sample_info["panel_name"].dropna().unique().tolist()
+                        )
+                # Handle dict (could be a dict representation of DataFrame or nested structure)
+                elif isinstance(library_sample_info, dict):
+                    # Check if it's a dict with 'panel_name' as a key containing a list/Series
+                    if "panel_name" in library_sample_info:
+                        panel_data = library_sample_info["panel_name"]
+                        if isinstance(panel_data, (list, pd.Series)):
+                            if isinstance(panel_data, pd.Series):
+                                suggested_panels = sorted(
+                                    panel_data.dropna().unique().tolist()
+                                )
+                            else:
+                                suggested_panels = sorted(
+                                    list(set([p for p in panel_data if p]))
+                                )
+                    # Check if values in dict are DataFrames with panel_name column
+                    else:
+                        for value in library_sample_info.values():
+                            if (
+                                isinstance(value, pd.DataFrame)
+                                and "panel_name" in value.columns
+                            ):
+                                suggested_panels.extend(
+                                    value["panel_name"].dropna().unique().tolist()
+                                )
+                        suggested_panels = sorted(list(set(suggested_panels)))
+                # Handle list of dicts
+                elif isinstance(library_sample_info, list):
+                    panel_names = [
+                        item.get("panel_name")
+                        for item in library_sample_info
+                        if isinstance(item, dict) and item.get("panel_name")
+                    ]
+                    suggested_panels = sorted(list(set(panel_names)))
+            except Exception:
+                # If extraction fails, just continue without suggestions
+                pass
+
+        # If we have suggested panels, show a selectbox with option to enter custom
+        if suggested_panels:
+            panel_options = suggested_panels + ["Enter custom panel name"]
+            selected_option = st.selectbox(
+                "Select panel name or enter custom:",
+                panel_options,
+                index=0,  # Default to first panel
+                help=f"Suggested panel names from library sample info: {', '.join(suggested_panels)}",
+            )
+
+            if selected_option == "Enter custom panel name":
+                return st.text_input(
+                    "Enter panel name:", help="Identifier name for the panel."
+                )
+            else:
+                return selected_option
+        else:
+            return st.text_input(
+                "Enter panel name:", help="Identifier name for the panel."
+            )
 
     def add_genome_information(self):
         st.subheader("Add Genome Information")
@@ -99,21 +199,42 @@ class PanelPage:
         selected_optional_fields,
         selected_additional_fields,
     ):
-        if (
-            all(
-                [
-                    panel_ID,
-                    field_mapping,
-                    genome_info["name"],
-                    genome_info["taxon_id"],
-                    genome_info["genome_version"],
-                    genome_info["url"],
-                ]
-            )
-            and selected_optional_fields != "Error"
-        ):
-            st.subheader("Transform Data")
-            if st.button("Transform Data"):
+        st.subheader("Transform Data")
+        if st.button("Transform Data"):
+            # Validate required fields
+            errors = []
+
+            if not panel_ID or not panel_ID.strip():
+                errors.append("Panel ID is required.")
+
+            if not field_mapping:
+                errors.append(
+                    "Field mapping is required. Please upload a file and map the fields."
+                )
+
+            if not genome_info.get("name") or not genome_info["name"].strip():
+                errors.append("Genome name is required.")
+
+            if not genome_info.get("taxon_id") or not genome_info["taxon_id"].strip():
+                errors.append("Taxon ID is required.")
+
+            if (
+                not genome_info.get("genome_version")
+                or not genome_info["genome_version"].strip()
+            ):
+                errors.append("Genome version is required.")
+
+            if not genome_info.get("url") or not genome_info["url"].strip():
+                errors.append("Genome URL is required.")
+
+            if selected_optional_fields == "Error":
+                errors.append("There was an error with the optional fields selection.")
+
+            if errors:
+                for error in errors:
+                    st.error(error)
+            else:
+                # All validations passed, proceed with transformation
                 transformed_df = transform_panel_info(
                     df,
                     panel_ID,
@@ -122,7 +243,6 @@ class PanelPage:
                     selected_optional_fields,
                     selected_additional_fields,
                 )
-                # json_data = json.dumps(transformed_df, indent=4)
                 st.session_state["panel_info"] = transformed_df
                 try:
                     self.panel_manager.save_panel(panel_ID, transformed_df)

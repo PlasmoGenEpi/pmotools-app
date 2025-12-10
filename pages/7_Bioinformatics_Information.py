@@ -2,12 +2,115 @@ import streamlit as st
 from src.format_page import render_header
 
 
-class BioInfoPage:
-    # Constants
+class ValidationHelper:
+    """Helper class for validation logic."""
+
     REQUIRED_FIELDS = ["program", "program_version"]
 
+    @staticmethod
+    def check_method_required_fields(method_dict, fields=None):
+        """Check if required fields are present and not empty."""
+        if fields is None:
+            fields = ValidationHelper.REQUIRED_FIELDS
+
+        missing_fields = []
+        for field in fields:
+            if (
+                field not in method_dict.keys()
+                or not method_dict[field]
+                or method_dict[field].strip() == ""
+            ):
+                missing_fields.append(field)
+
+        return (True, []) if not missing_fields else (False, missing_fields)
+
+    @staticmethod
+    def validate_runs(bioinfo_run_vals, methods_list):
+        """Validate bioinformatics runs."""
+        if not methods_list:
+            return False, [
+                "No bioinformatics methods available. Please add at least one bioinformatics method before saving run information."
+            ]
+
+        missing_names = []
+        missing_methods = []
+        invalid_methods = []
+        methods_count = len(methods_list)
+
+        for i, run_val in enumerate(bioinfo_run_vals):
+            run_name = run_val.get("bioinformatics_run_name", "")
+            if not run_name or not run_name.strip():
+                missing_names.append(i + 1)
+
+            methods_id = run_val.get("bioinformatics_methods_id")
+            if methods_id is None:
+                missing_methods.append(i + 1)
+            elif not (0 <= methods_id < methods_count):
+                invalid_methods.append(i + 1)
+
+        errors = []
+        if missing_names:
+            if len(missing_names) == 1:
+                errors.append(f"Run {missing_names[0]} is missing a required run name.")
+            else:
+                errors.append(
+                    f"Runs {', '.join(map(str, missing_names))} are missing required run names."
+                )
+
+        if missing_methods:
+            if len(missing_methods) == 1:
+                errors.append(
+                    f"Run {missing_methods[0]} is missing a required bioinformatics methods ID."
+                )
+            else:
+                errors.append(
+                    f"Runs {', '.join(map(str, missing_methods))} are missing required bioinformatics methods IDs."
+                )
+
+        if invalid_methods:
+            if len(invalid_methods) == 1:
+                errors.append(
+                    f"Run {invalid_methods[0]} has an invalid bioinformatics methods ID."
+                )
+            else:
+                errors.append(
+                    f"Runs {', '.join(map(str, invalid_methods))} have invalid bioinformatics methods IDs."
+                )
+
+        return len(errors) == 0, errors
+
+    @staticmethod
+    def validate_methods(bioinfo_method_infos):
+        """Validate all bioinformatics methods."""
+        methods_validation = {}
+        all_methods_valid = True
+        method_count = 0
+
+        if "methods" in bioinfo_method_infos.keys():
+            for method_data in bioinfo_method_infos["methods"]:
+                (
+                    method_valid,
+                    method_missing,
+                ) = ValidationHelper.check_method_required_fields(method_data)
+                methods_validation[method_count] = (method_valid, method_missing)
+                method_count += 1
+                if not method_valid:
+                    all_methods_valid = False
+
+        if method_count == 0:
+            all_methods_valid = False
+            methods_validation["_no_methods"] = (
+                False,
+                ["At least one bioinformatics method is required"],
+            )
+
+        return methods_validation, all_methods_valid
+
+
+class BioinformaticsRunManager:
+    """Manages bioinformatics run information."""
+
     def __init__(self):
-        self.bioinfo_method_infos = {}
         self._initialize_session_state()
 
     def _initialize_session_state(self):
@@ -38,27 +141,54 @@ class BioInfoPage:
         methods_count = len(st.session_state["bioinfo_methods_list"])
         key = (
             f"method_select_{i}_{methods_count}"
-            if i
+            if i is not None
             else f"method_select_{methods_count}"
         )
 
         selected_option = st.selectbox(
             "Bioinformatics Methods ID:",
             options=options,
-            help="Select the bioinformatics method to use for this run.",
+            help="Select the bioinformatics method to use for this run (required).",
             key=key,
         )
         return int(selected_option.split(":")[0])
 
-    def enter_bioinfo_run_vals(self, i=None):
+    def _get_unique_bioinfo_run_names(self):
+        """Extract unique bioinformatics run names from microhaplotype_info."""
+        unique_names = []
+        if "microhaplotype_info" in st.session_state:
+            microhaplotype_info = st.session_state["microhaplotype_info"]
+            try:
+                # microhaplotype_info is a dict with "detected_microhaplotypes" key
+                if isinstance(microhaplotype_info, dict):
+                    if "detected_microhaplotypes" in microhaplotype_info:
+                        detected_mhaps = microhaplotype_info["detected_microhaplotypes"]
+                        if isinstance(detected_mhaps, list):
+                            # Extract bioinformatics_run_name from each dict in the list
+                            run_names = [
+                                item.get("bioinformatics_run_name")
+                                for item in detected_mhaps
+                                if isinstance(item, dict)
+                                and item.get("bioinformatics_run_name")
+                            ]
+                            unique_names = sorted(list(set(run_names)))
+            except Exception:
+                # If extraction fails, just continue without pre-filling
+                pass
+        return unique_names
+
+    def _enter_run_values(self, i=None, prefill_name=None):
         """Enter bioinformatics run values."""
         cols1 = st.columns(3)
 
         with cols1[0]:
+            # Pre-fill with suggested name if provided
+            default_value = prefill_name if prefill_name else ""
             bioinfo_run_name = st.text_input(
                 "Bioinformatics Run Name:",
-                help="Name of the bioinformatics run.",
-                key=f"run_name_{i}" if i else None,
+                value=default_value,
+                help="Name of the bioinformatics run (required).",
+                key=f"run_name_{i}" if i is not None else None,
             )
         with cols1[1]:
             bioinfo_methods_id = self._get_method_selection(i)
@@ -68,7 +198,9 @@ class BioInfoPage:
                 "Bioinformatics Run Date (Optional):",
                 value=None,
                 help="The date the bioinformatics pipeline was run.",
+                key=f"run_date_{i}" if i is not None else None,
             )
+
         bioinfo_run_dict = {
             "bioinformatics_run_name": bioinfo_run_name,
             "bioinformatics_methods_id": bioinfo_methods_id,
@@ -78,52 +210,90 @@ class BioInfoPage:
 
         return bioinfo_run_dict
 
-    def _save_bioinfo_runs(self, bioinfo_run_vals):
+    def _save_runs(self, bioinfo_run_vals):
         """Save bioinformatics run values to session state."""
         if st.button("Save Bioinformatics Run Info", key="save_bioinfo_run_vals"):
-            st.session_state["bioinfo_run_infos"] = bioinfo_run_vals
-            st.success("Bioinformatics run values saved successfully!")
-
-    def _preview_bioinfo_runs(self):
-        """Show preview of bioinformatics run values."""
-        if "bioinfo_run_infos" in st.session_state:
-            preview_toggle = st.toggle(
-                "Preview Bioinformatics Run Values", key="preview_bioinfo_run_vals"
+            methods_list = st.session_state.get("bioinfo_methods_list", [])
+            is_valid, errors = ValidationHelper.validate_runs(
+                bioinfo_run_vals, methods_list
             )
-            if preview_toggle:
-                st.write("Current Bioinformatics Run Values:")
-                st.json(st.session_state["bioinfo_run_infos"])
 
-    def add_bioinfo_run_vals(self):
+            if not is_valid:
+                for error in errors:
+                    st.error(error)
+                if len(errors) > 1 or "No bioinformatics methods" not in errors[0]:
+                    st.warning("Please fill in all required fields before saving.")
+            else:
+                st.session_state["bioinfo_run_infos"] = bioinfo_run_vals
+                st.success("Bioinformatics run values saved successfully!")
+
+    def add_runs(self):
         """Add bioinformatics run values section."""
+        # Get unique bioinformatics run names from microhaplotype_info
+        unique_run_names = self._get_unique_bioinfo_run_names()
+
+        # Set default number of runs based on unique names found
+        default_num_runs = len(unique_run_names) if unique_run_names else 1
+
+        if unique_run_names:
+            st.info(
+                f"Found {len(unique_run_names)} unique bioinformatics run name(s) in microhaplotype data. "
+                f"Pre-filled below. You can modify the number of runs or names as needed."
+            )
+
         number_inputs = st.number_input(
             "Number of bioinformatics runs",
             min_value=0,
-            value=1,
+            value=default_num_runs,
             key="num_bioinfo_runs",
         )
+
+        # Pre-fill run names from unique values
         bioinfo_run_vals = [
-            self.enter_bioinfo_run_vals(i=i) for i in range(number_inputs)
+            self._enter_run_values(
+                i=i,
+                prefill_name=unique_run_names[i] if i < len(unique_run_names) else None,
+            )
+            for i in range(number_inputs)
         ]
 
-        self._save_bioinfo_runs(bioinfo_run_vals)
+        self._save_runs(bioinfo_run_vals)
         return bioinfo_run_vals
+
+    def preview_runs(self):
+        """Preview bioinformatics run information."""
+        if "bioinfo_run_infos" in st.session_state:
+            preview_toggle = st.toggle(
+                "Preview Bioinformatics Run Information",
+                key="preview_bioinfo_runs_toggle",
+            )
+            if preview_toggle:
+                st.write("Current Bioinformatics Run Information:")
+                st.json(st.session_state["bioinfo_run_infos"])
+
+
+class BioinformaticsMethodManager:
+    """Manages bioinformatics method information."""
+
+    def __init__(self):
+        self.bioinfo_method_infos = {}
 
     def _show_methods_count(self):
         """Show current methods count."""
-        if st.session_state["bioinfo_methods_list"]:
+        if st.session_state.get("bioinfo_methods_list"):
             st.info(f"Current methods: {len(st.session_state['bioinfo_methods_list'])}")
 
     def _get_method_name_input(self):
-        """Get optional method name input."""
-        return st.text_input(
-            "Bioinformatics Method Name (Optional):",
-            help="A unique identifier for this bioinformatics method.",
+        """Get optional pipeline name input."""
+        st.subheader("Pipeline (Optional)")
+        st.write(
+            "Putting in the pipeline information is optional. If you add information you must add both program and program version."
         )
+        pipeline_dict = self._create_method_step_input_fields(0)
+        return pipeline_dict["program"], pipeline_dict
 
     def _create_method_step_input_fields(self, method):
         """Create input fields for a bioinformatics method."""
-        # First row of columns
         cols1 = st.columns(2)
         with cols1[0]:
             program = st.text_input(
@@ -138,7 +308,6 @@ class BioInfoPage:
                 help="Version number of the program (e.g., '1.16.0', '11.0.667')",
             )
 
-        # Second row of columns
         cols2 = st.columns(2)
         with cols2[0]:
             program_description = st.text_input(
@@ -153,7 +322,6 @@ class BioInfoPage:
                 help="Any additional command-line arguments or parameters used",
             )
 
-        # Third row for program URL (full width)
         program_url = st.text_input(
             "program url (optional)",
             key=f"{method}_program_url",
@@ -175,7 +343,6 @@ class BioInfoPage:
             "program_version": inputs["program_version"],
         }
 
-        # Add optional fields only if they have values
         for field in ["additional_argument", "program_description", "program_url"]:
             if inputs[field] and inputs[field].strip():
                 step_dict[field] = inputs[field]
@@ -199,11 +366,11 @@ class BioInfoPage:
 
     def _add_custom_fields_to_dict(self, method_dict, field_names, field_values):
         """Add custom fields to the method dictionary."""
-        for i, (name, value) in enumerate(zip(field_names, field_values)):
-            if name and name.strip():  # Only add if field name is not empty
+        for name, value in zip(field_names, field_values):
+            if name and name.strip():
                 method_dict[name] = value
 
-    def add_additional_fields(self, method, method_dict):
+    def _add_additional_fields(self, method, method_dict):
         """Add additional custom fields to a method."""
         additional_fields_toggle = st.toggle(
             f"Add additional fields to {method}", key=f"{method}_toggle"
@@ -225,16 +392,14 @@ class BioInfoPage:
 
         return method_dict
 
-    def enter_bioinfo_method_step_info(self, method):
+    def _enter_method_step_info(self, method):
         """Enter bioinformatics method values."""
         inputs = self._create_method_step_input_fields(method)
         method_dict = self._build_method_step_dict(method, inputs)
-
-        # Add user specified additional fields
-        method_dict = self.add_additional_fields(method, method_dict)
+        method_dict = self._add_additional_fields(method, method_dict)
         return method_dict
 
-    def _create_bioinformatics_methods_steps(self):
+    def _create_methods_steps(self):
         """Create the bioinformatics methods section with at least one required."""
         st.subheader("Bioinformatics Method Steps")
         st.write(
@@ -252,29 +417,23 @@ class BioInfoPage:
         method_steps = []
         for i in range(number_of_steps):
             st.write(f"**Step {i+1}**")
-
-            method_data = self.enter_bioinfo_method_step_info(f"method_{i}")
+            method_data = self._enter_method_step_info(f"method_{i}")
             method_steps.append(method_data)
 
         return method_steps
 
-    def _build_bioinfo_infos_method_dict(self, method_name, methods):
+    def _build_method_dict(self, method_name, methods):
         """Build the bioinfo_infos dictionary."""
-        # bioinfo_infos = methods.copy()
         method_dict = {"methods": methods}
-        # Only add bioinformatics_method_name if it's populated
         if method_name and method_name.strip():
             method_dict["bioinformatics_method_name"] = method_name
-
         return method_dict
 
-    def add_bioinfo_methods_information(self):
+    def add_methods_information(self):
         """Add bioinformatics method information section."""
         st.subheader("Add Bioinformatics Method Information", divider="gray")
-
         self._show_methods_count()
 
-        # Toggle to show/hide the add method form
         add_method_toggle = st.checkbox(
             "Add New Bioinformatics Method",
             help="Check this box to add a new bioinformatics method",
@@ -282,60 +441,13 @@ class BioInfoPage:
         )
 
         if add_method_toggle:
-            method_name = self._get_method_name_input()
-            method_steps = self._create_bioinformatics_methods_steps()
-
-            self.bioinfo_method_infos = self._build_bioinfo_infos_method_dict(
+            method_name, pipeline_dict = self._get_method_name_input()
+            method_steps = self._create_methods_steps()
+            self.bioinfo_method_infos = self._build_method_dict(
                 method_name, method_steps
             )
         else:
-            # Set empty structure when not adding methods
             self.bioinfo_method_infos = {}
-
-    def check_method_required_fields(self, method_dict, fields=None):
-        """Check if required fields are present and not empty."""
-        if fields is None:
-            fields = self.REQUIRED_FIELDS
-
-        missing_fields = []
-        for field in fields:
-            if (
-                field not in method_dict.keys()
-                or not method_dict[field]
-                or method_dict[field].strip() == ""
-            ):
-                missing_fields.append(field)
-
-        return (True, []) if not missing_fields else (False, missing_fields)
-
-    def _validate_bioinformatics_methods(self, bioinfo_method_infos):
-        """Validate all bioinformatics methods."""
-        methods_validation = {}
-        all_methods_valid = True
-
-        # Check that at least one method is provided
-        method_count = 0
-        if "methods" in bioinfo_method_infos.keys():
-            for method_data in bioinfo_method_infos["methods"]:
-                # if method_name != "bioinformatics_method_name" and isinstance(
-                #     method_data, dict
-                # ):
-                method_valid, method_missing = self.check_method_required_fields(
-                    method_data
-                )
-                methods_validation[method_count] = (method_valid, method_missing)
-                method_count += 1
-                if not method_valid:
-                    all_methods_valid = False
-
-        if method_count == 0:
-            all_methods_valid = False
-            methods_validation["_no_methods"] = (
-                False,
-                ["At least one bioinformatics method is required"],
-            )
-
-        return methods_validation, all_methods_valid
 
     def _save_valid_method(self, bioinfo_method_infos):
         """Save a valid bioinformatics method."""
@@ -356,28 +468,21 @@ class BioInfoPage:
                     st.error(
                         f"Step '{method_id+1}' is missing required fields: {', '.join(method_missing)}"
                     )
-
         st.warning("Please fill in all required fields before saving.")
 
-    def transform_and_save_data(self):
+    def save_method(self):
         """Transform and save bioinformatics method data."""
         bioinfo_method_infos = self.bioinfo_method_infos
 
-        # Only show save button if there's data to save
-        # TODO: make this button only appear when add method toggle is on
         if st.button("Save Bioinformatics Method", key="save_bioinfo_method_infos"):
-            # Validate all methods
-            (
-                methods_validation,
-                all_methods_valid,
-            ) = self._validate_bioinformatics_methods(bioinfo_method_infos)
+            methods_validation, all_methods_valid = ValidationHelper.validate_methods(
+                bioinfo_method_infos
+            )
 
             if all_methods_valid:
                 self._save_valid_method(bioinfo_method_infos)
             else:
                 self._display_validation_errors(methods_validation)
-
-        self._remove_methods_section()
 
     def _create_remove_options(self):
         """Create options for method removal."""
@@ -396,9 +501,7 @@ class BioInfoPage:
         for option in selected_options:
             idx = int(option.split(":")[0])
             indices_to_remove.append(idx)
-        return sorted(
-            indices_to_remove, reverse=True
-        )  # Sort descending for safe removal
+        return sorted(indices_to_remove, reverse=True)
 
     def _update_run_info_indices(self, removed_indices):
         """Update bioinformatics run info indices after method removal."""
@@ -412,32 +515,24 @@ class BioInfoPage:
             current_method_id = run_info.get("bioinformatics_methods_id", 0)
             run_name = run_info.get("bioinformatics_run_name", f"Run {i+1}")
 
-            # Check if this run was using one of the removed methods
             if current_method_id in removed_indices:
                 affected_runs.append(run_name)
 
-            # Count how many removed indices are less than the current method ID
-            # This tells us how much to subtract from the current method ID
             adjustment = sum(
                 1 for removed_idx in removed_indices if removed_idx < current_method_id
             )
 
-            # Update the method ID
             new_method_id = current_method_id - adjustment
-
-            # If the new method ID is out of bounds, set it to a valid value
             max_method_id = len(st.session_state["bioinfo_methods_list"]) - 1
             if new_method_id > max_method_id:
                 new_method_id = max(0, max_method_id)
 
-            # Update the run info
             updated_run_info = run_info.copy()
             updated_run_info["bioinformatics_methods_id"] = new_method_id
             updated_run_infos.append(updated_run_info)
 
         st.session_state["bioinfo_run_infos"] = updated_run_infos
 
-        # Show warning if any runs were affected
         if affected_runs:
             st.warning(
                 f"Updated method references for affected runs: {', '.join(affected_runs)}"
@@ -445,7 +540,6 @@ class BioInfoPage:
 
     def _remove_selected_methods(self, indices_to_remove):
         """Remove methods at specified indices."""
-        # Store original indices before removal for updating run info
         original_indices = sorted(indices_to_remove)
 
         for idx in indices_to_remove:
@@ -456,15 +550,13 @@ class BioInfoPage:
                 )
                 st.success(f"Removed method: {method_name}")
 
-        # Update run info indices after method removal
         self._update_run_info_indices(original_indices)
-
         st.info(f"Remaining methods: {len(st.session_state['bioinfo_methods_list'])}")
         st.rerun()
 
-    def _remove_methods_section(self):
+    def remove_methods_section(self):
         """Display the remove methods section."""
-        if not st.session_state["bioinfo_methods_list"]:
+        if not st.session_state.get("bioinfo_methods_list"):
             return
 
         st.subheader("Remove Methods")
@@ -497,18 +589,7 @@ class BioInfoPage:
             else:
                 st.warning("No methods available to remove.")
 
-    def _preview_bioinfo_runs(self):
-        """Preview bioinformatics run information."""
-        if "bioinfo_run_infos" in st.session_state:
-            preview_toggle = st.toggle(
-                "Preview Bioinformatics Run Information",
-                key="preview_bioinfo_runs_toggle",
-            )
-            if preview_toggle:
-                st.write("Current Bioinformatics Run Information:")
-                st.json(st.session_state["bioinfo_run_infos"])
-
-    def _preview_bioinfo_methods(self):
+    def preview_methods(self):
         """Preview bioinformatics methods list."""
         if (
             "bioinfo_methods_list" in st.session_state
@@ -525,6 +606,14 @@ class BioInfoPage:
                     st.json(method)
                     st.write("---")
 
+
+class BioInfoPage:
+    """Main page class that coordinates bioinformatics information management."""
+
+    def __init__(self):
+        self.run_manager = BioinformaticsRunManager()
+        self.method_manager = BioinformaticsMethodManager()
+
     def display_info(self):
         """Display preview information for bioinformatics data."""
         if (
@@ -532,18 +621,19 @@ class BioInfoPage:
             or "bioinfo_run_infos" in st.session_state
         ):
             st.subheader("Preview Bioinformatics Information", divider="gray")
-            self._preview_bioinfo_runs()
-            self._preview_bioinfo_methods()
+            self.run_manager.preview_runs()
+            self.method_manager.preview_methods()
 
     def run(self):
-        # Add bioinformatics information
-        self.add_bioinfo_run_vals()
-        self.add_bioinfo_methods_information()
-        self.transform_and_save_data()
+        """Run the complete bioinformatics information page."""
+        self.run_manager.add_runs()
+        self.method_manager.add_methods_information()
+        self.method_manager.save_method()
+        self.method_manager.remove_methods_section()
         self.display_info()
 
 
-# Initialize and run the page
+# Initialize and run the app
 if __name__ == "__main__":
     render_header()
     st.subheader("Bioinformatics Run Information", divider="gray")

@@ -1,5 +1,8 @@
 from pmotools.pmo_builder.mhap_table_to_pmo import mhap_table_to_pmo
 from pmotools.pmo_builder.panel_information_to_pmo import panel_info_table_to_pmo
+from pmotools.pmo_builder.read_count_by_stage_table_to_pmo import (
+    read_count_by_stage_table_to_pmo,
+)
 from pmotools.pmo_builder.metatable_to_pmo import (
     library_sample_info_table_to_pmo,
     specimen_info_table_to_pmo,
@@ -55,6 +58,7 @@ def transform_panel_info(
         target_name_col=field_mapping["target_name"],
         forward_primers_seq_col=field_mapping["forward_primer_seq"],
         reverse_primers_seq_col=field_mapping["reverse_primer_seq"],
+        reaction_name_col=optional_fields.get("reaction_name"),
         forward_primers_start_col=optional_fields.get("forward_primers_start"),
         forward_primers_end_col=optional_fields.get("forward_primers_end"),
         reverse_primers_start_col=optional_fields.get("reverse_primers_start"),
@@ -63,6 +67,7 @@ def transform_panel_info(
         insert_end_col=optional_fields.get("insert_end"),
         chrom_col=optional_fields.get("chrom_col"),
         strand_col=optional_fields.get("strand"),
+        ref_seq_col=optional_fields.get("ref_seq"),
         gene_name_col=optional_fields.get("gene_name"),
         target_attributes_col=optional_fields.get("target_attributes"),
         additional_target_info_cols=additional_target_info_cols,
@@ -82,6 +87,8 @@ def transform_specimen_info(
         collection_country_col=field_mapping["collection_country"],
         project_name_col=field_mapping["project_name"],
         # optional fields - only pass if not None
+        alternate_identifiers_col=optional_field_mapping.get("alternate_identifiers"),
+        blood_meal_col=optional_field_mapping.get("blood_meal"),
         drug_usage_col=optional_field_mapping.get("drug_usage"),
         env_broad_scale_col=optional_field_mapping.get("env_broad_scale"),
         env_local_scale_col=optional_field_mapping.get("env_local_scale"),
@@ -89,6 +96,11 @@ def transform_specimen_info(
         geo_admin1_col=optional_field_mapping.get("geo_admin1"),
         geo_admin2_col=optional_field_mapping.get("geo_admin2"),
         geo_admin3_col=optional_field_mapping.get("geo_admin3"),
+        gravid_col=optional_field_mapping.get("gravid"),
+        gravidity_col=optional_field_mapping.get("gravidity"),
+        has_travel_out_six_month_col=optional_field_mapping.get(
+            "has_travel_out_six_month"
+        ),
         host_age_col=optional_field_mapping.get("host_age"),
         host_sex_col=optional_field_mapping.get("host_sex"),
         host_subject_id=optional_field_mapping.get("host_subject_id"),
@@ -106,13 +118,11 @@ def transform_specimen_info(
         ),
         specimen_comments_col=optional_field_mapping.get("specimen_comments"),
         specimen_store_loc_col=optional_field_mapping.get("specimen_store_loc"),
+        specimen_type_col=optional_field_mapping.get("specimen_type"),
+        treatment_status_col=optional_field_mapping.get("treatment_status"),
         additional_specimen_cols=additional_fields,
-        list_values_specimen_columns=optional_field_mapping.get("alternate_identifiers")
-        if optional_field_mapping.get("alternate_identifiers") is not None
-        else [],
         list_values_specimen_columns_delimiter=",",
     )
-    # TODO: make sure list values are handled correctly
     return transformed_df
 
 
@@ -125,26 +135,42 @@ def transform_library_sample_info(
         sequencing_info_name_col=field_mapping["sequencing_info_name"],
         specimen_name_col=field_mapping["specimen_name"],
         panel_name_col=field_mapping["panel_name"],
-        accession_col=optional_mapping.get("accession"),
-        library_prep_plate_col_col=optional_mapping.get("library_prep_plate_col"),
+        alternate_identifiers_col=optional_mapping.get("alternate_identifiers"),
+        experiment_accession_col=optional_mapping.get("experiment_accession"),
+        fastqs_loc_col=optional_mapping.get("fastqs_loc"),
         library_prep_plate_name_col=optional_mapping.get("library_prep_plate_name"),
+        library_prep_plate_col_col=optional_mapping.get("library_prep_plate_col"),
         library_prep_plate_row_col=optional_mapping.get("library_prep_plate_row"),
         library_prep_plate_position_col=optional_mapping.get(
             "library_prep_plate_position"
         ),
+        parasite_density_col=optional_mapping.get("parasite_density"),
+        parasite_density_method_col=optional_mapping.get("parasite_density_method"),
+        run_accession_col=optional_mapping.get("run_accession"),
         additional_library_sample_info_cols=additional_fields,
     )
     return transformed_df
 
 
-# def transform_demultiplexed_info(df, bioinfo_id, field_mapping,
-#                                  optional_mapping, additional_hap_detected_cols=None):
-#     """Reformat the DataFrame based on the provided field mapping."""
-#     transformed_df = demultiplexed_targets_to_pmo_dict(
-#         df,
-#         bioinfo_id,
-#         sampleID_col=field_mapping["sampleID"],
-#         target_id_col=field_mapping['target_id'],
-#         read_count_col=field_mapping['raw_read_count'],
-#         additional_hap_detected_cols=additional_hap_detected_cols)
-#     return transformed_df
+def transform_read_counts_per_stage(
+    raw_counts_df,
+    reads_by_stage_df,
+    bioinfo_run_name,
+    raw_counts_field_mapping,
+    reads_by_stage_field_mapping,
+    raw_counts_selected_additional_fields=None,
+    reads_by_stage_selected_additional_fields=None,
+):
+    transformed_df = read_count_by_stage_table_to_pmo(
+        bioinformatics_run_name=bioinfo_run_name,
+        total_raw_count_table=raw_counts_df,
+        reads_by_stage_table=reads_by_stage_df,
+        library_sample_name_col=raw_counts_field_mapping["library_sample_name"],
+        total_raw_count_col=raw_counts_field_mapping["total_raw_count"],
+        target_name_col=reads_by_stage_field_mapping["target_name"],
+        stage_col=reads_by_stage_field_mapping["stage"],
+        read_count_col=reads_by_stage_field_mapping["read_count"],
+        additional_library_sample_cols=raw_counts_selected_additional_fields,
+        additional_target_cols=reads_by_stage_selected_additional_fields,
+    )
+    return transformed_df
