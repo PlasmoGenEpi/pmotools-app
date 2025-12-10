@@ -5,13 +5,13 @@ from src.format_page import render_header
 from pmotools.pmo_builder.merge_to_pmo import merge_to_pmo
 
 check_dict = {
-    "panel_info": "Panel Information",
+    "project_info": "Project Information",
     "specimen_info": "Specimen Level Metadata",
     "library_sample_info": "Library Sample Level Metadata",
-    "microhaplotype_info": "Microhaplotype Information",
+    "panel_info": "Panel Information",
     "seq_info": "Sequencing Information",
+    "microhaplotype_info": "Microhaplotype Information",
     "bioinfo_run_infos": "Bioinformatics Runs Information",
-    "read_counts_per_stage": "Read Counts per Stage",
 }
 
 
