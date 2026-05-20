@@ -11,15 +11,15 @@ title = "specimen level metadata"
 class SpecimenMetadataPage:
     def __init__(
         self,
-        required_fields,
-        required_alternate_fields,
-        optional_fields,
-        optional_alternate_fields,
+        spec_required_fields,
+        spec_required_alternate_fields,
+        spec_optional_fields,
+        spec_optional_alternate_fields,
     ):
-        self.required_fields = required_fields
-        self.required_alternate_fields = required_alternate_fields
-        self.optional_fields = optional_fields
-        self.optional_alternate_fields = optional_alternate_fields
+        self.required_fields = spec_required_fields
+        self.required_alternate_fields = spec_required_alternate_fields
+        self.optional_fields = spec_optional_fields
+        self.optional_alternate_fields = spec_optional_alternate_fields
 
     def transform_and_save_data(
         self, df, mapped_fields, selected_optional_fields, selected_additional_fields

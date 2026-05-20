@@ -1,4 +1,42 @@
 {
+
+    "targeted_genomes": {
+        "required": [
+            "name",
+            "taxon_id",
+            "genome_version",
+            "url"
+        ],
+        "required_alternatives": {
+            "name": [
+                "genome_name"
+            ],
+            "taxon_id": [
+                "taxon"
+            ],
+            "genome_version": [
+                "version"
+            ],
+            "url": [
+                "genome_url",
+                "genome_link"
+            ]
+        },
+        "optional": [
+            "gff_url",
+            "chromosomes"
+        ],
+        "optional_alternatives": {
+            "gff_url": [
+                "gff_link",
+                "gff"
+            ],
+            "chromosomes": [
+                "chroms",
+                "chromosome"
+            ]
+        }
+    },
     "panel_info": {
         "required": [
             "target_name",
@@ -106,12 +144,7 @@
     },
     "specimen_level_metadata": {
         "required": [
-            "specimen_name",
-            "specimen_taxon_id",
-            "host_taxon_id",
-            "collection_date",
-            "collection_country",
-            "project_name"
+            "specimen_name"
         ],
         "required_alternatives": {
             "specimen_name": [
@@ -124,6 +157,11 @@
         },
         "optional": [
             "alternate_identifiers",
+            "specimen_taxon_id",
+            "host_taxon_id",
+            "collection_date",
+            "collection_country",
+            "project_name",
             "blood_meal",
             "drug_usage",
             "env_broad_scale",

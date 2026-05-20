@@ -206,7 +206,23 @@ def merge_data():
                 pmo_checker.validate_pmo_json(st.session_state["formatted_pmo"])
                 st.success("✅ Valid PMO — passed schema validation.")
             except ValidationError as e:
-                st.error(f"❌ Schema validation failed: {e.message}")
+                # Build a detailed error message matching the CLI output
+                path_str = (
+                    " -> ".join(str(p) for p in e.absolute_path)
+                    if e.absolute_path
+                    else "root"
+                )
+                schema_path_str = " -> ".join(str(p) for p in e.absolute_schema_path)
+                detailed_msg = (
+                    f"**Message:** {e.message}\n\n"
+                    f"**Instance path:** `{path_str}`\n\n"
+                    f"**Schema path:** `{schema_path_str}`\n\n"
+                    f"**Failing value:** `{e.instance}`"
+                )
+                st.error("❌ Schema validation failed:")
+                st.markdown(detailed_msg)
+                with st.expander("Full validation error", expanded=True):
+                    st.code(str(e), language="text")
             except Exception as e:
                 st.error(f"❌ Validation error: {e}")
 

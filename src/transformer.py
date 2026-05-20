@@ -81,11 +81,11 @@ def transform_specimen_info(
     transformed_df = specimen_info_table_to_pmo(
         df,
         specimen_name_col=field_mapping["specimen_name"],
-        specimen_taxon_id_col=field_mapping["specimen_taxon_id"],
-        host_taxon_id_col=field_mapping["host_taxon_id"],
-        collection_date_col=field_mapping["collection_date"],
-        collection_country_col=field_mapping["collection_country"],
-        project_name_col=field_mapping["project_name"],
+        specimen_taxon_id_col=optional_field_mapping.get("specimen_taxon_id"),
+        host_taxon_id_col=optional_field_mapping.get("host_taxon_id"),
+        collection_date_col=optional_field_mapping.get("collection_date"),
+        collection_country_col=optional_field_mapping.get("collection_country"),
+        project_name_col=optional_field_mapping.get("project_name"),
         # optional fields - only pass if not None
         alternate_identifiers_col=optional_field_mapping.get("alternate_identifiers"),
         blood_meal_col=optional_field_mapping.get("blood_meal"),
@@ -121,8 +121,12 @@ def transform_specimen_info(
         specimen_type_col=optional_field_mapping.get("specimen_type"),
         treatment_status_col=optional_field_mapping.get("treatment_status"),
         additional_specimen_cols=additional_fields,
-        list_values_specimen_columns_delimiter=",",
+        list_values_specimen_values_delimiter=",",
     )
+    # for spec in transformed_df:
+    #     if "specimen_taxon_id" in spec and not isinstance(spec["specimen_taxon_id"], list):
+    #         spec["specimen_taxon_id"] = [spec["specimen_taxon_id"]]
+    #
     return transformed_df
 
 
