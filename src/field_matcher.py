@@ -332,7 +332,7 @@ def load_data(
     file_uploader_key = f"file_uploader_{key_suffix}" if key_suffix else None
     uploaded_file = st.file_uploader(
         "Upload a TSV file",
-        type=["csv", "tsv", "xlsx", "xls", "txt"],
+        type=["csv", "tsv", "xlsx", "xls", "txt", "gz", "gzip"],
         key=file_uploader_key,
     )
     df, mapped_fields, selected_optional_fields, selected_additional_fields = (
