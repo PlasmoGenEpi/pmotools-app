@@ -120,41 +120,6 @@
                 "sample_id",
                 "bio_id",
                 "sample_accession"
-            ],
-            "specimen_taxon_id": [
-                "specimen_taxon_id",
-                "taxon_id",
-                "species_id",
-                "organism_id",
-                "sample_taxon_id"
-            ],
-            "host_taxon_id": [
-                "host_taxon_id",
-                "taxon_id",
-                "species_id",
-                "individual_taxon_id",
-                "sample_taxon_id"
-            ],
-            "collection_date": [
-                "collection_date",
-                "date_of_collection",
-                "sampling_date",
-                "gathering_date"
-            ],
-            "collection_country": [
-                "collection_country",
-                "country_of_collection",
-                "sampling_country",
-                "origin_country",
-                "country",
-                "admin_level_0",
-                "geo_admin0"
-            ],
-            "project_name": [
-                "project_name",
-                "study_name",
-                "research_project",
-                "experiment_name"
             ]
         },
         "optional": [
@@ -321,6 +286,41 @@
             "treatment_status": [
                 "treatment_status",
                 "treated"
+            ],
+            "specimen_taxon_id": [
+                "specimen_taxon_id",
+                "taxon_id",
+                "species_id",
+                "organism_id",
+                "sample_taxon_id"
+            ],
+            "host_taxon_id": [
+                "host_taxon_id",
+                "taxon_id",
+                "species_id",
+                "individual_taxon_id",
+                "sample_taxon_id"
+            ],
+            "collection_date": [
+                "collection_date",
+                "date_of_collection",
+                "sampling_date",
+                "gathering_date"
+            ],
+            "collection_country": [
+                "collection_country",
+                "country_of_collection",
+                "sampling_country",
+                "origin_country",
+                "country",
+                "admin_level_0",
+                "geo_admin0"
+            ],
+            "project_name": [
+                "project_name",
+                "study_name",
+                "research_project",
+                "experiment_name"
             ]
         }
     },

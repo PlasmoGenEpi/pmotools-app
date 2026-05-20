@@ -2,9 +2,15 @@ import streamlit as st
 import json
 import os
 from src.format_page import render_header
+from pmotools.pmo_builder.mhap_table_to_pmo import (
+    create_minimum_library_specimen_dict_from_mhap_table,
+)
 from pmotools.pmo_builder.merge_to_pmo import merge_to_pmo
 
-check_dict = {
+
+from pmotools.pmo_builder.pmo_updater import PMOUpdater
+
+full_check_dict = {
     "project_info": "Project Information",
     "specimen_info": "Specimen Level Metadata",
     "library_sample_info": "Library Sample Level Metadata",
@@ -12,6 +18,11 @@ check_dict = {
     "seq_info": "Sequencing Information",
     "microhaplotype_info": "Microhaplotype Information",
     "bioinfo_run_infos": "Bioinformatics Runs Information",
+}
+
+check_dict = {
+    "panel_info": "Panel Information",
+    "microhaplotype_info": "Microhaplotype Information",
 }
 
 
@@ -39,27 +50,120 @@ def merge_data():
     st.subheader("Merge Components to Final PMO")
     panel_info = st.session_state["panel_info"]
 
-    # Get bioinformatics methods and runs
-    bioinfo_methods = st.session_state.get("bioinfo_methods_list", [])
-    bioinfo_runs = st.session_state.get("bioinfo_run_infos", [])
+    # Get bioinformatics methods and runs if present
+    bioinfo_methods = None
+    if "bioinfo_methods_list" in st.session_state:
+        bioinfo_methods = st.session_state.get("bioinfo_methods_list", [])
+    bioinfo_runs = None
+    if "bioinfo_methods_list" in st.session_state:
+        bioinfo_runs = st.session_state.get("bioinfo_run_infos", [])
     if "read_counts_per_stage" in st.session_state:
         read_counts_per_stage = st.session_state["read_counts_per_stage"]
     else:
         read_counts_per_stage = None
+    if "project_info" in st.session_state:
+        project_info = st.session_state["project_info"]
+    else:
+        project_info = None
+    if "seq_info" in st.session_state:
+        seq_info = st.session_state["seq_info"]
+    else:
+        seq_info = None
     if st.button("Merge Data"):
         try:
+            if (
+                "specimen_info" not in st.session_state
+                and "library_sample_info" not in st.session_state
+            ):
+                lib_and_spec_infos = (
+                    create_minimum_library_specimen_dict_from_mhap_table(
+                        st.session_state["microhaplotype_info"][
+                            "detected_microhaplotypes"
+                        ],
+                        panel_name=panel_info["panel_info"][0]["panel_name"],
+                    )
+                )
+                spec_info = lib_and_spec_infos["specimen_info"]
+                lib_info = lib_and_spec_infos["library_sample_info"]
+            elif (
+                "specimen_info" in st.session_state
+                and "library_sample_info" not in st.session_state
+            ):
+                lib_and_spec_infos = (
+                    create_minimum_library_specimen_dict_from_mhap_table(
+                        st.session_state["microhaplotype_info"][
+                            "detected_microhaplotypes"
+                        ],
+                        panel_name=panel_info["panel_info"][0]["panel_name"],
+                    )
+                )
+                spec_info = lib_and_spec_infos["specimen_info"]
+                spec_info = PMOUpdater.merge_dicts_by_key(
+                    spec_info,
+                    st.session_state["specimen_info"],
+                    key_field="specimen_name",
+                )
+                lib_info = lib_and_spec_infos["library_sample_info"]
+            elif (
+                "specimen_info" not in st.session_state
+                and "library_sample_info" in st.session_state
+            ):
+                # in this instance, the default specimen_info will just bhe library_sample_info 1:1
+                spec_info = None
+                lib_info = st.session_state["library_sample_info"]
+            else:
+                spec_info = st.session_state["specimen_info"]
+                lib_info = st.session_state["library_sample_info"]
             st.session_state["formatted_pmo"] = merge_to_pmo(
-                specimen_info=st.session_state["specimen_info"],
-                library_sample_info=st.session_state["library_sample_info"],
-                sequencing_info=st.session_state["seq_info"],
-                panel_info=panel_info,
+                specimen_info=spec_info,
+                library_sample_info=lib_info,
+                sequencing_info=seq_info,
+                panel_and_target_info=panel_info,
                 mhap_info=st.session_state["microhaplotype_info"],
                 bioinfo_method_info=bioinfo_methods,
                 bioinfo_run_info=bioinfo_runs,
-                project_info=st.session_state["project_info"],
+                project_info=project_info,
                 read_counts_by_stage_info=read_counts_per_stage,
             )
             st.success("Data merged successfully!")
+
+            # --- Merge summary ---
+            pmo = st.session_state["formatted_pmo"]
+
+            def _count(key, nested_key=None):
+                """Return len of pmo[key] or pmo[key][nested_key], defaulting to 0."""
+                val = pmo.get(key)
+                if val is None:
+                    return 0
+                if nested_key is not None:
+                    val = val.get(nested_key) if isinstance(val, dict) else None
+                    if val is None:
+                        return 0
+                return len(val) if hasattr(val, "__len__") else 0
+
+            # Always-present fields
+            always_present = [
+                (_count("library_sample_info"), "library sample(s)"),
+                (_count("specimen_info"), "specimen(s)"),
+                (_count("panel_info"), "panel(s)"),
+                (_count("target_info"), "target(s)"),
+                (
+                    _count("representative_microhaplotypes", "targets"),
+                    "target(s) with microhaplotype calls",
+                ),
+            ]
+
+            # Optional fields (show 0 if absent)
+            optional = [
+                (_count("targeted_genomes"), "genome(s)"),
+                (_count("sequencing_info"), "sequencing run(s)"),
+                (_count("project_info"), "project(s)"),
+                (_count("bioinformatics_run_info"), "bioinformatics run(s)"),
+            ]
+
+            st.markdown("**Merge Summary**")
+            for count, label in always_present + optional:
+                st.markdown(f"- Loaded **{count}** {label}")
         except Exception as e:
             st.error(f"Error merging data: {e}")
 
@@ -70,7 +174,7 @@ def merge_data():
         # Convert the PMO data to JSON string
         pmo_json = json.dumps(st.session_state["formatted_pmo"], indent=2, default=str)
 
-        # Create download button
+        # Create a download button
         st.download_button(
             label="Download PMO JSON File",
             data=pmo_json,

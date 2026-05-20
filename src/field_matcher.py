@@ -162,6 +162,38 @@ def fuzzy_field_matching_page_section(
     return field_mapping, unused_field_names
 
 
+# def interactive_field_mapping_page_section(
+#     field_mapping,
+#     df_columns,
+#     toggle_name="Manually Alter Field Mapping",
+#     key_suffix: str = "",
+#     is_required: bool = True,
+# ):
+#     unique_key = (
+#         f"interactive_field_mapping_{key_suffix}"
+#         if key_suffix
+#         else "interactive_field_mapping"
+#     )
+#     interactive_field_mapping_on = st.toggle(toggle_name, key=unique_key)
+#     if interactive_field_mapping_on:
+#         updated_mapping = interactive_field_mapping(
+#             field_mapping, df_columns, is_required=is_required
+#         )
+#         st.write("Updated Field Mapping:")
+#         st.dataframe(field_mapping_json_to_table(updated_mapping))
+#         no_duplicates(updated_mapping)
+#
+#         # Calculate updated unused_field_names
+#         used_fields = {field for field in updated_mapping.values() if field is not None}
+#         updated_unused_field_names = [
+#             field for field in df_columns if field not in used_fields
+#         ]
+#
+#         return updated_mapping, updated_unused_field_names
+#     return field_mapping, df_columns
+#
+
+
 def interactive_field_mapping_page_section(
     field_mapping,
     df_columns,
@@ -176,14 +208,52 @@ def interactive_field_mapping_page_section(
     )
     interactive_field_mapping_on = st.toggle(toggle_name, key=unique_key)
     if interactive_field_mapping_on:
-        updated_mapping = interactive_field_mapping(
-            field_mapping, df_columns, is_required=is_required
-        )
+        # "Set All to No Match" button — writes to session state before selectboxes render
+        # no_match_key = f"no_match_all_{unique_key}"
+        if st.button("Set All to No Match", key=f"btn_{unique_key}"):
+            for field in field_mapping:
+                selectbox_key = f"sb_{unique_key}_{field}"
+                st.session_state[selectbox_key] = "no match"
+
+        # Add "no match" option to the available choices
+        if is_required:
+            options = df_columns
+        else:
+            options = ["no match"] + df_columns
+
+        updated_mapping = {}
+        for field, suggested_match in field_mapping.items():
+            selectbox_key = f"sb_{unique_key}_{field}"
+
+            # Determine the default index, preferring session state if already set
+            if selectbox_key in st.session_state:
+                try:
+                    index = options.index(st.session_state[selectbox_key])
+                except ValueError:
+                    index = 0
+            else:
+                try:
+                    if isinstance(suggested_match, list):
+                        index = (
+                            options.index(suggested_match[0]) if suggested_match else 0
+                        )
+                    else:
+                        index = options.index(suggested_match) if suggested_match else 0
+                except ValueError:
+                    index = 0
+
+            selected = st.selectbox(
+                f"Modify match for {field}",
+                options=options,
+                index=index,
+                key=selectbox_key,
+            )
+            updated_mapping[field] = None if selected == "no match" else selected
+
         st.write("Updated Field Mapping:")
         st.dataframe(field_mapping_json_to_table(updated_mapping))
         no_duplicates(updated_mapping)
 
-        # Calculate updated unused_field_names
         used_fields = {field for field in updated_mapping.values() if field is not None}
         updated_unused_field_names = [
             field for field in df_columns if field not in used_fields

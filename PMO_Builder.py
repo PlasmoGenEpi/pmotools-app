@@ -20,14 +20,14 @@ def main():
     st.markdown(
         """
         As you move through the app you will put together the following information. Together these will make a complete PMO:
+        - **Panel Information**: A table including data on the targets that make up the panel, at minimum the panel name, target names and their primer pairs
+        - **Microhaplotype Information**: A table containing the alleles called for each of the samples for each of the targets and the read counts associated.
+        **Optionally, you can also add the following:**
+        - **Specimen Information (highly recommended)**: Metadata describing the biological specimens.
         - **Project Information**: Information describing the project this data belongs to.
-        - **Specimen Information**: Metadata describing the biological specimens.
         - **Library Sample Information**: Metadata describing each library created from a specimen.
-        - **Panel Information**: A table including data on the targets that make up the panel.
-        - **Sequencing Information**: Information on how the samples were sequenced.
-        - **Microhaplotype Information**: A table containing the alleles called for each of the samples for each of the targets and the reads associated.
         - **Bioinformatics Information**: Information on the bioinformatics pipeline used to generate the allele data.
-        Optionally, you can also add:
+        - **Sequencing Information**: Information on how the samples were sequenced.
         - **Read Counts per Stage**: A table containing the raw read counts per sample and a table containing the read counts for each stage of the bioinformatics pipeline per sample per target.
 
         More information on the file format can be found [here](https://plasmogenepi.github.io/PMO_Docs/)
