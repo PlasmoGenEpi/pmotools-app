@@ -342,7 +342,27 @@ def load_data(
         None,
     )
     if uploaded_file:
-        df = load_csv(uploaded_file)
+        # --- Excel sheet selection ---
+        sheet_name = None
+        if uploaded_file.name.endswith((".xlsx", ".xls")):
+            xl = pd.ExcelFile(uploaded_file)
+            sheet_names = xl.sheet_names
+            if len(sheet_names) > 1:
+                sheet_key = (
+                    f"sheet_selector_{key_suffix}" if key_suffix else "sheet_selector"
+                )
+                sheet_name = st.selectbox(
+                    "Multiple sheets detected — select a sheet to load:",
+                    options=sheet_names,
+                    key=sheet_key,
+                )
+                st.info(f"Loading sheet: **{sheet_name}**")
+            else:
+                sheet_name = sheet_names[0]
+            # Reset file pointer after ExcelFile peek
+            uploaded_file.seek(0)
+
+        df = load_csv(uploaded_file, sheet_name=sheet_name)
         preview_toggle_key = f"preview_toggle_{key_suffix}" if key_suffix else None
         interactive_preview = st.toggle("Preview File", key=preview_toggle_key)
         if interactive_preview:
@@ -377,7 +397,6 @@ def load_data(
         selected_additional_fields = additional_fields_section(
             unused_field_names, key_suffix=additional_key_suffix
         )
-        # For output, set selected_optional_fields to the optional mapping result
         selected_optional_fields = mapped_optional_fields
 
     return df, mapped_fields, selected_optional_fields, selected_additional_fields

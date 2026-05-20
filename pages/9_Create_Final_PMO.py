@@ -6,6 +6,9 @@ from pmotools.pmo_builder.mhap_table_to_pmo import (
     create_minimum_library_specimen_dict_from_mhap_table,
 )
 from pmotools.pmo_builder.merge_to_pmo import merge_to_pmo
+from jsonschema import ValidationError
+from pmotools.pmo_engine.pmo_checker import PMOChecker
+from pmotools.utils.schema_loader import load_schema
 
 
 from pmotools.pmo_builder.pmo_updater import PMOUpdater
@@ -186,6 +189,26 @@ def merge_data():
         # Optional: Show preview of the data
         with st.expander("Preview PMO Data"):
             st.json(st.session_state["formatted_pmo"])
+
+        # --- Validate PMO ---
+        st.subheader("Validate PMO File")
+        avail_versions = ["v1.0.0", "v1.1.0"]
+        schema_version = st.selectbox(
+            "Select schema version", avail_versions, index=len(avail_versions) - 1
+        )
+
+        if st.button("Validate PMO against schema"):
+            try:
+                pmo_jsonschema_data_ = load_schema(
+                    f"portable_microhaplotype_object_{schema_version}.schema.json"
+                )
+                pmo_checker = PMOChecker(pmo_jsonschema_data_)
+                pmo_checker.validate_pmo_json(st.session_state["formatted_pmo"])
+                st.success("✅ Valid PMO — passed schema validation.")
+            except ValidationError as e:
+                st.error(f"❌ Schema validation failed: {e.message}")
+            except Exception as e:
+                st.error(f"❌ Validation error: {e}")
 
 
 # Initialize and run the app

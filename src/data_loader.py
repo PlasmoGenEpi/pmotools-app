@@ -3,7 +3,7 @@ import gzip
 import io
 
 
-def load_csv(file):
+def load_csv(file, sheet_name=None):
     """Load a CSV file into a pandas DataFrame with automatic separator detection."""
     try:
         filename = file.name
@@ -16,7 +16,7 @@ def load_csv(file):
                 df = pd.read_csv(f, sep=None, engine="python")
 
         elif filename.endswith((".xlsx", ".xls")):
-            df = pd.read_excel(file)
+            df = pd.read_excel(file, sheet_name=sheet_name)
 
         else:
             raise ValueError(
