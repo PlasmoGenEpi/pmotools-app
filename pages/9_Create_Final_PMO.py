@@ -13,13 +13,11 @@ from pmotools.utils.schema_loader import load_schema
 
 from pmotools.pmo_builder.pmo_updater import PMOUpdater
 
-full_check_dict = {
+optional_check_dict = {
     "project_info": "Project Information",
     "specimen_info": "Specimen Level Metadata",
     "library_sample_info": "Library Sample Level Metadata",
-    "panel_info": "Panel Information",
     "seq_info": "Sequencing Information",
-    "microhaplotype_info": "Microhaplotype Information",
     "bioinfo_run_infos": "Bioinformatics Runs Information",
 }
 
@@ -29,7 +27,7 @@ check_dict = {
 }
 
 
-def check_all(check_dict):
+def check_all(check_dict, optional_check_dict):
     """
     checks if outputs of a given page exists, and refers user to the page to
     populate if the page doesn't exist
@@ -45,6 +43,13 @@ def check_all(check_dict):
                 " page) before proceeding"
             )
             all_passed = False
+    for check_key, source_page in optional_check_dict.items():
+        if check_key in st.session_state:
+            st.success(f"Data from {source_page} tab has been successfully loaded.")
+        else:
+            st.warning(
+                f"Optional Data from {source_page} not found, will not be included in PMO"
+            )
     return all_passed
 
 
@@ -235,5 +240,5 @@ if __name__ == "__main__":
     render_header()
     st.subheader("Create Final PMO", divider="gray")
     st.subheader("Components")
-    if check_all(check_dict):
+    if check_all(check_dict, optional_check_dict):
         merge_data()

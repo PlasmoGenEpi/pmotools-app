@@ -12,21 +12,8 @@ def fuzzy_match_fields(
     is_required: bool = True,
     match_threshold: int = 60,
 ):
-    """
-    Matches field names to the target schema using fuzzy matching, ensuring
-    that each target schema field is only matched to one field name.
-
-    Args:
-        field_names (list): List of column names to be matched.
-        target_schema (list): List of standard schema fields to match against.
-
-    Returns:
-        dict: A dictionary mapping each field name to the best-matched schema field.
-        list: A list of unused field names that could not be matched.
-    """
     # Initialize all targets with None to ensure full coverage in the table
     matches = {target: None for target in target_schema}
-    # Track remaining available fields to enforce one-to-one mapping
     available_fields = set(field_names)
 
     # Error if not enough unique fields to match all targets
@@ -36,11 +23,43 @@ def fuzzy_match_fields(
             f"Have {len(available_fields)} unique field(s) for {len(target_schema)} target(s)."
         )
 
-    # For every target find the best matching unused field
+    # --- First pass: exact matches (target name or any alternate name) ---
     for target in target_schema:
         if not available_fields:
-            # If no fields remain, required path already surfaced a global error above
-            # For optional, we keep 'no match' as initialized
+            continue
+
+        exact_match = None
+
+        # Check if the target itself exactly matches an available field (case-insensitive)
+        for field in available_fields:
+            if field.lower() == target.lower():
+                exact_match = field
+                break
+
+        # If no direct exact match, check alternate names
+        if (
+            exact_match is None
+            and alternate_schema_names
+            and target in alternate_schema_names
+        ):
+            for alt_target in alternate_schema_names.get(target, []):
+                for field in available_fields:
+                    if field.lower() == alt_target.lower():
+                        exact_match = field
+                        break
+                if exact_match:
+                    break
+
+        if exact_match:
+            matches[target] = exact_match
+            available_fields.discard(exact_match)
+
+    # --- Second pass: fuzzy match remaining unmatched targets ---
+    for target in target_schema:
+        if matches[target] is not None:
+            # Already matched in exact pass
+            continue
+        if not available_fields:
             continue
 
         remaining_fields = list(available_fields)
@@ -53,23 +72,19 @@ def fuzzy_match_fields(
                     best_match = alt_match
 
         if not best_match:
-            # Leave as None
             continue
 
         best_match_field = best_match[0]
         best_score = best_match[1]
 
         if is_required:
-            # Always take the best remaining field for required targets
             matches[target] = best_match_field
             available_fields.discard(best_match_field)
         else:
-            # Only accept if above threshold; otherwise keep None
             if best_score >= match_threshold:
                 matches[target] = best_match_field
                 available_fields.discard(best_match_field)
 
-    # Fields not used in matching
     unused_field_names = list(available_fields)
     return matches, unused_field_names
 
@@ -160,38 +175,6 @@ def fuzzy_field_matching_page_section(
     st.write("Suggested Field Mapping:")
     st.dataframe(field_mapping_json_to_table(field_mapping))
     return field_mapping, unused_field_names
-
-
-# def interactive_field_mapping_page_section(
-#     field_mapping,
-#     df_columns,
-#     toggle_name="Manually Alter Field Mapping",
-#     key_suffix: str = "",
-#     is_required: bool = True,
-# ):
-#     unique_key = (
-#         f"interactive_field_mapping_{key_suffix}"
-#         if key_suffix
-#         else "interactive_field_mapping"
-#     )
-#     interactive_field_mapping_on = st.toggle(toggle_name, key=unique_key)
-#     if interactive_field_mapping_on:
-#         updated_mapping = interactive_field_mapping(
-#             field_mapping, df_columns, is_required=is_required
-#         )
-#         st.write("Updated Field Mapping:")
-#         st.dataframe(field_mapping_json_to_table(updated_mapping))
-#         no_duplicates(updated_mapping)
-#
-#         # Calculate updated unused_field_names
-#         used_fields = {field for field in updated_mapping.values() if field is not None}
-#         updated_unused_field_names = [
-#             field for field in df_columns if field not in used_fields
-#         ]
-#
-#         return updated_mapping, updated_unused_field_names
-#     return field_mapping, df_columns
-#
 
 
 def interactive_field_mapping_page_section(

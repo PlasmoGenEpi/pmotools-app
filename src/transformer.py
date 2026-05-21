@@ -7,6 +7,9 @@ from pmotools.pmo_builder.metatable_to_pmo import (
     library_sample_info_table_to_pmo,
     specimen_info_table_to_pmo,
 )
+
+from pmotools.pmo_builder.json_convert_utils import remove_optional_null_values
+
 # from pmotools.pmo_builder import demultiplexed_targets_to_pmo_dict
 
 
@@ -38,6 +41,12 @@ def transform_mhap_info(
             "additional_representative_mhap"
         ),
         additional_mhap_detected_cols=additional_mhap_detected_cols,
+    )
+    remove_optional_null_values(
+        transformed_df["detected_microhaplotypes"], optional_mapping
+    )
+    remove_optional_null_values(
+        transformed_df["representative_microhaplotypes"]["targets"], optional_mapping
     )
     return transformed_df
 
@@ -72,6 +81,7 @@ def transform_panel_info(
         target_attributes_col=optional_fields.get("target_attributes"),
         additional_target_info_cols=additional_target_info_cols,
     )
+    remove_optional_null_values(transformed_df["target_info"], optional_fields)
     return transformed_df
 
 
@@ -123,10 +133,8 @@ def transform_specimen_info(
         additional_specimen_cols=additional_fields,
         list_values_specimen_values_delimiter=",",
     )
-    # for spec in transformed_df:
-    #     if "specimen_taxon_id" in spec and not isinstance(spec["specimen_taxon_id"], list):
-    #         spec["specimen_taxon_id"] = [spec["specimen_taxon_id"]]
-    #
+
+    remove_optional_null_values(transformed_df, optional_field_mapping)
     return transformed_df
 
 
@@ -136,7 +144,7 @@ def transform_library_sample_info(
     transformed_df = library_sample_info_table_to_pmo(
         df,
         library_sample_name_col=field_mapping["library_sample_name"],
-        sequencing_info_name_col=field_mapping["sequencing_info_name"],
+        sequencing_info_name_col=optional_mapping.get("sequencing_info_name"),
         specimen_name_col=field_mapping["specimen_name"],
         panel_name_col=field_mapping["panel_name"],
         alternate_identifiers_col=optional_mapping.get("alternate_identifiers"),
@@ -153,6 +161,8 @@ def transform_library_sample_info(
         run_accession_col=optional_mapping.get("run_accession"),
         additional_library_sample_info_cols=additional_fields,
     )
+    if additional_fields is not None:
+        remove_optional_null_values(transformed_df, additional_fields)
     return transformed_df
 
 
