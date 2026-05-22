@@ -6,6 +6,7 @@ import pandas as pd
 import io
 from unittest.mock import patch, MagicMock
 
+
 from data_loader import load_csv
 
 
@@ -71,7 +72,7 @@ class TestLoadCSV:
             result = load_csv(mock_file)
 
             assert isinstance(result, pd.DataFrame)
-            mock_read_excel.assert_called_once_with(mock_file)
+            mock_read_excel.assert_called_once_with(mock_file, sheet_name=None)
 
     def test_load_xls_file(self):
         """Test loading an old Excel file successfully."""
@@ -85,7 +86,7 @@ class TestLoadCSV:
             result = load_csv(mock_file)
 
             assert isinstance(result, pd.DataFrame)
-            mock_read_excel.assert_called_once_with(mock_file)
+            mock_read_excel.assert_called_once_with(mock_file, sheet_name=None)
 
     def test_unsupported_file_format(self):
         """Test error handling for unsupported file format."""

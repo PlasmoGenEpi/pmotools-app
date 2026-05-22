@@ -42,12 +42,6 @@ def transform_mhap_info(
         ),
         additional_mhap_detected_cols=additional_mhap_detected_cols,
     )
-    remove_optional_null_values(
-        transformed_df["detected_microhaplotypes"], optional_mapping
-    )
-    remove_optional_null_values(
-        transformed_df["representative_microhaplotypes"]["targets"], optional_mapping
-    )
     return transformed_df
 
 
