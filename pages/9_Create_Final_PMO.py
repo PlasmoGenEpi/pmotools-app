@@ -177,25 +177,7 @@ def merge_data():
 
     # Download button - only show if PMO has been created
     if "formatted_pmo" in st.session_state:
-        st.subheader("Download PMO File")
-
-        # Convert the PMO data to JSON string
-        pmo_json = json.dumps(st.session_state["formatted_pmo"], indent=2, default=str)
-
-        # Create a download button
-        st.download_button(
-            label="Download PMO JSON File",
-            data=pmo_json,
-            file_name="pmo_data.json",
-            mime="application/json",
-            help="Download the merged PMO data as a JSON file",
-        )
-
-        # Optional: Show preview of the data
-        with st.expander("Preview PMO Data"):
-            st.json(st.session_state["formatted_pmo"])
-
-        # --- Validate PMO ---
+        # Validate PMO
         st.subheader("Validate PMO File")
         avail_versions = ["v1.0.0", "v1.1.0"]
         schema_version = st.selectbox(
@@ -230,6 +212,24 @@ def merge_data():
                     st.code(str(e), language="text")
             except Exception as e:
                 st.error(f"❌ Validation error: {e}")
+
+        st.subheader("Download PMO File")
+
+        # Convert the PMO data to JSON string
+        pmo_json = json.dumps(st.session_state["formatted_pmo"], indent=2, default=str)
+
+        # Create a download button
+        st.download_button(
+            label="Download PMO JSON File",
+            data=pmo_json,
+            file_name="pmo_data.json",
+            mime="application/json",
+            help="Download the merged PMO data as a JSON file",
+        )
+
+        # Optional: Show preview of the data
+        with st.expander("Preview PMO Data"):
+            st.json(st.session_state["formatted_pmo"])
 
 
 # Initialize and run the app
