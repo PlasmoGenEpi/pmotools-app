@@ -2,16 +2,11 @@ import streamlit as st
 import json
 import os
 from src.format_page import render_header
-from pmotools.pmo_builder.mhap_table_to_pmo import (
-    create_minimum_library_specimen_dict_from_mhap_table,
-)
 from pmotools.pmo_builder.merge_to_pmo import merge_to_pmo
 from jsonschema import ValidationError
 from pmotools.pmo_engine.pmo_checker import PMOChecker
 from pmotools.utils.schema_loader import load_schema
 
-
-from pmotools.pmo_builder.pmo_updater import PMOUpdater
 
 optional_check_dict = {
     "project_info": "Project Information",
@@ -83,35 +78,14 @@ def merge_data():
                 "specimen_info" not in st.session_state
                 and "library_sample_info" not in st.session_state
             ):
-                lib_and_spec_infos = (
-                    create_minimum_library_specimen_dict_from_mhap_table(
-                        st.session_state["microhaplotype_info"][
-                            "detected_microhaplotypes"
-                        ],
-                        panel_name=panel_info["panel_info"][0]["panel_name"],
-                    )
-                )
-                spec_info = lib_and_spec_infos["specimen_info"]
-                lib_info = lib_and_spec_infos["library_sample_info"]
+                spec_info = None
+                lib_info = None
             elif (
                 "specimen_info" in st.session_state
                 and "library_sample_info" not in st.session_state
             ):
-                lib_and_spec_infos = (
-                    create_minimum_library_specimen_dict_from_mhap_table(
-                        st.session_state["microhaplotype_info"][
-                            "detected_microhaplotypes"
-                        ],
-                        panel_name=panel_info["panel_info"][0]["panel_name"],
-                    )
-                )
-                spec_info = lib_and_spec_infos["specimen_info"]
-                spec_info = PMOUpdater.merge_dicts_by_key(
-                    spec_info,
-                    st.session_state["specimen_info"],
-                    key_field="specimen_name",
-                )
-                lib_info = lib_and_spec_infos["library_sample_info"]
+                spec_info = st.session_state["specimen_info"]
+                lib_info = None
             elif (
                 "specimen_info" not in st.session_state
                 and "library_sample_info" in st.session_state
@@ -126,7 +100,7 @@ def merge_data():
                 specimen_info=spec_info,
                 library_sample_info=lib_info,
                 sequencing_info=seq_info,
-                panel_and_target_info=panel_info,
+                panel_target_info=panel_info,
                 mhap_info=st.session_state["microhaplotype_info"],
                 bioinfo_method_info=bioinfo_methods,
                 bioinfo_run_info=bioinfo_runs,
