@@ -105,7 +105,7 @@ class ReadCountsPerStagePage:
         self.display_panel_info(f"Preview {title}")
 
 
-if __name__ == "__main__":
+if __name__ in ("__main__", "__page__"):
     render_header()
     schema_fields = load_schema()
     raw_counts_required_fields = schema_fields["read_counts_perstage"]["raw_counts"][

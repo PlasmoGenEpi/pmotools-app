@@ -366,7 +366,7 @@ class PanelPage:
 
 
 # Initialize and run the app
-if __name__ == "__main__":
+if __name__ in ("__main__", "__page__"):
     render_header()
     st.subheader("Panel Information Converter", divider="gray")
     schema_fields = load_schema()

@@ -795,7 +795,7 @@ class BioInfoPage:
 
 
 # Initialize and run the app
-if __name__ == "__main__":
+if __name__ in ("__main__", "__page__"):
     render_header()
     st.subheader("Bioinformatics Run Information", divider="gray")
     schema_fields = load_schema()

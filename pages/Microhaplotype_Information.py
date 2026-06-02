@@ -141,7 +141,7 @@ class MicrohaplotypeInfoPage:
         self.display_microhaplotype_info(f"Preview {title}")
 
 
-if __name__ == "__main__":
+if __name__ in ("__main__", "__page__"):
     render_header()
     st.subheader("Microhaplotype Information Converter", divider="gray")
     schema_fields = load_schema()

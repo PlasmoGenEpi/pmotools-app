@@ -338,7 +338,7 @@ class ProjectInfoPage:
 
 
 # Initialize and run the page
-if __name__ == "__main__":
+if __name__ in ("__main__", "__page__"):
     render_header()
     st.subheader("Project Information", divider="gray")
     from src.utils import load_schema

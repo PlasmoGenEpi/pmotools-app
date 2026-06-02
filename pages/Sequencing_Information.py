@@ -378,7 +378,7 @@ class SeqInfoPage:
 
 
 # Initialize and run the page
-if __name__ == "__main__":
+if __name__ in ("__main__", "__page__"):
     render_header()
     st.subheader("Sequencing Information", divider="gray")
     schema_fields = load_schema()
