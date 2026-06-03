@@ -148,11 +148,6 @@ class BioinformaticsRunManager:
         self.required_alternate_fields = required_alternate_fields
         self.optional_fields = optional_fields
         self.optional_alternate_fields = optional_alternate_fields
-        self._initialize_session_state()
-
-    def _initialize_session_state(self):
-        if "bioinfo_methods_list" not in st.session_state:
-            st.session_state["bioinfo_methods_list"] = []
 
     def _create_method_dropdown_options(self):
         options = []
@@ -668,6 +663,8 @@ class BioinformaticsMethodManager:
                     self.bioinfo_method_infos
                 )
                 if all_valid:
+                    if "bioinfo_methods_list" not in st.session_state:
+                        st.session_state["bioinfo_methods_list"] = []
                     st.session_state["bioinfo_methods_list"].append(
                         self.bioinfo_method_infos
                     )
