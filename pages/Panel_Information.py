@@ -194,7 +194,14 @@ class PanelPage:
 
         if genome_input_mode == "Enter Manually":
             genome_name = st.text_input("Name:", help="Name of the genome.")
-            taxon_id = st.text_input("Taxon ID:", help="The NCBI taxonomy number.")
+            taxon_id = st.number_input(
+                "Taxon ID:",
+                min_value=1,
+                step=1,
+                value=None,  # or value=None if you want it to start empty
+                format="%d",
+                help="The NCBI taxonomy number.",
+            )
             version = st.text_input("Genome Version:", help="The genome version.")
             genome_url = st.text_input("URL:", help="A link to the genome file.")
             gff_url = st.text_input(
@@ -276,11 +283,11 @@ class PanelPage:
                 if len(genome_info) == 0:
                     genome_info = None
             elif isinstance(genome_info, dict):
-                print([s.strip() for s in genome_info["taxon_id"]])
+                print(genome_info["taxon_id"])
                 # Manually entered — check if all blank
                 genome_info_all_blank = (
                     "" == genome_info["name"].strip()
-                    and [""] == [s.strip() for s in genome_info["taxon_id"]]
+                    and [None] == genome_info["taxon_id"]
                     and "" == genome_info["genome_version"].strip()
                     and "" == genome_info["url"].strip()
                 )
@@ -289,9 +296,10 @@ class PanelPage:
                 else:
                     if not genome_info.get("name") or not genome_info["name"].strip():
                         errors.append("Genome name is required.")
-                    if not genome_info.get("taxon_id") or [""] == [
-                        s.strip() for s in genome_info["taxon_id"]
-                    ]:
+                    if (
+                        not genome_info.get("taxon_id")
+                        or [None] == genome_info["taxon_id"]
+                    ):
                         errors.append("Taxon ID is required.")
                     if (
                         not genome_info.get("genome_version")
