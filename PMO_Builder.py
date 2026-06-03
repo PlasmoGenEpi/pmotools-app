@@ -2,9 +2,8 @@ import streamlit as st
 from src.format_page import render_header
 
 
-def main():
+def home() -> None:
     render_header()
-    # Introduction Section
     st.subheader("About the PMO Builder", divider="gray")
     st.markdown(
         """
@@ -15,7 +14,6 @@ def main():
         """
     )
 
-    # Key Features
     st.subheader("Components", divider="gray")
     st.markdown(
         """
@@ -34,7 +32,6 @@ def main():
         """
     )
 
-    # How this will work
     st.subheader("How building your PMO will work", divider="gray")
     st.markdown(
         """
@@ -47,18 +44,44 @@ def main():
         """
     )
 
-    # Call to Action
-    st.markdown("---")
-    st.markdown("### Ready to Get Started?")
-    st.write(
-        "Select the page below (or click on the sidebar) to begin building your PMO file!"
-    )
-    st.page_link(
-        "pages/0_Required_Panel_Information.py",
-        label="Required Panel Information",
-        icon="📋",  # optional
+    st.markdown(
+        """
+            ---
+            ### Ready to Get Started?
+            Select **Panel Information** from the sidebar to begin building your PMO file!
+            """
     )
 
 
-if __name__ == "__main__":
-    main()
+pages = {
+    "Required": [
+        st.Page("pages/Panel_Information.py", title="Panel Information"),
+        st.Page(
+            "pages/Microhaplotype_Information.py", title="Microhaplotype Information"
+        ),
+    ],
+    "Optional": [
+        st.Page("pages/Specimen_Level_Metadata.py", title="Specimen Level Metadata"),
+        st.Page("pages/Project_Information.py", title="Project Information"),
+        st.Page(
+            "pages/Library_Sample_Level_Metadata.py",
+            title="Library Sample Level Metadata",
+        ),
+        st.Page("pages/Sequencing_Information.py", title="Sequencing Information"),
+        st.Page(
+            "pages/Bioinformatics_Information.py", title="Bioinformatics Information"
+        ),
+        st.Page("pages/Read_Counts_per_Stage.py", title="Read Counts per Stage"),
+    ],
+    "Finalize": [
+        st.Page("pages/Create_Final_PMO.py", title="Create Final PMO"),
+    ],
+}
+
+pg = st.navigation(
+    {
+        "": [st.Page(home, title="Home", default=True)],
+        **pages,
+    }
+)
+pg.run()

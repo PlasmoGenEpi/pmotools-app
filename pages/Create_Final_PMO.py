@@ -207,7 +207,7 @@ def merge_data():
 
 
 # Initialize and run the app
-if __name__ == "__main__":
+if __name__ in ("__main__", "__page__"):
     current_directory = os.getcwd()  # Get the current working directory
     SAVE_DIR = os.path.join(current_directory, "finished_PMO_files")
     os.makedirs(SAVE_DIR, exist_ok=True)
