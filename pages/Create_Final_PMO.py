@@ -4,8 +4,7 @@ import os
 from src.format_page import render_header
 from pmotools.pmo_builder.merge_to_pmo import merge_to_pmo
 from jsonschema import ValidationError
-from pmotools.pmo_engine.pmo_checker import PMOChecker
-from pmotools.utils.schema_loader import load_schema
+from pmotools.pmo_engine.pmo_checker import PMOChecker, load_schema
 
 
 optional_check_dict = {
