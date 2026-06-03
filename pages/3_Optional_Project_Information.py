@@ -315,7 +315,7 @@ class ProjectInfoPage:
         """Run the complete project information page."""
         project_input_mode = st.radio(
             "Project information input method:",
-            ["Upload File", "Enter Manually"],
+            ["Enter Manually", "Upload File"],
             horizontal=True,
         )
 

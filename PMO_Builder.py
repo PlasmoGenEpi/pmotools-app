@@ -48,12 +48,15 @@ def main():
     )
 
     # Call to Action
-    st.markdown(
-        """
-            ---
-            ### Ready to Get Started?
-            Select **Project Information** from the sidebar to begin building your PMO file!
-            """
+    st.markdown("---")
+    st.markdown("### Ready to Get Started?")
+    st.write(
+        "Select the page below (or click on the sidebar) to begin building your PMO file!"
+    )
+    st.page_link(
+        "pages/0_Required_Panel_Information.py",
+        label="Required Panel Information",
+        icon="📋",  # optional
     )
 
 

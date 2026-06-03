@@ -182,10 +182,10 @@ class PanelPage:
             )
 
     def add_genome_information(self):
-        st.subheader(
-            "Add Genome Information (optional but required if panel_info has genomic location)"
+        st.subheader("Add Genome Information (Optional)")
+        st.write(
+            "Note: Genome information is required if you have included genomic locations above."
         )
-
         genome_input_mode = st.radio(
             "Genome input method:",
             ["Enter Manually", "Upload File"],
