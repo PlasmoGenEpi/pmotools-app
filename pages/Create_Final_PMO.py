@@ -14,6 +14,7 @@ optional_check_dict = {
     "library_sample_info": "Library Sample Level Metadata",
     "seq_info": "Sequencing Information",
     "bioinfo_run_infos": "Bioinformatics Runs Information",
+    "read_counts_per_stage": "Read Counts per Stage",
 }
 
 check_dict = {
