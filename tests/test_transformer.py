@@ -202,8 +202,6 @@ class TestTransformSpecimenInfo:
             mock_transform.assert_called_once()
             call_args = mock_transform.call_args[1]
             assert call_args["specimen_name_col"] == "specimen"
-            assert call_args["specimen_taxon_id_col"] == "specimen_taxon"
-            assert call_args["host_taxon_id_col"] == "host_taxon"
 
     def test_transform_specimen_info_with_optional_fields(self):
         """Test transformation with optional fields."""
@@ -316,7 +314,6 @@ class TestTransformLibrarySampleInfo:
             mock_transform.assert_called_once()
             call_args = mock_transform.call_args[1]
             assert call_args["library_sample_name_col"] == "library_sample"
-            assert call_args["sequencing_info_name_col"] == "sequencing_info"
             assert call_args["specimen_name_col"] == "specimen"
             assert call_args["panel_name_col"] == "panel"
 

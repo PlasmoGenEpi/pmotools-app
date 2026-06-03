@@ -8,10 +8,6 @@ from pmotools.pmo_builder.metatable_to_pmo import (
     specimen_info_table_to_pmo,
 )
 
-from pmotools.pmo_builder.json_convert_utils import remove_optional_null_values
-
-# from pmotools.pmo_builder import demultiplexed_targets_to_pmo_dict
-
 
 def transform_mhap_info(
     df, bioinfo_id, field_mapping, optional_mapping, additional_mhap_detected_cols=None
@@ -75,7 +71,6 @@ def transform_panel_info(
         target_attributes_col=optional_fields.get("target_attributes"),
         additional_target_info_cols=additional_target_info_cols,
     )
-    remove_optional_null_values(transformed_df["target_info"], optional_fields)
     return transformed_df
 
 
@@ -128,7 +123,6 @@ def transform_specimen_info(
         list_values_specimen_values_delimiter=",",
     )
 
-    remove_optional_null_values(transformed_df, optional_field_mapping)
     return transformed_df
 
 
@@ -155,8 +149,7 @@ def transform_library_sample_info(
         run_accession_col=optional_mapping.get("run_accession"),
         additional_library_sample_info_cols=additional_fields,
     )
-    if additional_fields is not None:
-        remove_optional_null_values(transformed_df, additional_fields)
+
     return transformed_df
 
 
