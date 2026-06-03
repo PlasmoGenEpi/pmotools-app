@@ -157,7 +157,7 @@ class BioinformaticsRunManager:
         return options
 
     def _get_method_selection(self, i=None):
-        if not st.session_state["bioinfo_methods_list"]:
+        if not st.session_state.get("bioinfo_methods_list"):
             st.warning(
                 "No bioinformatics methods available. Please add a method below."
             )
