@@ -17,12 +17,6 @@ class SeqInfoPage:
         self.required_alternate_fields = required_alternate_fields
         self.optional_fields = optional_fields
         self.optional_alternate_fields = optional_alternate_fields
-        self._initialize_session_state()
-
-    def _initialize_session_state(self):
-        """Initialize session state variables if they don't exist."""
-        if "seq_info" not in st.session_state:
-            st.session_state["seq_info"] = []
 
     def _show_runs_count(self):
         """Show current sequencing runs count."""
@@ -252,6 +246,8 @@ class SeqInfoPage:
                     st.error(error)
                 st.warning("Please fill in all required fields before saving.")
             else:
+                if "seq_info" not in st.session_state:
+                    st.session_state["seq_info"] = []
                 st.session_state["seq_info"].append(seq_info)
                 st.success("Sequencing information saved successfully!")
                 st.info(f"Total sequencing runs: {len(st.session_state['seq_info'])}")
@@ -290,7 +286,8 @@ class SeqInfoPage:
                         k: v for k, v in entry.items() if v is not None and v != ""
                     }
                     new_runs.append(entry)
-
+                if "seq_info" not in st.session_state:
+                    st.session_state["seq_info"] = []
                 st.session_state["seq_info"].extend(new_runs)
                 st.success(f"Added {len(new_runs)} sequencing run(s) successfully!")
                 st.info(f"Total sequencing runs: {len(st.session_state['seq_info'])}")
