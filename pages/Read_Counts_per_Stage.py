@@ -49,9 +49,9 @@ class ReadCountsPerStagePage:
                 )
                 st.session_state[session_name] = transformed_df
                 try:
-                    st.success("Specimen Information has been saved!")
+                    st.success("Read counts per stage has been saved!")
                 except Exception as e:
-                    st.error(f"Error saving Specimen Information: {e}")
+                    st.error(f"Error saving Read counts per stage Information: {e}")
 
     def display_panel_info(self, toggle_text):
         if session_name in st.session_state:
@@ -59,6 +59,27 @@ class ReadCountsPerStagePage:
             if preview:
                 st.write(f"Current {title}:")
                 st.json(st.session_state[session_name])
+
+    def bioinfo_name_input(self):
+        """Get bioinformatics name from user - either from a column or as a string."""
+        st.subheader("Bioinformatics ID (Optional)")
+
+        # Option to select from column or enter manually
+        input_method = st.radio(
+            "Select bioinformatics name source:",
+            ["None", "Enter manually"],
+            horizontal=True,
+            key="bioinfo_id_method",
+        )
+        # No file uploaded, only allow manual entry or none
+        if "Enter manually" == input_method:
+            return st.text_input(
+                "Enter bioinformatics Name:",
+                help="Identifier for the bioinformatics run.",
+                key="bioinformatics_run_text",
+            )
+        else:
+            return None
 
     def run(self):
         st.subheader("Raw Read Counts per Sample", divider="gray")
@@ -87,9 +108,8 @@ class ReadCountsPerStagePage:
             [],
             key_suffix="reads_by_stage",
         )
-        bioinfo_run_name = st.text_input(
-            "Bioinformatics Run Name:", help="The name of the bioinformatics run."
-        )
+        bioinfo_run_name = self.bioinfo_name_input()
+
         # Transform and save data
         if raw_counts_mapped_fields and reads_by_stage_mapped_fields:
             self.transform_and_save_data(
@@ -130,5 +150,8 @@ if __name__ in ("__main__", "__page__"):
         st.success(
             f"Your {title} has already been saved during a" " previous run of this page"
         )
+        if st.button("Clear Previous Info", type="secondary"):
+            del st.session_state[session_name]
+            st.rerun()
         app.display_panel_info(f"Preview previously stored {title}")
     app.run()

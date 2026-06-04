@@ -398,4 +398,7 @@ if __name__ in ("__main__", "__page__"):
         st.success(
             f"You have {len(st.session_state['seq_info'])} sequencing run(s) saved."
         )
+        if st.button("Clear Previous Info", type="secondary"):
+            del st.session_state["seq_info"]
+            st.rerun()
     app.run()

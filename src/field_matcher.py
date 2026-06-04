@@ -193,10 +193,11 @@ def interactive_field_mapping_page_section(
     if interactive_field_mapping_on:
         # "Set All to No Match" button — writes to session state before selectboxes render
         # no_match_key = f"no_match_all_{unique_key}"
-        if st.button("Set All to No Match", key=f"btn_{unique_key}"):
-            for field in field_mapping:
-                selectbox_key = f"sb_{unique_key}_{field}"
-                st.session_state[selectbox_key] = "no match"
+        if not is_required:
+            if st.button("Set All to No Match", key=f"btn_{unique_key}"):
+                for field in field_mapping:
+                    selectbox_key = f"sb_{unique_key}_{field}"
+                    st.session_state[selectbox_key] = "no match"
 
         # Add "no match" option to the available choices
         if is_required:

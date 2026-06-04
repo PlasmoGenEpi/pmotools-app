@@ -124,9 +124,17 @@ def merge_data():
                 return len(val) if hasattr(val, "__len__") else 0
 
             # Always-present fields
+            library_samples_with_detected_count = 0
+            for detected in pmo.get("detected_microhaplotypes", []):
+                library_samples_with_detected_count += len(detected["library_samples"])
+
             always_present = [
-                (_count("library_sample_info"), "library sample(s)"),
                 (_count("specimen_info"), "specimen(s)"),
+                (_count("library_sample_info"), "library sample(s)"),
+                (
+                    library_samples_with_detected_count,
+                    "library sample(s) with detected microhaplotypes",
+                ),
                 (_count("panel_info"), "panel(s)"),
                 (_count("target_info"), "target(s)"),
                 (
@@ -134,6 +142,11 @@ def merge_data():
                     "target(s) with microhaplotype calls",
                 ),
             ]
+            library_samples_with_read_counts_per_stage = 0
+            for reads_by_stage in pmo.get("read_counts_by_stage", []):
+                library_samples_with_read_counts_per_stage += len(
+                    reads_by_stage["read_counts_by_library_sample_by_stage"]
+                )
 
             # Optional fields (show 0 if absent)
             optional = [
@@ -141,13 +154,18 @@ def merge_data():
                 (_count("sequencing_info"), "sequencing run(s)"),
                 (_count("project_info"), "project(s)"),
                 (_count("bioinformatics_run_info"), "bioinformatics run(s)"),
+                (
+                    library_samples_with_read_counts_per_stage,
+                    "library sample(s) with read counts per stage",
+                ),
             ]
 
             st.markdown("**Merge Summary**")
             for count, label in always_present + optional:
                 st.markdown(f"- Loaded **{count}** {label}")
         except Exception as e:
-            st.error(f"Error merging data: {e}")
+            with st.expander("Error merging data", expanded=True):
+                st.code(str(e), language="text")
 
     # Download button - only show if PMO has been created
     if "formatted_pmo" in st.session_state:

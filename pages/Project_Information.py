@@ -359,5 +359,8 @@ if __name__ in ("__main__", "__page__"):
         st.success(
             "Your project information has already been saved during a previous run of this page"
         )
+        if st.button("Clear Previous Info", type="secondary"):
+            del st.session_state["project_info"]
+            st.rerun()
         app.display_info(key_suffix="prev")
     app.run()

@@ -10,16 +10,19 @@ def home() -> None:
         The **PMO Builder** is designed to help create and manage PMO
         (Portable Microhaplotype Object) files from your own data to organize
         and store information in a standardized format. This app simplifies the
-        conversion of your data from multiple CSV files into the relational PMO format.
+        conversion of your data from multiple tabular files (CSV, TSV, EXCEL) into the relational PMO format.
         """
     )
 
     st.subheader("Components", divider="gray")
+
     st.markdown(
         """
         As you move through the app you will put together the following information. Together these will make a complete PMO:
         - **Panel Information**: A table including data on the targets that make up the panel, at minimum the panel name, target names and their primer pairs
         - **Microhaplotype Information**: A table containing the alleles called for each of the samples for each of the targets and the read counts associated.
+
+
         **Optionally, you can also add the following:**
         - **Specimen Information (highly recommended)**: Metadata describing the biological specimens.
         - **Project Information**: Information describing the project this data belongs to.
@@ -31,6 +34,18 @@ def home() -> None:
         More information on the file format can be found [here](https://plasmogenepi.github.io/PMO_Docs/)
         """
     )
+
+    st.markdown(
+        "If unfamiliar with the PMO format, you can download a template Excel file below to get started"
+    )
+    with open("example_data/PMO_building_template.xlsx", "rb") as f:
+        st.download_button(
+            label="Download PMO Excel template",
+            data=f,
+            file_name="PMO_building_template.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            icon=":material/download:",  # optional
+        )
 
     st.subheader("How building your PMO will work", divider="gray")
     st.markdown(
@@ -48,9 +63,10 @@ def home() -> None:
         """
             ---
             ### Ready to Get Started?
-            Select **Panel Information** from the sidebar to begin building your PMO file!
+            Select **Panel Information** from the sidebar (or click link below) to begin building your PMO file!
             """
     )
+    st.page_link("pages/Panel_Information.py", label="Panel Information")
 
 
 pages = {
