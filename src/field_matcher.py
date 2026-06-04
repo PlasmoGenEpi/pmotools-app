@@ -12,21 +12,8 @@ def fuzzy_match_fields(
     is_required: bool = True,
     match_threshold: int = 60,
 ):
-    """
-    Matches field names to the target schema using fuzzy matching, ensuring
-    that each target schema field is only matched to one field name.
-
-    Args:
-        field_names (list): List of column names to be matched.
-        target_schema (list): List of standard schema fields to match against.
-
-    Returns:
-        dict: A dictionary mapping each field name to the best-matched schema field.
-        list: A list of unused field names that could not be matched.
-    """
     # Initialize all targets with None to ensure full coverage in the table
     matches = {target: None for target in target_schema}
-    # Track remaining available fields to enforce one-to-one mapping
     available_fields = set(field_names)
 
     # Error if not enough unique fields to match all targets
@@ -36,11 +23,43 @@ def fuzzy_match_fields(
             f"Have {len(available_fields)} unique field(s) for {len(target_schema)} target(s)."
         )
 
-    # For every target find the best matching unused field
+    # --- First pass: exact matches (target name or any alternate name) ---
     for target in target_schema:
         if not available_fields:
-            # If no fields remain, required path already surfaced a global error above
-            # For optional, we keep 'no match' as initialized
+            continue
+
+        exact_match = None
+
+        # Check if the target itself exactly matches an available field (case-insensitive)
+        for field in available_fields:
+            if field.lower() == target.lower():
+                exact_match = field
+                break
+
+        # If no direct exact match, check alternate names
+        if (
+            exact_match is None
+            and alternate_schema_names
+            and target in alternate_schema_names
+        ):
+            for alt_target in alternate_schema_names.get(target, []):
+                for field in available_fields:
+                    if field.lower() == alt_target.lower():
+                        exact_match = field
+                        break
+                if exact_match:
+                    break
+
+        if exact_match:
+            matches[target] = exact_match
+            available_fields.discard(exact_match)
+
+    # --- Second pass: fuzzy match remaining unmatched targets ---
+    for target in target_schema:
+        if matches[target] is not None:
+            # Already matched in exact pass
+            continue
+        if not available_fields:
             continue
 
         remaining_fields = list(available_fields)
@@ -53,23 +72,19 @@ def fuzzy_match_fields(
                     best_match = alt_match
 
         if not best_match:
-            # Leave as None
             continue
 
         best_match_field = best_match[0]
         best_score = best_match[1]
 
         if is_required:
-            # Always take the best remaining field for required targets
             matches[target] = best_match_field
             available_fields.discard(best_match_field)
         else:
-            # Only accept if above threshold; otherwise keep None
             if best_score >= match_threshold:
                 matches[target] = best_match_field
                 available_fields.discard(best_match_field)
 
-    # Fields not used in matching
     unused_field_names = list(available_fields)
     return matches, unused_field_names
 
@@ -176,14 +191,53 @@ def interactive_field_mapping_page_section(
     )
     interactive_field_mapping_on = st.toggle(toggle_name, key=unique_key)
     if interactive_field_mapping_on:
-        updated_mapping = interactive_field_mapping(
-            field_mapping, df_columns, is_required=is_required
-        )
+        # "Set All to No Match" button — writes to session state before selectboxes render
+        # no_match_key = f"no_match_all_{unique_key}"
+        if not is_required:
+            if st.button("Set All to No Match", key=f"btn_{unique_key}"):
+                for field in field_mapping:
+                    selectbox_key = f"sb_{unique_key}_{field}"
+                    st.session_state[selectbox_key] = "no match"
+
+        # Add "no match" option to the available choices
+        if is_required:
+            options = df_columns
+        else:
+            options = ["no match"] + df_columns
+
+        updated_mapping = {}
+        for field, suggested_match in field_mapping.items():
+            selectbox_key = f"sb_{unique_key}_{field}"
+
+            # Determine the default index, preferring session state if already set
+            if selectbox_key in st.session_state:
+                try:
+                    index = options.index(st.session_state[selectbox_key])
+                except ValueError:
+                    index = 0
+            else:
+                try:
+                    if isinstance(suggested_match, list):
+                        index = (
+                            options.index(suggested_match[0]) if suggested_match else 0
+                        )
+                    else:
+                        index = options.index(suggested_match) if suggested_match else 0
+                except ValueError:
+                    index = 0
+
+            selected = st.selectbox(
+                f"Modify match for {field}",
+                options=options,
+                index=index,
+                key=selectbox_key,
+            )
+            updated_mapping[field] = None if selected == "no match" else selected
+
         st.write("Updated Field Mapping:")
         st.dataframe(field_mapping_json_to_table(updated_mapping))
         no_duplicates(updated_mapping)
 
-        # Calculate updated unused_field_names
         used_fields = {field for field in updated_mapping.values() if field is not None}
         updated_unused_field_names = [
             field for field in df_columns if field not in used_fields
@@ -262,7 +316,7 @@ def load_data(
     file_uploader_key = f"file_uploader_{key_suffix}" if key_suffix else None
     uploaded_file = st.file_uploader(
         "Upload a TSV file",
-        type=["csv", "tsv", "xlsx", "xls", "txt"],
+        type=["csv", "tsv", "xlsx", "xls", "txt", "gz", "gzip"],
         key=file_uploader_key,
     )
     df, mapped_fields, selected_optional_fields, selected_additional_fields = (
@@ -272,7 +326,27 @@ def load_data(
         None,
     )
     if uploaded_file:
-        df = load_csv(uploaded_file)
+        # --- Excel sheet selection ---
+        sheet_name = None
+        if uploaded_file.name.endswith((".xlsx", ".xls")):
+            xl = pd.ExcelFile(uploaded_file)
+            sheet_names = xl.sheet_names
+            if len(sheet_names) > 1:
+                sheet_key = (
+                    f"sheet_selector_{key_suffix}" if key_suffix else "sheet_selector"
+                )
+                sheet_name = st.selectbox(
+                    "Multiple sheets detected — select a sheet to load:",
+                    options=sheet_names,
+                    key=sheet_key,
+                )
+                st.info(f"Loading sheet: **{sheet_name}**")
+            else:
+                sheet_name = sheet_names[0]
+            # Reset file pointer after ExcelFile peek
+            uploaded_file.seek(0)
+
+        df = load_csv(uploaded_file, sheet_name=sheet_name)
         preview_toggle_key = f"preview_toggle_{key_suffix}" if key_suffix else None
         interactive_preview = st.toggle("Preview File", key=preview_toggle_key)
         if interactive_preview:
@@ -307,7 +381,6 @@ def load_data(
         selected_additional_fields = additional_fields_section(
             unused_field_names, key_suffix=additional_key_suffix
         )
-        # For output, set selected_optional_fields to the optional mapping result
         selected_optional_fields = mapped_optional_fields
 
     return df, mapped_fields, selected_optional_fields, selected_additional_fields

@@ -11,15 +11,15 @@ title = "specimen level metadata"
 class SpecimenMetadataPage:
     def __init__(
         self,
-        required_fields,
-        required_alternate_fields,
-        optional_fields,
-        optional_alternate_fields,
+        spec_required_fields,
+        spec_required_alternate_fields,
+        spec_optional_fields,
+        spec_optional_alternate_fields,
     ):
-        self.required_fields = required_fields
-        self.required_alternate_fields = required_alternate_fields
-        self.optional_fields = optional_fields
-        self.optional_alternate_fields = optional_alternate_fields
+        self.required_fields = spec_required_fields
+        self.required_alternate_fields = spec_required_alternate_fields
+        self.optional_fields = spec_optional_fields
+        self.optional_alternate_fields = spec_optional_alternate_fields
 
     def transform_and_save_data(
         self, df, mapped_fields, selected_optional_fields, selected_additional_fields
@@ -67,7 +67,7 @@ class SpecimenMetadataPage:
         self.display_panel_info(f"Preview {title}")
 
 
-if __name__ == "__main__":
+if __name__ in ("__main__", "__page__"):
     render_header()
     st.subheader("Specimen Level Metadata Converter", divider="gray")
     schema_fields = load_schema()
@@ -89,5 +89,8 @@ if __name__ == "__main__":
         st.success(
             f"Your {title} has already been saved during a" " previous run of this page"
         )
+        if st.button("Clear Previous Info", type="secondary"):
+            del st.session_state[session_name]
+            st.rerun()
         app.display_panel_info(f"Preview previously stored {title}")
     app.run()

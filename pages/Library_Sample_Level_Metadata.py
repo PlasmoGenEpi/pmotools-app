@@ -67,7 +67,7 @@ class LibrarySampleMetadataPageMetadataPage:
         self.display_panel_info(f"Preview {title}")
 
 
-if __name__ == "__main__":
+if __name__ in ("__main__", "__page__"):
     render_header()
     st.subheader("Library Sample Level Metadata Converter", divider="gray")
     schema_fields = load_schema()
@@ -89,5 +89,8 @@ if __name__ == "__main__":
         st.success(
             f"Your {title} has already been saved during a" " previous run of this page"
         )
+        if st.button("Clear Previous Info", type="secondary"):
+            del st.session_state[session_name]
+            st.rerun()
         app.display_panel_info(f"Preview previously stored {title}")
     app.run()

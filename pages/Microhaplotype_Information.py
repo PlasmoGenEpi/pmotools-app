@@ -23,13 +23,13 @@ class MicrohaplotypeInfoPage:
 
     def bioinfo_id_input(self, df):
         """Get bioinformatics ID from user - either from a column or as a string."""
-        st.subheader("Bioinformatics ID")
+        st.subheader("Bioinformatics ID (Optional)")
 
         if df is not None and not df.empty:
             # Option to select from column or enter manually
             input_method = st.radio(
                 "Select bioinformatics ID source:",
-                ["Select from column", "Enter manually"],
+                ["None", "Enter manually", "Select from column"],
                 horizontal=True,
                 key="bioinfo_id_method",
             )
@@ -41,19 +41,27 @@ class MicrohaplotypeInfoPage:
                     key="bioinfo_id_column",
                 )
                 return column
-            else:
+            elif "Enter manually" == input_method:
                 return st.text_input(
                     "Enter bioinformatics ID:",
                     help="Identifier for the bioinformatics run.",
                     key="bioinfo_id_text",
                 )
         else:
-            # No file uploaded, only allow manual entry
-            return st.text_input(
-                "Enter bioinformatics ID:",
-                help="Identifier for the bioinformatics run.",
-                key="bioinfo_id_text",
+            # Option to select from column or enter manually
+            input_method = st.radio(
+                "Select bioinformatics ID source:",
+                ["None", "Enter manually"],
+                horizontal=True,
+                key="bioinfo_id_method",
             )
+            # No file uploaded, only allow manual entry or none
+            if "Enter manually" == input_method:
+                return st.text_input(
+                    "Enter bioinformatics ID:",
+                    help="Identifier for the bioinformatics run.",
+                    key="bioinfo_id_text",
+                )
 
     def transform_and_save_data(
         self,
@@ -71,7 +79,8 @@ class MicrohaplotypeInfoPage:
             if not bioinfo_id or (
                 isinstance(bioinfo_id, str) and not bioinfo_id.strip()
             ):
-                errors.append("Bioinformatics ID is required.")
+                bioinfo_id = None
+                # errors.append("Bioinformatics ID is required.")
 
             if not mapped_fields:
                 errors.append(
@@ -132,7 +141,7 @@ class MicrohaplotypeInfoPage:
         self.display_microhaplotype_info(f"Preview {title}")
 
 
-if __name__ == "__main__":
+if __name__ in ("__main__", "__page__"):
     render_header()
     st.subheader("Microhaplotype Information Converter", divider="gray")
     schema_fields = load_schema()

@@ -1,4 +1,89 @@
 {
+    "project_name": {
+        "required": [
+            "project_name",
+            "project_description"
+        ],
+        "required_alternatives": {
+            "project_name": [
+                "name"
+            ],
+            "project_description": [
+                "description",
+                "study_description",
+                "project_summary",
+                "summary",
+                "abstract"
+            ]
+        },
+        "optional": [
+            "BioProject_accession",
+            "project_collector_chief_scientist",
+            "project_contributors",
+            "project_type"
+        ],
+        "optional_alternatives": {
+            "BioProject_accession": [
+                "bioproject_id",
+                "bioproject_accession",
+                "ncbi_bioproject"
+            ],
+            "project_collector_chief_scientist": [
+                "chief_scientist",
+                "collector",
+                "principal_investigator",
+                "pi"
+            ],
+            "project_contributors": [
+                "contributors",
+                "collaborators",
+                "project_collaborators",
+                "team_members"
+            ],
+            "project_type": [
+                "study_type",
+                "project_category",
+                "research_type"
+            ]
+        }
+    },
+    "targeted_genomes": {
+        "required": [
+            "name",
+            "taxon_id",
+            "genome_version",
+            "url"
+        ],
+        "required_alternatives": {
+            "name": [
+                "genome_name"
+            ],
+            "taxon_id": [
+                "taxon"
+            ],
+            "genome_version": [
+                "version"
+            ],
+            "url": [
+                "genome_url",
+                "genome_link"
+            ]
+        },
+        "optional": [
+            "gff_url",
+            "chromosomes"
+        ],
+        "optional_alternatives": {
+            "gff_url": [
+                "gff_link",
+                "gff"
+            ],
+            "chromosomes": [
+                "chroms",
+                "chromosome"
+            ]
+        }
+    },
     "panel_info": {
         "required": [
             "target_name",
@@ -106,12 +191,7 @@
     },
     "specimen_level_metadata": {
         "required": [
-            "specimen_name",
-            "specimen_taxon_id",
-            "host_taxon_id",
-            "collection_date",
-            "collection_country",
-            "project_name"
+            "specimen_name"
         ],
         "required_alternatives": {
             "specimen_name": [
@@ -120,45 +200,15 @@
                 "sample_id",
                 "bio_id",
                 "sample_accession"
-            ],
-            "specimen_taxon_id": [
-                "specimen_taxon_id",
-                "taxon_id",
-                "species_id",
-                "organism_id",
-                "sample_taxon_id"
-            ],
-            "host_taxon_id": [
-                "host_taxon_id",
-                "taxon_id",
-                "species_id",
-                "individual_taxon_id",
-                "sample_taxon_id"
-            ],
-            "collection_date": [
-                "collection_date",
-                "date_of_collection",
-                "sampling_date",
-                "gathering_date"
-            ],
-            "collection_country": [
-                "collection_country",
-                "country_of_collection",
-                "sampling_country",
-                "origin_country",
-                "country",
-                "admin_level_0",
-                "geo_admin0"
-            ],
-            "project_name": [
-                "project_name",
-                "study_name",
-                "research_project",
-                "experiment_name"
             ]
         },
         "optional": [
             "alternate_identifiers",
+            "specimen_taxon_id",
+            "host_taxon_id",
+            "collection_date",
+            "collection_country",
+            "project_name",
             "blood_meal",
             "drug_usage",
             "env_broad_scale",
@@ -321,13 +371,47 @@
             "treatment_status": [
                 "treatment_status",
                 "treated"
+            ],
+            "specimen_taxon_id": [
+                "specimen_taxon_id",
+                "taxon_id",
+                "species_id",
+                "organism_id",
+                "sample_taxon_id"
+            ],
+            "host_taxon_id": [
+                "host_taxon_id",
+                "taxon_id",
+                "species_id",
+                "individual_taxon_id",
+                "sample_taxon_id"
+            ],
+            "collection_date": [
+                "collection_date",
+                "date_of_collection",
+                "sampling_date",
+                "gathering_date"
+            ],
+            "collection_country": [
+                "collection_country",
+                "country_of_collection",
+                "sampling_country",
+                "origin_country",
+                "country",
+                "admin_level_0",
+                "geo_admin0"
+            ],
+            "project_name": [
+                "project_name",
+                "study_name",
+                "research_project",
+                "experiment_name"
             ]
         }
     },
     "library_sample_level_metadata": {
         "required": [
             "library_sample_name",
-            "sequencing_info_name",
             "specimen_name",
             "panel_name"
         ],
@@ -338,15 +422,6 @@
                 "sample_name",
                 "library_id",
                 "experiment_sample_id"
-            ],
-            "sequencing_info_name": [
-                "sequencing_info_name",
-                "sequencing_info_id",
-                "seq_info_id",
-                "sequencing_id",
-                "sequence_record_id",
-                "sequencing_run",
-                "seq_run"
             ],
             "specimen_name": [
                 "specimen_name",
@@ -374,7 +449,8 @@
             "library_prep_plate_position",
             "parasite_density",
             "parasite_density_method",
-            "run_accession"
+            "run_accession",
+            "sequencing_info_name"
         ],
         "optional_alternatives": {
             "alternate_identifiers": [
@@ -423,6 +499,15 @@
                 "run_accession",
                 "run_id",
                 "run_accession_number"
+            ],
+            "sequencing_info_name": [
+                "sequencing_info_name",
+                "sequencing_info_id",
+                "seq_info_id",
+                "sequencing_id",
+                "sequence_record_id",
+                "sequencing_run",
+                "seq_run"
             ]
         }
     },
@@ -588,18 +673,46 @@
         "optional_alternatives": {}
     },
     "sequencing_info": {
-        "required": [
-            "seq_date",
-            "nucl_acid_ext",
-            "nucl_acid_amp",
-            "nucl_acid_ext_date",
-            "nucl_acid_amp_date",
-            "pcr_cond",
-            "lib_screen",
-            "lib_layout",
-            "lib_kit",
-            "seq_center"
-        ]
+      "required": [
+          "sequencing_info_name",
+          "seq_platform",
+          "seq_instrument_model",
+          "library_layout",
+          "library_strategy",
+          "library_source",
+          "library_selection"
+      ],
+      "required_alternatives": {
+          "sequencing_info_name": ["sequencing_name", "seq_info_name", "run_name", "sequencing_id"],
+          "seq_platform": ["platform", "sequencing_platform", "instrument_platform"],
+          "seq_instrument_model": ["instrument_model", "instrument", "sequencer_model", "model"],
+          "library_layout": ["layout", "read_layout", "paired_end", "read_type"],
+          "library_strategy": ["strategy", "seq_strategy", "sequencing_strategy"],
+          "library_source": ["source", "seq_source", "nucleic_acid_source"],
+          "library_selection": ["selection", "seq_selection", "library_prep"]
+      },
+      "optional": [
+          "library_kit",
+          "library_screen",
+          "nucl_acid_amp",
+          "nucl_acid_amp_date",
+          "nucl_acid_ext",
+          "nucl_acid_ext_date",
+          "pcr_cond",
+          "seq_center",
+          "seq_date"
+      ],
+      "optional_alternatives": {
+          "library_kit": ["kit", "library_preparation_kit", "prep_kit"],
+          "library_screen": ["screen", "normalization", "enrichment"],
+          "nucl_acid_amp": ["amplification", "nucleic_acid_amplification", "amp_method"],
+          "nucl_acid_amp_date": ["amplification_date", "amp_date"],
+          "nucl_acid_ext": ["extraction", "nucleic_acid_extraction", "ext_method"],
+          "nucl_acid_ext_date": ["extraction_date", "ext_date"],
+          "pcr_cond": ["pcr_conditions", "pcr_cycles", "pcr_protocol"],
+          "seq_center": ["sequencing_center", "center", "facility", "core_facility"],
+          "seq_date": ["sequencing_date", "date_sequenced", "run_date"]
+      }
     },
     "bioinformatics_info": {
         "required": [
@@ -662,5 +775,28 @@
                 ]
             }
         }
-    }
+    },
+    "bioinformatics_run_info": {
+      "required": ["bioinformatics_run_name"],
+      "required_alternatives": {
+          "bioinformatics_run_name": ["run_name", "bioinfo_run_name", "analysis_run_name"]
+      },
+      "optional": ["run_date"],
+      "optional_alternatives": {
+          "run_date": ["date", "analysis_date", "pipeline_date", "bioinformatics_run_date"]
+      }
+  },
+  "bioinformatics_methods_info": {
+      "required": ["program", "program_version"],
+      "required_alternatives": {
+          "program": ["tool", "software", "program_name", "tool_name"],
+          "program_version": ["version", "tool_version", "software_version"]
+      },
+      "optional": ["additional_argument", "program_description", "program_url"],
+      "optional_alternatives": {
+          "additional_argument": ["arguments", "args", "parameters", "params", "additional_arguments"],
+          "program_description": ["description", "method_description", "tool_description"],
+          "program_url": ["url", "tool_url", "software_url", "program_link"]
+      }
+  }
 }

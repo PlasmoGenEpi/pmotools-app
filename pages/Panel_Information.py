@@ -43,18 +43,28 @@ class PanelPage:
     def __init__(
         self,
         save_dir,
-        required_fields,
-        required_alternate_fields,
-        optional_fields,
-        optional_alternate_fields,
+        panel_required_fields,
+        panel_required_alternate_fields,
+        panel_optional_fields,
+        panel_optional_alternate_fields,
+        genome_required_fields,
+        genome_required_alternate_fields,
+        genome_optional_fields,
+        genome_optional_alternate_fields,
     ):
         self.save_dir = save_dir
         self.panel_manager = PanelManager(self.save_dir)
         self.panel_manager.check_save_dir()
-        self.required_fields = required_fields
-        self.required_alternate_fields = required_alternate_fields
-        self.optional_fields = optional_fields
-        self.optional_alternate_fields = optional_alternate_fields
+
+        self.required_fields = panel_required_fields
+        self.required_alternate_fields = panel_required_alternate_fields
+        self.optional_fields = panel_optional_fields
+        self.optional_alternate_fields = panel_optional_alternate_fields
+
+        self.genome_required_fields = genome_required_fields
+        self.genome_required_alternate_fields = genome_required_alternate_fields
+        self.genome_optional_fields = genome_optional_fields
+        self.genome_optional_alternate_fields = genome_optional_alternate_fields
 
     def load_saved_panel(self):
         use_past = st.checkbox("Use a past version")
@@ -172,23 +182,79 @@ class PanelPage:
             )
 
     def add_genome_information(self):
-        st.subheader("Add Genome Information")
-        genome_name = st.text_input("Name:", help="Name of the genome.")
-        taxon_id = st.text_input("Taxon ID:", help="The NCBI taxonomy number.")
-        version = st.text_input("Genome Version:", help="The genome version.")
-        genome_url = st.text_input("URL:", help="A link to the genome file.")
-        gff_url = st.text_input(
-            "GFF URL (Optional):", help="A link to the genome’s annotation file"
+        st.subheader("Add Genome Information (Optional)")
+        st.write(
+            "Note: Genome information is required if you have included genomic locations above."
         )
-        genome_info = {
-            "name": genome_name,
-            "taxon_id": taxon_id,
-            "url": genome_url,
-            "genome_version": version,
-        }
-        if gff_url:
-            genome_info["gff_url"] = gff_url
-        return genome_info
+        genome_input_mode = st.radio(
+            "Genome input method:",
+            ["Enter Manually", "Upload File"],
+            horizontal=True,
+        )
+
+        if genome_input_mode == "Enter Manually":
+            genome_name = st.text_input("Name:", help="Name of the genome.")
+            taxon_id = st.number_input(
+                "Taxon ID:",
+                min_value=1,
+                step=1,
+                value=None,  # or value=None if you want it to start empty
+                format="%d",
+                help="The NCBI taxonomy number.",
+            )
+            version = st.text_input("Genome Version:", help="The genome version.")
+            genome_url = st.text_input("URL:", help="A link to the genome file.")
+            gff_url = st.text_input(
+                "GFF URL (Optional):", help="A link to the genome's annotation file"
+            )
+            genome_info = {
+                "name": genome_name,
+                "taxon_id": [taxon_id],
+                "url": genome_url,
+                "genome_version": version,
+            }
+            if gff_url:
+                genome_info["gff_url"] = gff_url
+            return genome_info
+
+        else:  # Upload File
+            (
+                df,
+                mapped_fields,
+                selected_optional_fields,
+                selected_additional_fields,
+            ) = load_data(
+                self.genome_required_fields,
+                self.genome_required_alternate_fields,
+                self.genome_optional_fields,
+                self.genome_optional_alternate_fields,
+                key_suffix="genome",
+            )
+            if df is not None and mapped_fields is not None:
+                # Build list of genome info dicts from the uploaded file
+                genome_info_list = []
+                for _, row in df.iterrows():
+                    genome_entry = {}
+                    # Map required/optional fields
+                    for pmo_field, input_field in mapped_fields.items():
+                        if input_field and input_field in df.columns:
+                            if pmo_field == "taxon_id":
+                                genome_entry[pmo_field] = [row[input_field]]
+                            else:
+                                genome_entry[pmo_field] = row[input_field]
+                    # Map optional fields if present
+                    if selected_optional_fields:
+                        for pmo_field, input_field in selected_optional_fields.items():
+                            if input_field and input_field in df.columns:
+                                genome_entry[pmo_field] = row[input_field]
+                    # Add any additional fields selected
+                    if selected_additional_fields:
+                        for field in selected_additional_fields:
+                            if field in df.columns:
+                                genome_entry[field] = row[field]
+                    genome_info_list.append(genome_entry)
+                return genome_info_list
+            return None
 
     def transform_and_save_data(
         self,
@@ -201,7 +267,6 @@ class PanelPage:
     ):
         st.subheader("Transform Data")
         if st.button("Transform Data"):
-            # Validate required fields
             errors = []
 
             if not panel_ID or not panel_ID.strip():
@@ -212,20 +277,37 @@ class PanelPage:
                     "Field mapping is required. Please upload a file and map the fields."
                 )
 
-            if not genome_info.get("name") or not genome_info["name"].strip():
-                errors.append("Genome name is required.")
-
-            if not genome_info.get("taxon_id") or not genome_info["taxon_id"].strip():
-                errors.append("Taxon ID is required.")
-
-            if (
-                not genome_info.get("genome_version")
-                or not genome_info["genome_version"].strip()
-            ):
-                errors.append("Genome version is required.")
-
-            if not genome_info.get("url") or not genome_info["url"].strip():
-                errors.append("Genome URL is required.")
+            # Validate genome_info depending on type
+            if isinstance(genome_info, list):
+                # Uploaded list of dicts — skip blank checks, trust the upload
+                if len(genome_info) == 0:
+                    genome_info = None
+            elif isinstance(genome_info, dict):
+                print(genome_info["taxon_id"])
+                # Manually entered — check if all blank
+                genome_info_all_blank = (
+                    "" == genome_info["name"].strip()
+                    and [None] == genome_info["taxon_id"]
+                    and "" == genome_info["genome_version"].strip()
+                    and "" == genome_info["url"].strip()
+                )
+                if genome_info_all_blank:
+                    genome_info = None
+                else:
+                    if not genome_info.get("name") or not genome_info["name"].strip():
+                        errors.append("Genome name is required.")
+                    if (
+                        not genome_info.get("taxon_id")
+                        or [None] == genome_info["taxon_id"]
+                    ):
+                        errors.append("Taxon ID is required.")
+                    if (
+                        not genome_info.get("genome_version")
+                        or not genome_info["genome_version"].strip()
+                    ):
+                        errors.append("Genome version is required.")
+                    if not genome_info.get("url") or not genome_info["url"].strip():
+                        errors.append("Genome URL is required.")
 
             if selected_optional_fields == "Error":
                 errors.append("There was an error with the optional fields selection.")
@@ -234,7 +316,6 @@ class PanelPage:
                 for error in errors:
                     st.error(error)
             else:
-                # All validations passed, proceed with transformation
                 transformed_df = transform_panel_info(
                     df,
                     panel_ID,
@@ -261,7 +342,7 @@ class PanelPage:
         # Load past panel if applicable
         self.load_saved_panel()
         # Input for panel ID
-        panel_ID = self.panel_id_input()
+        panel_id = self.panel_id_input()
 
         (
             df,
@@ -269,10 +350,10 @@ class PanelPage:
             selected_optional_fields,
             selected_additional_fields,
         ) = load_data(
-            required_fields,
-            required_alternate_fields,
-            optional_fields,
-            optional_alternate_fields,
+            self.required_fields,
+            self.required_alternate_fields,
+            self.optional_fields,
+            self.optional_alternate_fields,
         )
 
         # Add genome information
@@ -281,7 +362,7 @@ class PanelPage:
         # Transform and save data
         self.transform_and_save_data(
             df,
-            panel_ID,
+            panel_id,
             mapped_fields,
             genome_info,
             selected_optional_fields,
@@ -293,7 +374,7 @@ class PanelPage:
 
 
 # Initialize and run the app
-if __name__ == "__main__":
+if __name__ in ("__main__", "__page__"):
     render_header()
     st.subheader("Panel Information Converter", divider="gray")
     schema_fields = load_schema()
@@ -301,12 +382,26 @@ if __name__ == "__main__":
     required_alternate_fields = schema_fields["panel_info"]["required_alternatives"]
     optional_fields = schema_fields["panel_info"]["optional"]
     optional_alternate_fields = schema_fields["panel_info"]["optional_alternatives"]
+
+    genome_required_fields = schema_fields["targeted_genomes"]["required"]
+    genome_required_alternate_fields = schema_fields["targeted_genomes"][
+        "required_alternatives"
+    ]
+    genome_optional_fields = schema_fields["targeted_genomes"]["optional"]
+    genome_optional_alternate_fields = schema_fields["targeted_genomes"][
+        "optional_alternatives"
+    ]
+
     app = PanelPage(
         os.path.join(os.getcwd(), "saved_panels"),
         required_fields,
         required_alternate_fields,
         optional_fields,
         optional_alternate_fields,
+        genome_required_fields,
+        genome_required_alternate_fields,
+        genome_optional_fields,
+        genome_optional_alternate_fields,
     )
     if session_name in st.session_state:
         st.success(

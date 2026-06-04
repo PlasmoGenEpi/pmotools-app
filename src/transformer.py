@@ -7,7 +7,6 @@ from pmotools.pmo_builder.metatable_to_pmo import (
     library_sample_info_table_to_pmo,
     specimen_info_table_to_pmo,
 )
-# from pmotools.pmo_builder import demultiplexed_targets_to_pmo_dict
 
 
 def transform_mhap_info(
@@ -81,11 +80,11 @@ def transform_specimen_info(
     transformed_df = specimen_info_table_to_pmo(
         df,
         specimen_name_col=field_mapping["specimen_name"],
-        specimen_taxon_id_col=field_mapping["specimen_taxon_id"],
-        host_taxon_id_col=field_mapping["host_taxon_id"],
-        collection_date_col=field_mapping["collection_date"],
-        collection_country_col=field_mapping["collection_country"],
-        project_name_col=field_mapping["project_name"],
+        specimen_taxon_id_col=optional_field_mapping.get("specimen_taxon_id"),
+        host_taxon_id_col=optional_field_mapping.get("host_taxon_id"),
+        collection_date_col=optional_field_mapping.get("collection_date"),
+        collection_country_col=optional_field_mapping.get("collection_country"),
+        project_name_col=optional_field_mapping.get("project_name"),
         # optional fields - only pass if not None
         alternate_identifiers_col=optional_field_mapping.get("alternate_identifiers"),
         blood_meal_col=optional_field_mapping.get("blood_meal"),
@@ -121,8 +120,9 @@ def transform_specimen_info(
         specimen_type_col=optional_field_mapping.get("specimen_type"),
         treatment_status_col=optional_field_mapping.get("treatment_status"),
         additional_specimen_cols=additional_fields,
-        list_values_specimen_columns_delimiter=",",
+        list_values_specimen_values_delimiter=",",
     )
+
     return transformed_df
 
 
@@ -132,7 +132,7 @@ def transform_library_sample_info(
     transformed_df = library_sample_info_table_to_pmo(
         df,
         library_sample_name_col=field_mapping["library_sample_name"],
-        sequencing_info_name_col=field_mapping["sequencing_info_name"],
+        sequencing_info_name_col=optional_mapping.get("sequencing_info_name"),
         specimen_name_col=field_mapping["specimen_name"],
         panel_name_col=field_mapping["panel_name"],
         alternate_identifiers_col=optional_mapping.get("alternate_identifiers"),
@@ -149,6 +149,7 @@ def transform_library_sample_info(
         run_accession_col=optional_mapping.get("run_accession"),
         additional_library_sample_info_cols=additional_fields,
     )
+
     return transformed_df
 
 
