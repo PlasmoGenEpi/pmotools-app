@@ -165,6 +165,7 @@ def merge_data():
                 st.markdown(f"- Loaded **{count}** {label}")
         except Exception as e:
             with st.expander("Error merging data", expanded=True):
+                st.error("Something went wrong while merging your data.")
                 st.code(str(e), language="text")
 
     # Download button - only show if PMO has been created
