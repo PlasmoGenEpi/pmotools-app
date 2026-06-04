@@ -66,31 +66,35 @@ def home() -> None:
             Select **Panel Information** from the sidebar (or click link below) to begin building your PMO file!
             """
     )
-    st.page_link("pages/Panel_Information.py", label="Panel Information")
+    st.page_link("app_pages/Panel_Information.py", label="Panel Information")
 
 
 pages = {
     "Required": [
-        st.Page("pages/Panel_Information.py", title="Panel Information"),
+        st.Page("app_pages/Panel_Information.py", title="Panel Information"),
         st.Page(
-            "pages/Microhaplotype_Information.py", title="Microhaplotype Information"
+            "app_pages/Microhaplotype_Information.py",
+            title="Microhaplotype Information",
         ),
     ],
     "Optional": [
-        st.Page("pages/Specimen_Level_Metadata.py", title="Specimen Level Metadata"),
-        st.Page("pages/Project_Information.py", title="Project Information"),
         st.Page(
-            "pages/Library_Sample_Level_Metadata.py",
+            "app_pages/Specimen_Level_Metadata.py", title="Specimen Level Metadata"
+        ),
+        st.Page("app_pages/Project_Information.py", title="Project Information"),
+        st.Page(
+            "app_pages/Library_Sample_Level_Metadata.py",
             title="Library Sample Level Metadata",
         ),
-        st.Page("pages/Sequencing_Information.py", title="Sequencing Information"),
+        st.Page("app_pages/Sequencing_Information.py", title="Sequencing Information"),
         st.Page(
-            "pages/Bioinformatics_Information.py", title="Bioinformatics Information"
+            "app_pages/Bioinformatics_Information.py",
+            title="Bioinformatics Information",
         ),
-        st.Page("pages/Read_Counts_per_Stage.py", title="Read Counts per Stage"),
+        st.Page("app_pages/Read_Counts_per_Stage.py", title="Read Counts per Stage"),
     ],
     "Finalize": [
-        st.Page("pages/Create_Final_PMO.py", title="Create Final PMO"),
+        st.Page("app_pages/Create_Final_PMO.py", title="Create Final PMO"),
     ],
 }
 
