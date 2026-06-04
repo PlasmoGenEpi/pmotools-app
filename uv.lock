@@ -690,17 +690,18 @@ wheels = [
 
 [[package]]
 name = "pmotools"
-version = "1.0.0"
+version = "1.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "biopython" },
     { name = "jsonschema" },
+    { name = "openpyxl" },
     { name = "pandas" },
     { name = "pre-commit" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6e/52/ba2aa698043eaa14afa791aac4ebce0ec2cc962ed10ca72dc5c72f9a9030/pmotools-1.0.0.tar.gz", hash = "sha256:a1a4bcf86286c85976afb12be72aa46155eedaf6407d9f221628f86a3848f5b3", size = 84689, upload-time = "2025-11-25T21:03:55.758Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/45/c0/32db8ddf94ba863e98b41979e213fc9c82c810a2db970a35859c01ecc81d/pmotools-1.1.0.tar.gz", hash = "sha256:84f0064eabaa9f470677641264216ede0ee9528a91ce67f11948654cc0edce93", size = 104985, upload-time = "2026-06-04T22:09:02.988Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/af/22/8119ff54f4948908b4fe1c11053713d126613c5b21775827f9fa743a478f/pmotools-1.0.0-py3-none-any.whl", hash = "sha256:893e9ede5ef482c193e820addbd219453baeb4d2a54ab88d8c06a54b7887d40e", size = 102442, upload-time = "2025-11-25T21:03:54.878Z" },
+    { url = "https://files.pythonhosted.org/packages/c5/ef/d1691a2b08304d54791d9175534984cabb2c71801980b61c4f8bc5856beb/pmotools-1.1.0-py3-none-any.whl", hash = "sha256:ce5ce474eb708970447908fb1584919e932b98a7469de964ea53a110dcc2a016", size = 126422, upload-time = "2026-06-04T22:09:01.876Z" },
 ]
 
 [[package]]
@@ -729,7 +730,7 @@ requires-dist = [
     { name = "numpy", specifier = "==2.1.3" },
     { name = "openpyxl", specifier = ">=3.1.5" },
     { name = "pandas", specifier = "==2.2.3" },
-    { name = "pmotools", specifier = "==1.0.0" },
+    { name = "pmotools", specifier = "==1.1.0" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=7.0.0" },
     { name = "pytest-cov", marker = "extra == 'test'", specifier = ">=4.0.0" },
     { name = "streamlit", specifier = "==1.40.1" },
