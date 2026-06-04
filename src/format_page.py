@@ -6,10 +6,12 @@ in the PMO Builder Streamlit application.
 """
 import streamlit as st
 import os
+from PIL import Image
 
 # Constants
-PGE_LOGO_PATH = "images/PMO_logo.png"
-PMO_LOGO_PATH = "images/PGE_logo.png"
+PGE_LOGO_PATH = "images/PGE_logo.png"
+PMO_LOGO_PATH = "images/PMO_logo.png"
+PMO_LIGHT_ICON_PATH = "images/pmo_logo_mini.png"
 PAGE_TITLE = "PMO Builder"
 PAGE_ICON = "📂"
 LAYOUT = "wide"
@@ -23,9 +25,15 @@ def render_header() -> None:
     Sets up the page configuration and displays the PMO Builder header
     with the PGE logo and title information. Also adds PGE logo to sidebar bottom.
     """
+    # Load icon image if it exists, otherwise fall back to emoji
+    if os.path.exists(PMO_LIGHT_ICON_PATH):
+        page_icon = Image.open(PMO_LIGHT_ICON_PATH)
+    else:
+        page_icon = PAGE_ICON  # fallback emoji
+
     st.set_page_config(
         page_title=PAGE_TITLE,
-        page_icon=PAGE_ICON,
+        page_icon=page_icon,
         layout=LAYOUT,
     )
 
