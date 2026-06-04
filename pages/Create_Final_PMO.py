@@ -5,6 +5,7 @@ from src.format_page import render_header
 from pmotools.pmo_builder.merge_to_pmo import merge_to_pmo
 from jsonschema import ValidationError
 from pmotools.pmo_engine.pmo_checker import PMOChecker, load_schema
+import warnings
 
 
 optional_check_dict = {
@@ -96,18 +97,27 @@ def merge_data():
             else:
                 spec_info = st.session_state["specimen_info"]
                 lib_info = st.session_state["library_sample_info"]
-            st.session_state["formatted_pmo"] = merge_to_pmo(
-                specimen_info=spec_info,
-                library_sample_info=lib_info,
-                sequencing_info=seq_info,
-                panel_target_info=panel_info,
-                mhap_info=st.session_state["microhaplotype_info"],
-                bioinfo_method_info=bioinfo_methods,
-                bioinfo_run_info=bioinfo_runs,
-                project_info=project_info,
-                read_counts_by_stage_info=read_counts_per_stage,
-            )
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter("always")
+                st.session_state["formatted_pmo"] = merge_to_pmo(
+                    specimen_info=spec_info,
+                    library_sample_info=lib_info,
+                    sequencing_info=seq_info,
+                    panel_target_info=panel_info,
+                    mhap_info=st.session_state["microhaplotype_info"],
+                    bioinfo_method_info=bioinfo_methods,
+                    bioinfo_run_info=bioinfo_runs,
+                    project_info=project_info,
+                    read_counts_by_stage_info=read_counts_per_stage,
+                )
             st.success("Data merged successfully!")
+            # Report any non-fatal warnings
+            if caught:
+                with st.expander(
+                    f"{len(caught)} warning(s) during merge", expanded=True
+                ):
+                    for w in caught:
+                        st.warning(str(w.message))
 
             # --- Merge summary ---
             pmo = st.session_state["formatted_pmo"]
