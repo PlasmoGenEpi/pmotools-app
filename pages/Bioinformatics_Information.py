@@ -551,20 +551,19 @@ class BioinformaticsMethodManager:
     def add_methods_information(self):
         st.subheader("Add Bioinformatics Method Information", divider="gray")
         self._show_methods_count()
-
-        method_input_mode = st.radio(
-            "Method information input method:",
-            ["Enter Manually", "Upload File"],
-            horizontal=True,
-            key="method_input_mode",
+        add_method_toggle = st.checkbox(
+            "Add New Bioinformatics Method",
+            key="add_new_bioinfo_method_checkbox",
         )
-
-        if method_input_mode == "Enter Manually":
-            add_method_toggle = st.checkbox(
-                "Add New Bioinformatics Method",
-                key="add_new_bioinfo_method_checkbox",
+        if add_method_toggle:
+            method_input_mode = st.radio(
+                "Method information input method:",
+                ["Enter Manually", "Upload File"],
+                horizontal=True,
+                key="method_input_mode",
             )
-            if add_method_toggle:
+
+            if method_input_mode == "Enter Manually":
                 method_name, _ = self._get_method_name_input()
                 method_steps = self._create_methods_steps()
                 self.bioinfo_method_infos = {"methods": method_steps}
@@ -572,44 +571,45 @@ class BioinformaticsMethodManager:
                     self.bioinfo_method_infos[
                         "bioinformatics_method_name"
                     ] = method_name
-            else:
+            else:  # Upload File
+                (
+                    df,
+                    mapped_fields,
+                    selected_optional_fields,
+                    selected_additional_fields,
+                ) = load_data(
+                    self.required_fields,
+                    self.required_alternate_fields,
+                    self.optional_fields,
+                    self.optional_alternate_fields,
+                    key_suffix="bioinfo_methods",
+                )
                 self.bioinfo_method_infos = {}
+                self._upload_df = df
+                self._upload_mapped = mapped_fields
+                self._upload_optional = selected_optional_fields
+                self._upload_additional = selected_additional_fields
 
-        else:  # Upload File
-            (
-                df,
-                mapped_fields,
-                selected_optional_fields,
-                selected_additional_fields,
-            ) = load_data(
-                self.required_fields,
-                self.required_alternate_fields,
-                self.optional_fields,
-                self.optional_alternate_fields,
-                key_suffix="bioinfo_methods",
-            )
+                if df is not None:
+                    # Grouping column selector — shown after file is loaded
+                    st.write("**Optional: select a grouping column**")
+                    st.write(
+                        "If selected, each unique value in this column becomes a separate method entry "
+                        "and its value is used as the `bioinformatics_method_name`."
+                    )
+                    grouping_options = ["None"] + df.columns.tolist()
+                    grouping_col = st.selectbox(
+                        "Grouping column:",
+                        grouping_options,
+                        key="methods_grouping_col",
+                    )
+                    self._grouping_col = (
+                        None if grouping_col == "None" else grouping_col
+                    )
+                else:
+                    self._grouping_col = None
+        else:
             self.bioinfo_method_infos = {}
-            self._upload_df = df
-            self._upload_mapped = mapped_fields
-            self._upload_optional = selected_optional_fields
-            self._upload_additional = selected_additional_fields
-
-            if df is not None:
-                # Grouping column selector — shown after file is loaded
-                st.write("**Optional: select a grouping column**")
-                st.write(
-                    "If selected, each unique value in this column becomes a separate method entry "
-                    "and its value is used as the `bioinformatics_method_name`."
-                )
-                grouping_options = ["None"] + df.columns.tolist()
-                grouping_col = st.selectbox(
-                    "Grouping column:",
-                    grouping_options,
-                    key="methods_grouping_col",
-                )
-                self._grouping_col = None if grouping_col == "None" else grouping_col
-            else:
-                self._grouping_col = None
 
     def save_method(self):
         """Save method — handles both manual and upload paths."""
