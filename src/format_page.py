@@ -1,8 +1,8 @@
 """
-Format page utilities for the PMO Builder application.
+Format page utilities for the PMO Tools application.
 
 This module provides common UI components and utilities for formatting pages
-in the PMO Builder Streamlit application.
+in the PMO Tools Streamlit application.
 """
 import streamlit as st
 import os
@@ -12,7 +12,7 @@ from PIL import Image
 PGE_LOGO_PATH = "images/PGE_logo.png"
 PMO_LOGO_PATH = "images/PMO_logo.png"
 PMO_LIGHT_ICON_PATH = "images/pmo_logo_mini.png"
-PAGE_TITLE = "PMO Builder"
+PAGE_TITLE = "PMO Tools"
 PAGE_ICON = "📂"
 LAYOUT = "wide"
 LOGO_COLUMN_RATIO = [1, 6]
@@ -99,8 +99,8 @@ def _render_logo() -> None:
 
 def _render_title_section() -> None:
     """Render the title and subtitle section."""
-    st.title("PMO File Builder")
-    st.markdown("**Streamlined Workflow for Generating PMO Files**")
+    st.title("PMO Tools")
+    st.markdown("**Build, merge and work with PMO files**")
 
 
 def render_section_header(title: str, divider: str = "gray") -> None:

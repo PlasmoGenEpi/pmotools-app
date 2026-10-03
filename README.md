@@ -1,6 +1,11 @@
-# PMO Builder (pmotools-app)
+# PMO Tools (pmotools-app)
 
-A [Streamlit](https://streamlit.io/) app that helps you build **PMO** (Portable Microhaplotype Object) files from your own tabular data. The app guides you through entering or uploading data, mapping fields to the PMO schema, and merging everything into a validated PMO JSON file. Conversion and validation use the [`pmotools`](https://pypi.org/project/pmotools/) package ([source](https://github.com/PlasmoGenEpi/pmotools-python)).
+A [Streamlit](https://streamlit.io/) app for building and working with **PMO** (Portable Microhaplotype Object) files without writing code:
+
+- **Build a PMO** from your own tabular data. The app guides you through entering or uploading data, mapping fields to the PMO schema, and merging everything into a validated PMO JSON file.
+- **Merge PMOs**: combine several PMO files (e.g. from different sequencing runs or sites using the same panel) into one.
+
+Conversion, merging and validation use the [`pmotools`](https://pypi.org/project/pmotools/) package ([source](https://github.com/PlasmoGenEpi/pmotools-python)).
 
 ## Documentation
 
@@ -27,13 +32,14 @@ For the PMO file format and schema, see the [PMO documentation site](https://pla
 - Save progress for reusable sections (e.g. panel definitions)
 - Merge required and optional sections and export a PMO JSON file
 - Validate output against the PMO schema before download
+- Merge multiple PMO files into one
 
-### Required sections
+### Building a PMO: required sections
 
 - **Panel Information** — targets, primers, and panel metadata
 - **Microhaplotype Information** — allele calls and read counts per sample
 
-### Optional sections
+### Building a PMO: optional sections
 
 - Specimen-level metadata (recommended)
 - Project information
@@ -51,7 +57,13 @@ Use **Create Final PMO** to combine saved sections and download the result.
 3. For each section: enter or upload data → map fields → save (optional).
 4. Open **Create Final PMO** to merge, validate, and export.
 
-Example files and an Excel template are in `example_data/`. The app home page also offers a downloadable PMO building template.
+Example files and an Excel template are in `example_data/`. The Build a PMO getting started page also offers a downloadable PMO building template.
+
+### Merging PMOs
+
+On **Merge PMO Files**, upload the PMO files (`.json` or `.json.gz`), select several files at once, or upload a folder as a `.zip` or `.tar.gz`. The app shows a summary of each file and checks it against the schema, then merges them with `pmotools`. You can then validate the merged PMO and download it.
+
+Merging requires unique library sample names across the files. A specimen can appear in more than one file only if its metadata is identical, and projects with the same name must have the same description. Example PMOs to merge are in `example_data/pmos_to_merge/` (also zipped as `example_data/pmos_to_merge.zip`).
 
 ## Requirements
 
@@ -112,7 +124,7 @@ See the [pmotool-app-web README](https://github.com/PlasmoGenEpi/pmotool-app-web
 | `PMO_Builder.py` | Streamlit entrypoint and navigation |
 | `app_pages/` | Individual app sections (not Streamlit’s auto `pages/` folder) |
 | `src/` | Shared UI and data transformation helpers |
-| `example_data/` | Sample inputs and PMO building template |
+| `example_data/` | Sample inputs, PMO building template and example PMOs to merge |
 | `tests/` | Pytest suite |
 
 ## Developer notes
