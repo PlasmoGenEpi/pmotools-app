@@ -1,5 +1,5 @@
 import streamlit as st
-from src.format_page import render_header
+from src.format_page import render_header, render_requirement
 from src.field_matcher import load_data
 from src.transformer import transform_library_sample_info
 from src.utils import load_schema
@@ -72,6 +72,7 @@ class LibrarySampleMetadataPageMetadataPage:
 if __name__ in ("__main__", "__page__"):
     render_header()
     st.subheader("Library Sample Level Metadata Converter", divider="gray")
+    render_requirement(required=False)
     schema_fields = load_schema()
     required_fields = schema_fields["library_sample_level_metadata"]["required"]
     required_alternate_fields = schema_fields["library_sample_level_metadata"][

@@ -37,6 +37,25 @@ def _fill_blanks(df, cols):
     return df
 
 
+def _genome_ids(values, target_genome_info):
+    """Convert genome_id values given as genome names to genome indexes."""
+    genomes = target_genome_info or []
+    if isinstance(genomes, dict):
+        genomes = [genomes]
+    index_by_name = {g.get("name"): i for i, g in enumerate(genomes)}
+
+    def to_index(value):
+        if not isinstance(value, str):
+            return value
+        if value in index_by_name:
+            return index_by_name[value]
+        if value.strip().isdigit():
+            return int(value)
+        raise ValueError(f"genome_id '{value}' does not match a genome name")
+
+    return values.map(to_index)
+
+
 def _pseudocigar_kwargs(optional_mapping):
     kwargs = {
         f"{field}_col": optional_mapping.get(field)
@@ -94,8 +113,13 @@ def transform_panel_info(
     additional_target_info_cols=None,
 ):
     """Reformat the DataFrame based on the provided field mapping."""
+    df = _fill_blanks(df, [optional_fields.get("target_attributes")])
+    genome_id_col = optional_fields.get("genome_id")
+    if genome_id_col in df.columns:
+        df = df.copy()
+        df[genome_id_col] = _genome_ids(df[genome_id_col], target_genome_info)
     transformed_df = panel_info_table_to_pmo(
-        _fill_blanks(df, [optional_fields.get("target_attributes")]),
+        df,
         panel_id,
         target_genome_info,
         target_name_col=field_mapping["target_name"],

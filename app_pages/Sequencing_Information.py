@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from src.format_page import render_header
+from src.format_page import render_header, render_requirement
 from src.field_matcher import load_data
 from src.utils import load_schema
 
@@ -379,6 +379,7 @@ class SeqInfoPage:
 if __name__ in ("__main__", "__page__"):
     render_header()
     st.subheader("Sequencing Information", divider="gray")
+    render_requirement(required=False)
     schema_fields = load_schema()
     required_fields = schema_fields["sequencing_info"]["required"]
     required_alternate_fields = schema_fields["sequencing_info"][

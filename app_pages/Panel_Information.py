@@ -4,7 +4,7 @@ import os
 import pandas as pd
 from src.field_matcher import load_data
 from src.transformer import transform_panel_info
-from src.format_page import render_header
+from src.format_page import render_header, render_requirement
 from src.utils import load_schema
 from pmotools.pmo_builder.panel_information_to_pmo import merge_panel_info_dicts
 
@@ -383,6 +383,7 @@ class PanelPage:
 if __name__ in ("__main__", "__page__"):
     render_header()
     st.subheader("Panel Information Converter", divider="gray")
+    render_requirement(required=True)
     schema_fields = load_schema()
     required_fields = schema_fields["panel_info"]["required"]
     required_alternate_fields = schema_fields["panel_info"]["required_alternatives"]

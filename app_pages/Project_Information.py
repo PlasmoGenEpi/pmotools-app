@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from typing import Dict, List, Optional, Any
-from src.format_page import render_header
+from src.format_page import render_header, render_requirement
 from src.data_loader import load_csv
 from src.field_matcher import load_data
 from src.template_builder import render_template_download
@@ -343,6 +343,7 @@ class ProjectInfoPage:
 if __name__ in ("__main__", "__page__"):
     render_header()
     st.subheader("Project Information", divider="gray")
+    render_requirement(required=False)
     from src.utils import load_schema
 
     schema_fields = load_schema()

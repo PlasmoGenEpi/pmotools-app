@@ -14,7 +14,7 @@
     "chrom": "The chromosome name.",
     "strand": "Which strand the location is on: + or -.",
     "ref_seq": "The reference sequence of this genomic location.",
-    "genome_id": "Index (starting at 0) of the genome in the Genome Info sheet that the genomic locations refer to. Defaults to 0 if left blank.",
+    "genome_id": "The genome in the Genome Info sheet that the genomic locations refer to, given as its name or its index (starting at 0). Defaults to the first genome if left blank.",
     "gene_name": "An identifier of the gene, if any, covered by this target.",
     "target_attributes": "Classification types for this target. Separate multiple values with commas.",
 
@@ -49,11 +49,11 @@
 
     "specimen_name": "An identifier for the specimen, unique within this sample set.",
     "alternate_identifiers": "Alternative names. Separate multiple values with commas.",
-    "specimen_taxon_id": "The NCBI taxonomy number of the organism(s) in the specimen. Separate multiple values with commas for mixed samples.",
-    "host_taxon_id": "The NCBI taxonomy number of the host the specimen was collected from.",
-    "collection_date": "The date of specimen collection: YYYY, YYYY-MM, or YYYY-MM-DD.",
-    "collection_country": "The country the specimen was collected in (admin level 0).",
-    "project_name": "A name for the project; must be unique if multiple projects are listed.",
+    "specimen_taxon_id": "The NCBI taxonomy number of the organism(s) in the specimen. Separate multiple values with commas for mixed samples. If included, fill in for every specimen.",
+    "host_taxon_id": "The NCBI taxonomy number of the host the specimen was collected from. If included, fill in for every specimen.",
+    "collection_date": "The date of specimen collection: YYYY, YYYY-MM, or YYYY-MM-DD. If included, fill in for every specimen.",
+    "collection_country": "The country the specimen was collected in (admin level 0). If included, fill in for every specimen.",
+    "project_name": "A name for the project; must be unique if multiple projects are listed. On the Specimen Level sheet, must match a project on the Project Info sheet and, if included, be filled in for every specimen.",
     "blood_meal": "Whether the host specimen has had a recent blood meal (TRUE/FALSE).",
     "drug_usage": "Drugs used by the subject and frequency of usage. Separate multiple values with commas.",
     "env_broad_scale": "The broad environment the specimen was collected from, e.g. highlands, lowlands.",
@@ -89,7 +89,7 @@
     "project_type": "The type of project, e.g. TES, surveillance, transmission.",
 
     "panel_name": "A name for the panel; must match the panel name entered on the Panel Information page.",
-    "sequencing_info_name": "A name for a specific sequencing run, e.g. batch1; must match a name in the Sequencing Info sheet.",
+    "sequencing_info_name": "A name for a specific sequencing run, e.g. batch1; must match a name in the Sequencing Info sheet. If included, fill in for every library sample.",
     "experiment_accession": "ERA/SRA experiment accession for the sample if submitted.",
     "fastqs_loc": "Location (URL or file path) of the FASTQs for this library.",
     "library_prep_plate_name": "Name of the plate the library was prepared on.",
@@ -115,6 +115,7 @@
     "seq_date": "Date of sequencing (YYYY-MM or YYYY-MM-DD).",
 
     "bioinformatics_run_name": "A name for this bioinformatics run; must be unique to each run.",
+    "bioinformatics_method_name": "Name of the pipeline. On the Bioinformatics Methods sheet, rows with the same name form one pipeline; on the Bioinformatics Run sheet, the pipeline used for that run. Leave blank if there is only one pipeline.",
     "run_date": "Date of the run (YYYY-MM-DD).",
     "program": "Name of the program used for this part of the pipeline.",
     "program_version": "Version of the program, e.g. v1.2.0.",

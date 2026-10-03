@@ -1,5 +1,5 @@
 import streamlit as st
-from src.format_page import render_header
+from src.format_page import render_header, render_requirement
 from src.field_matcher import load_data
 from src.transformer import transform_mhap_info
 from src.utils import load_schema
@@ -146,6 +146,7 @@ class MicrohaplotypeInfoPage:
 if __name__ in ("__main__", "__page__"):
     render_header()
     st.subheader("Microhaplotype Information Converter", divider="gray")
+    render_requirement(required=True)
     schema_fields = load_schema()
     required_fields = schema_fields["mhap_info"]["required"]
     required_alternate_fields = schema_fields["mhap_info"]["required_alternatives"]

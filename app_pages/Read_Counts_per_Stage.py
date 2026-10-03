@@ -1,5 +1,5 @@
 import streamlit as st
-from src.format_page import render_header
+from src.format_page import render_header, render_requirement
 from src.field_matcher import load_data
 from src.transformer import transform_read_counts_per_stage
 from src.utils import load_schema
@@ -128,6 +128,8 @@ class ReadCountsPerStagePage:
 
 if __name__ in ("__main__", "__page__"):
     render_header()
+    st.subheader("Read Counts", divider="gray")
+    render_requirement(required=False)
     schema_fields = load_schema()
     raw_counts_required_fields = schema_fields["read_counts_perstage"]["raw_counts"][
         "required"

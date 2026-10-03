@@ -23,31 +23,36 @@ XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 REQUIRED_HEADER_FILL = PatternFill("solid", fgColor="DDEE3B")
 OPTIONAL_HEADER_FILL = PatternFill("solid", fgColor="FCDAE6")
 CUSTOM_HEADER_FILL = PatternFill("solid", fgColor="7589C3")
+REQUIRED_SHEETS = ("Panel Targets", "Microhaplotype")
 
 TEMPLATE_SECTIONS = [
     {
         "sheet": "Panel Targets",
+        "template_name": "panel_info",
         "schema_path": ["panel_info"],
         "page": "Panel Information",
         "description": "One row per target in the panel, with its primers and optional genomic locations. The panel name is entered in the app.",
         "pmo_sections": "panel_info, target_info",
     },
     {
-        "sheet": "Genome Info",
-        "schema_path": ["targeted_genomes"],
-        "page": "Panel Information",
-        "description": "The genome(s) the panel targets. Required if Panel Targets includes genomic locations.",
-        "pmo_sections": "targeted_genomes",
-    },
-    {
         "sheet": "Microhaplotype",
+        "template_name": "microhaplotype_info",
         "schema_path": ["mhap_info"],
         "page": "Microhaplotype Information",
         "description": "One row per microhaplotype detected in each library sample for each target. The bioinformatics run name is entered in the app.",
         "pmo_sections": "representative_microhaplotypes, detected_microhaplotypes",
     },
     {
+        "sheet": "Genome Info",
+        "template_name": "genome_info",
+        "schema_path": ["targeted_genomes"],
+        "page": "Panel Information",
+        "description": "The genome(s) the panel targets. Required if Panel Targets includes genomic locations.",
+        "pmo_sections": "targeted_genomes",
+    },
+    {
         "sheet": "Specimen Level",
+        "template_name": "specimen_level_metadata",
         "schema_path": ["specimen_level_metadata"],
         "page": "Specimen Level Metadata",
         "description": "Metadata on each biological specimen.",
@@ -55,6 +60,7 @@ TEMPLATE_SECTIONS = [
     },
     {
         "sheet": "Project Info",
+        "template_name": "project_info",
         "schema_path": ["project_name"],
         "page": "Project Information",
         "description": "The project(s) the specimens belong to.",
@@ -62,6 +68,7 @@ TEMPLATE_SECTIONS = [
     },
     {
         "sheet": "Library Sample Info",
+        "template_name": "library_sample_level_metadata",
         "schema_path": ["library_sample_level_metadata"],
         "page": "Library Sample Level Metadata",
         "description": "Each library prepared from a specimen; a specimen may have several library samples.",
@@ -69,6 +76,7 @@ TEMPLATE_SECTIONS = [
     },
     {
         "sheet": "Sequencing Info",
+        "template_name": "sequencing_info",
         "schema_path": ["sequencing_info"],
         "page": "Sequencing Information",
         "description": "How the samples were sequenced, e.g. platform, instrument and dates.",
@@ -76,20 +84,25 @@ TEMPLATE_SECTIONS = [
     },
     {
         "sheet": "Bioinformatics Run",
+        "template_name": "bioinformatics_run_info",
         "schema_path": ["bioinformatics_run_info"],
+        "link_fields": ["bioinformatics_method_name"],
         "page": "Bioinformatics Information",
         "description": "Each bioinformatics run, if samples were analysed in one or several runs.",
         "pmo_sections": "bioinformatics_run_info",
     },
     {
         "sheet": "Bioinformatics Methods",
+        "template_name": "bioinformatics_methods_info",
         "schema_path": ["bioinformatics_methods_info"],
+        "link_fields": ["bioinformatics_method_name"],
         "page": "Bioinformatics Information",
-        "description": "The programs used to generate the microhaplotypes.",
+        "description": "The programs used to generate the microhaplotypes, one row per program. Rows sharing a bioinformatics_method_name form one pipeline.",
         "pmo_sections": "bioinformatics_methods_info",
     },
     {
         "sheet": "Raw Read Counts",
+        "template_name": "raw_counts",
         "schema_path": ["read_counts_perstage", "raw_counts"],
         "page": "Read Counts per Stage",
         "description": "Total raw read count for each library sample.",
@@ -97,6 +110,7 @@ TEMPLATE_SECTIONS = [
     },
     {
         "sheet": "Reads by Stage",
+        "template_name": "reads_by_stage",
         "schema_path": ["read_counts_perstage", "reads_by_stage"],
         "page": "Read Counts per Stage",
         "description": "Read counts per library sample, per target, at each pipeline stage.",
@@ -107,8 +121,9 @@ TEMPLATE_SECTIONS = [
 OVERVIEW_TEXT = [
     "This template provides a structured format for building a Portable Microhaplotype Object (PMO).",
     "Find more details at: https://plasmogenepi.github.io/PMO_Docs/",
+    "A minimum PMO only needs the Panel Targets and Microhaplotype sheets (yellow-green tabs). All other sheets (pink tabs) are optional, but add context that makes the data easier to interpret and share; Specimen Level is highly recommended.",
     "Each sheet is one table. Required columns must be completed to create a valid PMO; optional columns store additional metadata. Hover over a column header to see a description of the field.",
-    "Column names match the PMO Builder app and the table-to-PMO functions in pmotools-python, so a completed sheet can be uploaded to the matching page of the app (select the sheet after uploading this workbook) or passed directly to pmotools-python.",
+    "Column names match the PMO Builder app and the table-to-PMO functions in pmotools-python. Upload the completed workbook on the app's Load Full Template page to load every sheet at once, upload it on a single page and select the matching sheet, or pass a sheet directly to pmotools-python. Sheets you leave empty are skipped.",
     "Some values are entered in the app rather than in a sheet: the panel name (Panel Information page) and the bioinformatics run name (Microhaplotype Information and Read Counts per Stage pages).",
     "Columns that accept several values (noted in the header description) should be separated with commas. Dates should be stored as YYYY-MM-DD.",
     "You may add your own custom fields to store project-specific information. If there are fields you use regularly and believe would be broadly useful, please contact us so we can consider them for a future version of the PMO specification.",
@@ -120,10 +135,15 @@ def load_field_descriptions() -> dict:
         return json.load(f)
 
 
-def _section_fields(schema: dict, schema_path: list) -> tuple:
+def schema_section(schema: dict, schema_path: list) -> dict:
     section = schema
     for key in schema_path:
         section = section[key]
+    return section
+
+
+def _section_fields(schema: dict, schema_path: list) -> tuple:
+    section = schema_section(schema, schema_path)
     return section["required"], section.get("optional", [])
 
 
@@ -221,8 +241,15 @@ def build_full_template() -> bytes:
     wb.active.title = "Overview"
     for section in TEMPLATE_SECTIONS:
         required, optional = _section_fields(schema, section["schema_path"])
+        optional = optional + section.get("link_fields", [])
         ws = wb.create_sheet(section["sheet"])
         _write_header(ws, required, optional, descriptions, custom=True)
+        fill = (
+            REQUIRED_HEADER_FILL
+            if section["sheet"] in REQUIRED_SHEETS
+            else OPTIONAL_HEADER_FILL
+        )
+        ws.sheet_properties.tabColor = fill.fgColor.rgb[-6:]
     return _to_bytes(wb)
 
 

@@ -1,64 +1,8 @@
 import streamlit as st
 import pandas as pd
-from src.format_page import render_header
+from src.format_page import render_header, render_requirement
 from src.field_matcher import load_data
-from src.utils import load_schema
-
-
-def parse_list_field(value):
-    """
-    Parse a string that looks like a list into an actual list.
-    Splits on commas but respects quoted substrings (single or double quotes).
-    Parses character by character, toggling in_quote when a quote is encountered.
-
-    Examples:
-        "[--illumina, '--qualThres 25,20']" -> ["--illumina", "--qualThres 25,20"]
-        "--illumina, --paired" -> ["--illumina", "--paired"]
-        "single_value" -> "single_value" (returned as-is if no list-like structure)
-    """
-    if not isinstance(value, str):
-        return value
-
-    stripped = value.strip()
-    if stripped.startswith("[") and stripped.endswith("]"):
-        stripped = stripped[1:-1].strip()
-    elif "," not in stripped:
-        return value
-
-    tokens = []
-    current = []
-    in_quote = False
-    quote_char = None
-
-    for char in stripped:
-        if char in ('"', "'"):
-            if not in_quote:
-                # entering a quoted section
-                in_quote = True
-                quote_char = char
-                # don't append the quote char itself
-            elif char == quote_char:
-                # closing the quoted section
-                in_quote = False
-                quote_char = None
-                # don't append the quote char itself
-            else:
-                # different quote char inside a quoted section — treat as literal
-                current.append(char)
-        elif char == "," and not in_quote:
-            token = "".join(current).strip()
-            if token:
-                tokens.append(token)
-            current = []
-        else:
-            current.append(char)
-
-    # Don't forget the last token
-    last = "".join(current).strip()
-    if last:
-        tokens.append(last)
-
-    return tokens if len(tokens) > 1 else (tokens[0] if tokens else value)
+from src.utils import load_schema, parse_list_field
 
 
 class ValidationHelper:
@@ -797,6 +741,7 @@ class BioInfoPage:
 if __name__ in ("__main__", "__page__"):
     render_header()
     st.subheader("Bioinformatics Run Information", divider="gray")
+    render_requirement(required=False)
     schema_fields = load_schema()
 
     run_required = schema_fields["bioinformatics_run_info"]["required"]

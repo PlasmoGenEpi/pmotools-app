@@ -114,6 +114,21 @@ def render_section_header(title: str, divider: str = "gray") -> None:
     st.subheader(title, divider=divider)
 
 
+def render_requirement(required: bool) -> None:
+    """Show whether the page's section is needed for a minimum PMO."""
+    if required:
+        st.markdown(
+            ":red-background[**Required**] This section is needed for every PMO."
+            " A minimum PMO only needs Panel Information and Microhaplotype"
+            " Information."
+        )
+    else:
+        st.markdown(
+            ":blue-background[**Optional**] Add this section if you have the"
+            " information. You can skip it and still build a valid PMO."
+        )
+
+
 def render_info_box(message: str, message_type: str = "info") -> None:
     """
     Render an information box with different styles.

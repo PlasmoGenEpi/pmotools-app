@@ -79,6 +79,7 @@ class TestBuildFullTemplate:
         wb = load_workbook(BytesIO(build_full_template()))
         for section in TEMPLATE_SECTIONS:
             required, optional = _section_fields(schema, section["schema_path"])
+            optional = optional + section.get("link_fields", [])
             header = _header(wb[section["sheet"]])
             expected = list(dict.fromkeys(required + optional)) + [CUSTOM_FIELD]
             assert [c.value for c in header] == expected, section["sheet"]
@@ -91,6 +92,7 @@ class TestBuildFullTemplate:
             field
             for section in TEMPLATE_SECTIONS
             for field in sum(_section_fields(schema, section["schema_path"]), [])
+            + section.get("link_fields", [])
             if field not in descriptions
         }
         assert not missing
