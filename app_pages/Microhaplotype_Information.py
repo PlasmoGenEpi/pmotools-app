@@ -95,18 +95,19 @@ class MicrohaplotypeInfoPage:
                     st.error(error)
             else:
                 # All validations passed, proceed with transformation
-                transformed_df = transform_mhap_info(
-                    df.astype(object) if df is not None else None,
-                    bioinfo_id,
-                    mapped_fields,
-                    selected_optional_fields,
-                    selected_additional_fields,
-                )
-                st.session_state[session_name] = transformed_df
                 try:
-                    st.success("Microhaplotype Information has been saved!")
+                    transformed_df = transform_mhap_info(
+                        df.astype(object) if df is not None else None,
+                        bioinfo_id,
+                        mapped_fields,
+                        selected_optional_fields,
+                        selected_additional_fields,
+                    )
                 except Exception as e:
-                    st.error(f"Error saving Microhaplotype Information: {e}")
+                    st.error(f"Error transforming Microhaplotype Information: {e}")
+                    return
+                st.session_state[session_name] = transformed_df
+                st.success("Microhaplotype Information has been saved!")
 
     def display_microhaplotype_info(self, toggle_text):
         if session_name in st.session_state:
@@ -126,6 +127,7 @@ class MicrohaplotypeInfoPage:
             required_alternate_fields,
             optional_fields,
             optional_alternate_fields,
+            template_name="microhaplotype_info",
         )
         # Get bioinformatics ID input
         bioinfo_id = self.bioinfo_id_input(df)

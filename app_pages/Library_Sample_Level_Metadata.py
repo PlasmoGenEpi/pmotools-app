@@ -27,17 +27,18 @@ class LibrarySampleMetadataPageMetadataPage:
         if mapped_fields and selected_optional_fields != "Error":
             st.subheader("Transform Data")
             if st.button("Transform Data"):
-                transformed_df = transform_library_sample_info(
-                    df.astype(object),
-                    mapped_fields,
-                    selected_optional_fields,
-                    selected_additional_fields,
-                )
-                st.session_state["library_sample_info"] = transformed_df
                 try:
-                    st.success("Library Sample Information has been saved!")
+                    transformed_df = transform_library_sample_info(
+                        df.astype(object),
+                        mapped_fields,
+                        selected_optional_fields,
+                        selected_additional_fields,
+                    )
                 except Exception as e:
-                    st.error(f"Error saving Library Sample Information: {e}")
+                    st.error(f"Error transforming Library Sample Information: {e}")
+                    return
+                st.session_state["library_sample_info"] = transformed_df
+                st.success("Library Sample Information has been saved!")
 
     def display_panel_info(self, toggle_text):
         if session_name in st.session_state:
@@ -58,6 +59,7 @@ class LibrarySampleMetadataPageMetadataPage:
             required_alternate_fields,
             optional_fields,
             optional_alternate_fields,
+            template_name="library_sample_level_metadata",
         )
         # Transform and save data
         self.transform_and_save_data(

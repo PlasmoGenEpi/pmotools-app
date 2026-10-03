@@ -3,6 +3,7 @@ from collections import Counter
 import pandas as pd
 import streamlit as st
 from src.data_loader import load_csv
+from src.template_builder import render_template_download
 
 
 def fuzzy_match_fields(
@@ -310,9 +311,16 @@ def load_data(
     optional_field_schema,
     optional_field_alternate_schema,
     key_suffix="",
+    template_name=None,
 ):
     # Load file
     st.subheader("Upload File")
+    render_template_download(
+        target_schema,
+        optional_field_schema,
+        template_name=template_name or key_suffix or "upload",
+        key_suffix=key_suffix,
+    )
     file_uploader_key = f"file_uploader_{key_suffix}" if key_suffix else None
     uploaded_file = st.file_uploader(
         "Upload a TSV file",

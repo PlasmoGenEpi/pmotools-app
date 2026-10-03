@@ -364,6 +364,7 @@ class BioinformaticsRunManager:
                 self.optional_fields,
                 self.optional_alternate_fields,
                 key_suffix="bioinfo_run",
+                template_name="bioinformatics_run_info",
             )
             self._save_upload_runs(
                 df, mapped_fields, selected_optional_fields, selected_additional_fields
@@ -583,6 +584,7 @@ class BioinformaticsMethodManager:
                     self.optional_fields,
                     self.optional_alternate_fields,
                     key_suffix="bioinfo_methods",
+                    template_name="bioinformatics_methods_info",
                 )
                 self.bioinfo_method_infos = {}
                 self._upload_df = df

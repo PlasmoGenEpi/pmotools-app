@@ -229,6 +229,7 @@ class PanelPage:
                 self.genome_optional_fields,
                 self.genome_optional_alternate_fields,
                 key_suffix="genome",
+                template_name="genome_info",
             )
             if df is not None and mapped_fields is not None:
                 # Build list of genome info dicts from the uploaded file
@@ -316,14 +317,18 @@ class PanelPage:
                 for error in errors:
                     st.error(error)
             else:
-                transformed_df = transform_panel_info(
-                    df,
-                    panel_ID,
-                    field_mapping,
-                    genome_info,
-                    selected_optional_fields,
-                    selected_additional_fields,
-                )
+                try:
+                    transformed_df = transform_panel_info(
+                        df,
+                        panel_ID,
+                        field_mapping,
+                        genome_info,
+                        selected_optional_fields,
+                        selected_additional_fields,
+                    )
+                except Exception as e:
+                    st.error(f"Error transforming panel information: {e}")
+                    return
                 st.session_state["panel_info"] = transformed_df
                 try:
                     self.panel_manager.save_panel(panel_ID, transformed_df)
@@ -354,6 +359,7 @@ class PanelPage:
             self.required_alternate_fields,
             self.optional_fields,
             self.optional_alternate_fields,
+            template_name="panel_info",
         )
 
         # Add genome information

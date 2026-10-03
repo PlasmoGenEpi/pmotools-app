@@ -38,20 +38,21 @@ class ReadCountsPerStagePage:
         ):
             st.subheader("Transform Data")
             if st.button("Transform Data"):
-                transformed_df = transform_read_counts_per_stage(
-                    raw_counts_df,
-                    reads_by_stage_df,
-                    bioinfo_run_name,
-                    raw_counts_field_mapping,
-                    reads_by_stage_field_mapping,
-                    raw_counts_selected_additional_fields,
-                    reads_by_stage_selected_additional_fields,
-                )
-                st.session_state[session_name] = transformed_df
                 try:
-                    st.success("Read counts per stage has been saved!")
+                    transformed_df = transform_read_counts_per_stage(
+                        raw_counts_df,
+                        reads_by_stage_df,
+                        bioinfo_run_name,
+                        raw_counts_field_mapping,
+                        reads_by_stage_field_mapping,
+                        raw_counts_selected_additional_fields,
+                        reads_by_stage_selected_additional_fields,
+                    )
                 except Exception as e:
-                    st.error(f"Error saving Read counts per stage Information: {e}")
+                    st.error(f"Error transforming Read counts per stage: {e}")
+                    return
+                st.session_state[session_name] = transformed_df
+                st.success("Read counts per stage has been saved!")
 
     def display_panel_info(self, toggle_text):
         if session_name in st.session_state:

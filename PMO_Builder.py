@@ -1,5 +1,6 @@
 import streamlit as st
 from src.format_page import render_header
+from src.template_builder import XLSX_MIME, build_full_template
 
 
 def home() -> None:
@@ -38,14 +39,13 @@ def home() -> None:
     st.markdown(
         "If unfamiliar with the PMO format, you can download a template Excel file below to get started"
     )
-    with open("example_data/PMO_building_template.xlsx", "rb") as f:
-        st.download_button(
-            label="Download PMO Excel template",
-            data=f,
-            file_name="PMO_building_template.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            icon=":material/download:",  # optional
-        )
+    st.download_button(
+        label="Download PMO Excel template",
+        data=build_full_template(),
+        file_name="PMO_building_template.xlsx",
+        mime=XLSX_MIME,
+        icon=":material/download:",
+    )
 
     st.subheader("How building your PMO will work", divider="gray")
     st.markdown(

@@ -153,6 +153,8 @@ class TestTransformPanelInfo:
         optional_fields = {
             "gene_name": "gene_col",
             "target_attributes": "attrs_col",
+            "chrom": "chromosome",
+            "genome_id": "genome_idx",
         }
         target_genome_info = {"genome": "test"}
 
@@ -168,6 +170,8 @@ class TestTransformPanelInfo:
             call_args = mock_transform.call_args[1]
             assert call_args["gene_name_col"] == "gene_col"
             assert call_args["target_attributes_col"] == "attrs_col"
+            assert call_args["chrom_col"] == "chromosome"
+            assert call_args["genome_id_col"] == "genome_idx"
 
 
 class TestTransformSpecimenInfo:
@@ -339,15 +343,17 @@ class TestTransformLibrarySampleInfo:
         }
 
         with patch("transformer.library_sample_info_table_to_pmo") as mock_transform:
-            mock_result = pd.DataFrame({"transformed": ["data"]})
-            mock_transform.return_value = mock_result
+            mock_transform.return_value = [
+                {"library_sample_name": "LS1", "specimen_name": "LS1"}
+            ]
 
-            transform_library_sample_info(df, field_mapping, optional_mapping)
+            result = transform_library_sample_info(df, field_mapping, optional_mapping)
 
             mock_transform.assert_called_once()
             call_args = mock_transform.call_args[1]
             assert call_args["run_accession_col"] == "run_accession_col"
             assert call_args["library_prep_plate_name_col"] == "plate_name_col"
+            assert result[0]["specimen_name"] == "S1"
 
     def test_transform_library_sample_info_with_none_optional_fields(self):
         """Test transformation with None optional fields."""

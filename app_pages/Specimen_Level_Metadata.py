@@ -27,17 +27,18 @@ class SpecimenMetadataPage:
         if mapped_fields and selected_optional_fields != "Error":
             st.subheader("Transform Data")
             if st.button("Transform Data"):
-                transformed_df = transform_specimen_info(
-                    df.astype(object),
-                    mapped_fields,
-                    selected_optional_fields,
-                    selected_additional_fields,
-                )
-                st.session_state[session_name] = transformed_df
                 try:
-                    st.success("Specimen Information has been saved!")
+                    transformed_df = transform_specimen_info(
+                        df.astype(object),
+                        mapped_fields,
+                        selected_optional_fields,
+                        selected_additional_fields,
+                    )
                 except Exception as e:
-                    st.error(f"Error saving Specimen Information: {e}")
+                    st.error(f"Error transforming Specimen Information: {e}")
+                    return
+                st.session_state[session_name] = transformed_df
+                st.success("Specimen Information has been saved!")
 
     def display_panel_info(self, toggle_text):
         if session_name in st.session_state:
@@ -57,6 +58,7 @@ class SpecimenMetadataPage:
             required_alternate_fields,
             optional_fields,
             optional_alternate_fields,
+            template_name="specimen_level_metadata",
         )
         # Transform and save data
         if mapped_fields:

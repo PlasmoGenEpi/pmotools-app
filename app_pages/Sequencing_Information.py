@@ -209,6 +209,7 @@ class SeqInfoPage:
             self.optional_fields,
             self.optional_alternate_fields,
             key_suffix="seq_info",
+            template_name="sequencing_info",
         )
         return df, mapped_fields, selected_optional_fields, selected_additional_fields
 

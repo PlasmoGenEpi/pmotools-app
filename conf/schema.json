@@ -120,9 +120,10 @@
             "reverse_primers_end",
             "insert_start",
             "insert_end",
-            "chrom_col",
+            "chrom",
             "strand",
             "ref_seq",
+            "genome_id",
             "gene_name",
             "target_attributes"
         ],
@@ -161,10 +162,15 @@
                 "genomic_insert_end",
                 "insert_genomic_end_coordinate"
             ],
-            "chrom_col": [
+            "chrom": [
+                "chrom_col",
                 "chromosome",
                 "amplicon_chrom",
                 "gene_chrom"
+            ],
+            "genome_id": [
+                "genome_index",
+                "genome"
             ],
             "strand": [
                 "strand_col",
@@ -222,7 +228,7 @@
             "has_travel_out_six_month",
             "host_age",
             "host_sex",
-            "host_subject_id",
+            "host_subject_name",
             "lat_lon",
             "parasite_density",
             "parasite_density_method",
@@ -304,7 +310,7 @@
                 "male",
                 "female"
             ],
-            "host_subject_id": [
+            "host_subject_name": [
                 "host_subject_id",
                 "person",
                 "host_id",
@@ -567,6 +573,12 @@
             "masking_replacement_size",
             "microhaplotype_name",
             "pseudocigar",
+            "pseudocigar_chrom",
+            "pseudocigar_start",
+            "pseudocigar_end",
+            "pseudocigar_ref_seq",
+            "pseudocigar_strand",
+            "pseudocigar_generation_description",
             "quality",
             "additional_representative_mhap",
             "additional_mhap_detected"
@@ -628,6 +640,29 @@
             "pseudocigar": [
                 "cigar",
                 "alignment_cigar"
+            ],
+            "pseudocigar_chrom": [
+                "pseudocigar_chromosome",
+                "cigar_chrom"
+            ],
+            "pseudocigar_start": [
+                "pseudocigar_start_position",
+                "cigar_start"
+            ],
+            "pseudocigar_end": [
+                "pseudocigar_end_position",
+                "cigar_end"
+            ],
+            "pseudocigar_ref_seq": [
+                "pseudocigar_reference_sequence",
+                "cigar_ref_seq"
+            ],
+            "pseudocigar_strand": [
+                "cigar_strand"
+            ],
+            "pseudocigar_generation_description": [
+                "pseudocigar_description",
+                "cigar_description"
             ],
             "quality": [
                 "quality_score",

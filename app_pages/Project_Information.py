@@ -4,6 +4,7 @@ from typing import Dict, List, Optional, Any
 from src.format_page import render_header
 from src.data_loader import load_csv
 from src.field_matcher import load_data
+from src.template_builder import render_template_download
 
 # Constants
 REQUIRED_FIELDS = ["project_name", "project_description"]
@@ -50,6 +51,7 @@ class ProjectInfoPage:
 
     def _get_contributors_from_file(self) -> List[str]:
         """Get contributors from uploaded file."""
+        render_template_download(["contributor"], template_name="contributors")
         uploaded_file = st.file_uploader(
             "Upload a CSV, TSV, TXT, or Excel file", type=SUPPORTED_FILE_TYPES
         )
