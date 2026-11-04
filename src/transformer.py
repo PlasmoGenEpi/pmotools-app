@@ -102,7 +102,7 @@ def transform_specimen_info(
         ),
         host_age_col=optional_field_mapping.get("host_age"),
         host_sex_col=optional_field_mapping.get("host_sex"),
-        host_subject_id=optional_field_mapping.get("host_subject_id"),
+        host_subject_name_col=optional_field_mapping.get("host_subject_name"),
         lat_lon_col=optional_field_mapping.get("lat_lon"),
         parasite_density_col=optional_field_mapping.get("parasite_density"),
         parasite_density_method_col=optional_field_mapping.get(

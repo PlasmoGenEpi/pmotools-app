@@ -222,7 +222,7 @@
             "has_travel_out_six_month",
             "host_age",
             "host_sex",
-            "host_subject_id",
+            "host_subject_name",
             "lat_lon",
             "parasite_density",
             "parasite_density_method",
@@ -304,7 +304,8 @@
                 "male",
                 "female"
             ],
-            "host_subject_id": [
+            "host_subject_name": [
+                "host_subject_name",
                 "host_subject_id",
                 "person",
                 "host_id",
