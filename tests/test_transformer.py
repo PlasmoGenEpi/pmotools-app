@@ -33,7 +33,7 @@ class TestTransformMhapInfo:
         }
         optional_mapping = {}
 
-        with patch("transformer.mhap_table_to_pmo") as mock_transform:
+        with patch("transformer.mhap_table_to_pmo", autospec=True) as mock_transform:
             mock_result = pd.DataFrame({"transformed": ["data"]})
             mock_transform.return_value = mock_result
 
@@ -67,7 +67,7 @@ class TestTransformMhapInfo:
             "start": "start_col",
         }
 
-        with patch("transformer.mhap_table_to_pmo") as mock_transform:
+        with patch("transformer.mhap_table_to_pmo", autospec=True) as mock_transform:
             mock_result = pd.DataFrame({"transformed": ["data"]})
             mock_transform.return_value = mock_result
 
@@ -95,7 +95,7 @@ class TestTransformMhapInfo:
             "chrom": None,
         }
 
-        with patch("transformer.mhap_table_to_pmo") as mock_transform:
+        with patch("transformer.mhap_table_to_pmo", autospec=True) as mock_transform:
             mock_result = pd.DataFrame({"transformed": ["data"]})
             mock_transform.return_value = mock_result
 
@@ -127,7 +127,7 @@ class TestTransformPanelInfo:
         optional_fields = {}
         target_genome_info = {"genome": "test"}
 
-        with patch("transformer.panel_info_table_to_pmo") as mock_transform:
+        with patch("transformer.panel_info_table_to_pmo", autospec=True) as mock_transform:
             mock_result = pd.DataFrame({"transformed": ["data"]})
             mock_transform.return_value = mock_result
 
@@ -156,7 +156,7 @@ class TestTransformPanelInfo:
         }
         target_genome_info = {"genome": "test"}
 
-        with patch("transformer.panel_info_table_to_pmo") as mock_transform:
+        with patch("transformer.panel_info_table_to_pmo", autospec=True) as mock_transform:
             mock_result = pd.DataFrame({"transformed": ["data"]})
             mock_transform.return_value = mock_result
 
@@ -192,7 +192,7 @@ class TestTransformSpecimenInfo:
         }
         optional_field_mapping = {}
 
-        with patch("transformer.specimen_info_table_to_pmo") as mock_transform:
+        with patch("transformer.specimen_info_table_to_pmo", autospec=True) as mock_transform:
             mock_result = pd.DataFrame({"transformed": ["data"]})
             mock_transform.return_value = mock_result
 
@@ -222,7 +222,7 @@ class TestTransformSpecimenInfo:
             "lat_lon": "location_col",
         }
 
-        with patch("transformer.specimen_info_table_to_pmo") as mock_transform:
+        with patch("transformer.specimen_info_table_to_pmo", autospec=True) as mock_transform:
             mock_result = pd.DataFrame({"transformed": ["data"]})
             mock_transform.return_value = mock_result
 
@@ -249,7 +249,7 @@ class TestTransformSpecimenInfo:
         }
         optional_field_mapping = {"alternate_identifiers": None}
 
-        with patch("transformer.specimen_info_table_to_pmo") as mock_transform:
+        with patch("transformer.specimen_info_table_to_pmo", autospec=True) as mock_transform:
             mock_result = pd.DataFrame({"transformed": ["data"]})
             mock_transform.return_value = mock_result
 
@@ -273,7 +273,7 @@ class TestTransformSpecimenInfo:
         }
         optional_field_mapping = {"alternate_identifiers": "alt_id_col"}
 
-        with patch("transformer.specimen_info_table_to_pmo") as mock_transform:
+        with patch("transformer.specimen_info_table_to_pmo", autospec=True) as mock_transform:
             mock_result = pd.DataFrame({"transformed": ["data"]})
             mock_transform.return_value = mock_result
 
@@ -281,6 +281,34 @@ class TestTransformSpecimenInfo:
 
             mock_transform.assert_called_once()
             mock_transform.call_args[1]
+
+
+    def test_transform_specimen_info_host_subject_name_unmocked(self):
+        """Call the real pmotools builder so renamed keyword arguments fail here."""
+        df = pd.DataFrame(
+            {
+                "specimen": ["S1"],
+                "specimen_taxon": [5833],
+                "host_taxon": [9606],
+                "date_col": ["2024-01-01"],
+                "country_col": ["Uganda"],
+                "project_col": ["P1"],
+                "participant": ["H1"],
+            }
+        )
+        field_mapping = {
+            "specimen_name": "specimen",
+            "specimen_taxon_id": "specimen_taxon",
+            "host_taxon_id": "host_taxon",
+            "collection_date": "date_col",
+            "collection_country": "country_col",
+            "project_name": "project_col",
+        }
+        optional_field_mapping = {"host_subject_name": "participant"}
+
+        result = transform_specimen_info(df, field_mapping, optional_field_mapping)
+
+        assert result[0]["host_subject_name"] == "H1"
 
 
 class TestTransformLibrarySampleInfo:
@@ -304,7 +332,7 @@ class TestTransformLibrarySampleInfo:
         }
         optional_mapping = {}
 
-        with patch("transformer.library_sample_info_table_to_pmo") as mock_transform:
+        with patch("transformer.library_sample_info_table_to_pmo", autospec=True) as mock_transform:
             mock_result = pd.DataFrame({"transformed": ["data"]})
             mock_transform.return_value = mock_result
 
@@ -338,7 +366,7 @@ class TestTransformLibrarySampleInfo:
             "library_prep_plate_name": "plate_name_col",
         }
 
-        with patch("transformer.library_sample_info_table_to_pmo") as mock_transform:
+        with patch("transformer.library_sample_info_table_to_pmo", autospec=True) as mock_transform:
             mock_result = pd.DataFrame({"transformed": ["data"]})
             mock_transform.return_value = mock_result
 
@@ -370,7 +398,7 @@ class TestTransformLibrarySampleInfo:
             "library_prep_plate_name": None,
         }
 
-        with patch("transformer.library_sample_info_table_to_pmo") as mock_transform:
+        with patch("transformer.library_sample_info_table_to_pmo", autospec=True) as mock_transform:
             mock_result = pd.DataFrame({"transformed": ["data"]})
             mock_transform.return_value = mock_result
 
